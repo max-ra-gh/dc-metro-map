@@ -1,0 +1,2914 @@
+{
+  "spec_version": "1.0.0-draft",
+  "title": "DC Metro concentric map",
+  "source_of_truth_note": "Declarative source for DC-Metro.svg. The core bundle nests Yellow inside Green; every radius in it derives from the grid-pinned station axis by the one slot pitch (see rings).",
+  "canvas": {
+    "width": 2000,
+    "height": 2000,
+    "view_box": [0, 0, 2000, 2000],
+    "centre": [1000, 1000],
+    "background": "transparent",
+    "beltway_to_edge_margin": 280
+  },
+  "grid": {
+    "R": 720,
+    "definition": "R = the Capital Beltway radius. Rings marked basis='grid' are exact fractions of R.",
+    "fractions": {
+      "potomac-bulge": "R/4",
+      "core": "R/3",
+      "major": "31R/40",
+      "anacostia": "3R/4",
+      "outer-green": "79R/90",
+      "beltway": "R"
+    },
+    "off_grid": {
+      "core-blue": "core - 28 (the Blue slot, one pitch inside the station axis)",
+      "red-inner": "core-blue - 28 (one slot pitch inside Blue, and the Red arc the Metro Center capsule starts halfway through)",
+      "core-orange": "core + 28 (the Orange slot, one pitch outside the station axis)",
+      "yellow": "core-orange + 28 (the fourth nested core band)",
+      "green": "yellow + 28 (the fifth nested core band)",
+      "yg-seam": "(yellow + green)/2 = 310",
+      "nc-arc-orange": "outer-green - 14 (the rerouted Orange NE arc, one slot offset inside the midway ring)",
+      "nc-arc-silver": "outer-green + 14 (the rerouted Silver NE arc, one slot offset outside it)",
+      "potomac-trail": "potomac-bulge + 9.2 (the sliver rule)"
+    },
+    "note": "the core-ring STATION axis is the grid-pinned member of the nested stack, at R/3 = 240 - the axis is pinned like every corridor, and the ink derives at slot multiples off it: Blue 212 and red-inner 184 inside, Orange 268, Yellow 296 and Green 324 outside, each one 28 from the last, because the mean-slot rule must keep holding. The 28 pitch off the pinned axis is the primary rule for the stack; fractions of R are anchors, not a requirement per ring."
+  },
+  "conventions": {
+    "angle_units": "degrees",
+    "angle_zero": "+x axis (due east of centre)",
+    "angle_direction": "increasing angle turns clockwise on screen (SVG y-down); 90=south, 180=west, 270=north",
+    "polar_to_cartesian": "x = 1000 + r*cos(theta_deg); y = 1000 + r*sin(theta_deg)",
+    "axis_frame": "every straight guide is an `axis` = {origin, angle}. A point on it is origin + s*d + n*nrm, where d = (cos a, sin a) and nrm = (-sin a, cos a). `s` is distance along (positive = the axis direction), `n` is the signed perpendicular slot offset.",
+    "sweep": "arc `dir`:'cw' = increasing theta (SVG sweep-flag 1); 'ccw' = decreasing theta (sweep-flag 0). large-arc-flag = 1 when |delta| > 180.",
+    "point_continuity": "consecutive segments of a line share an endpoint exactly; corners are hard (no fillet) on metro lines. Fillets (r=14) are used only on the Potomac bank trail."
+  },
+  "constants": {
+    "line": {
+      "stroke_width": 26,
+      "casing_width": 30,
+      "linecap": "butt",
+      "linejoin": "round",
+      "casing_colour": "#ffffff"
+    },
+    "trunk": {
+      "slot_pitch": 28,
+      "note": "parallel lines in a shared corridor sit at multiples of 14 either side of the corridor axis; adjacent lines are 28 apart. A station dot sits at the mean slot of the lines that serve it.",
+      "rationale": "28 is tied to the 26-wide stroke (2 px paper gap), not to R. R/25 = 28.8 was considered and rejected: it breaks the integer 14 offset, widens nothing usefully, and would move every corridor station."
+    },
+    "fillet_radius": 14,
+    "station_dot": {"r": 8.665, "stroke_width": 6.67, "fill": "#ffffff", "stroke": "#1A1919"},
+    "interchange_dot": {
+      "outer_r": 23.5625,
+      "outer_stroke_width": 7.71875,
+      "inner_r": 8.9375,
+      "inner_stroke_width": 6.90625,
+      "fill": "#ffffff",
+      "stroke": "#1A1919"
+    },
+    "capsule": {
+      "casing_stroke_width": 54.85,
+      "inner_stroke_width": 39.41,
+      "linecap": "round",
+      "casing_colour": "#1A1919",
+      "inner_colour": "#ffffff",
+      "end_dot_r": 8.9375,
+      "end_dot_stroke_width": 6.90625,
+      "derivation": "casing width = 2*(interchange outer_r + outer_stroke_width/2) = 54.84375, carried at 54.85; inner width = 2*(outer_r - outer_stroke_width/2) = 39.40625, carried at 39.41 - both rounded to the 2 dp a stroke width is drawn at; the bar runs between the two constituent platform dots."
+    },
+    "terminal_dot": {
+      "r": 16.25,
+      "stroke_width": 3.25,
+      "stroke": "#1A1919",
+      "fill": "line colour",
+      "letter_baseline_dy": 4.98
+    },
+    "station_tick": {
+      "length": 33.0,
+      "stroke_width": 9.0,
+      "stroke": "#ffffff",
+      "linecap": "round",
+      "orientation": "perpendicular to the line at the dot (radial on a ring, normal to the axis on a straight); centred on the dot",
+      "derivation": "a tick only ever crosses a THREE-line band (the nine Blue/Orange/Silver stops), so its reach is read off the flanking slots: the round caps carry it (length + stroke_width)/2 = 21 from the dot, which is 15 to the near edge of the flanking line's ink (slot pitch 28 - stroke 26/2) plus 6 into it. It used to run 39.83 at 7.5, half-span 23.665, biting one dot radius (8.665) into each flank; shorter and blunter keeps the notch reading as a break in all three lines without eating a third of the outer two."
+    },
+    "geo": {
+      "water_stroke_width": 36,
+      "water_casing_stroke_width": 40,
+      "trail_stroke_width": 12,
+      "trail_sliver": 3.2,
+      "trail_offset_from_water_edge": 9.2,
+      "sliver_note": "trail centreline is offset (trail_stroke_width/2 + trail_sliver) = 9.2 outside the water edge, leaving a 3.2 paper sliver.",
+      "beltway_stroke_width": 6
+    },
+    "fonts": {
+      "family": "Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+      "primary": {"size_px": 14, "weight": 700, "fill": "#1A1919", "wrap_dy": 14},
+      "secondary": {"size_px": 12, "weight": 400, "fill": "#1A1919", "first_dy": 13, "subsequent_dy": 12},
+      "water": {
+        "size_px": 14,
+        "weight": 400,
+        "style": "italic",
+        "fill": "#11304A",
+        "baseline_dy": 5.0,
+        "wrap_dy": 14,
+        "note": "river names: italic type ON the water in a dark blue of the water's own hue (contrast about 7.1:1 on #8DC3E0), at the station names' size. `baseline_dy` is the same 5 that centres the 14 px cap height (10.2) for station labels, applied along the type's own down direction, so the caps sit centred on the point or ring the label names."
+      },
+      "park": {
+        "size_px": 12,
+        "weight": 400,
+        "style": "italic",
+        "fill": "#263C10",
+        "baseline_dy": 4.4,
+        "wrap_dy": 12,
+        "note": "park names: the water names' form in a dark green of the park hue (contrast about 8.5:1 on #CDE0A0), so they read as geography and not as station names. Smaller than the 14 px water names; `baseline_dy` is half the 12 px cap height (8.7) and `wrap_dy` is one font size."
+      },
+      "boundary": {
+        "size_px": 12,
+        "weight": 700,
+        "style": "italic",
+        "fill": "#6F7A6F",
+        "letter_spacing": 1.2,
+        "baseline_dy": 4.4,
+        "wrap_dy": 14,
+        "note": "jurisdiction names: spaced italic capitals at the park names' size in the grey of the Beltway's name, one step darker than the boundary's dots."
+      },
+      "beltway": {
+        "size_px": 14,
+        "weight": 700,
+        "style": "italic",
+        "fill": "#6F7A6F",
+        "letter_spacing": 1.4,
+        "baseline_dy": 5.0,
+        "note": "the Beltway's name, set in capitals at the station names' size, in a grey darker than the ring (contrast about 4.6:1 on paper). `baseline_dy` is the same 5 that centres the 14 px cap height (10.2) elsewhere."
+      },
+      "terminal_letter": {
+        "size_px": 14,
+        "weight": 700,
+        "fill": "#ffffff",
+        "fill_on_light_line": "#1A1919",
+        "light_line_colour_keys": ["yellow", "orange", "silver"],
+        "anchor": "middle",
+        "note": "the letter is paper white on the dark line colours and ink on the three light ones (a flat white letter is illegible on #FFD100 and weak on #ED8B00 / #919D9D). Relative luminance cannot separate these cleanly - orange 0.36, silver 0.32, blue 0.31, green 0.32 - so the light set is listed."
+      }
+    },
+    "station_marks": {
+      "note": "station features, as in the WMATA map's P and H. A station lists its `marks`, and the generator writes them INTO the station's own label line (`marks_line`, default the first title line) as inline glyphs: after the name, or before it when the label is end-anchored, so they sit at the end of the name away from the station. Because a mark is part of the text run, the renderer spaces it against the name with the font it really has - the generator's width estimate is a Helvetica proxy and renderers differ by 5% and more - and on curved type it follows the label's orbit. `gap` is the glyph's dx; `advance` is the room one mark takes, added to a curved line's carrier arc so the mark is not cut off.",
+      "gap": 7,
+      "advance": 22,
+      "marks": {
+        "parking": {
+          "text": "P",
+          "size_px": 14,
+          "fill": "#ffffff",
+          "box": {"text": "■", "size_px": 14, "fill": "#5B6470", "stroke_width": 3.5},
+          "overlay_dx": -11.06,
+          "lead_dx": 0.48,
+          "tail_dx": 2.52,
+          "note": "parking at the station: a white P on a slate background. The background is a real glyph, Inter's own filled square (U+25A0), set at the P's size, 14 px, the size of the station names: in Inter that square is exactly one cap height on the baseline - 10.2 x 10.2 at 14 px - so it is the P's own cap box, and a 3.5 stroke of the same colour grows it by 1.75 all round and rounds its corners: 13.7 x 13.7. `overlay_dx` draws the P back over the square, centre on centre, from Inter Bold's metrics (square: advance 0.909 em, ink 0.091 - 0.819 em; P: advance 0.645 em, ink 0.063 - 0.609 em). `lead_dx` and `tail_dx` add the part of the square that lies outside the two glyphs' advances, so `gap` is measured from the square's visible edges."
+        },
+        "hospital": {
+          "text": "+",
+          "size_px": 14,
+          "features": "'case'",
+          "fill": "#ffffff",
+          "box": {"text": "■", "size_px": 14, "fill": "#D7263D", "stroke_width": 3.5},
+          "overlay_dx": -11.07,
+          "lead_dx": 0.48,
+          "tail_dx": 2.13,
+          "note": "a hospital near the station: a white cross on a red background. The background is the same square as the parking mark's, 13.7 x 13.7 with its stroke. The cross is Inter Bold's plus sign at 14 px, 7.0 x 7.0. The plain plus stands 0.5 - 7.5 above the baseline, 1.1 below the square's centre (5.1), so `features` asks for Inter's capital form (OpenType `case`), which the font lifts to the middle of the cap height - the square's centre. A fallback font without that form shows the cross 1.1 low. `overlay_dx` centres it sideways from the font's metrics (plus: advance 0.673 em, ink 0.086 - 0.587 em)."
+        }
+      }
+    },
+    "colours": {
+      "red": "#BF0D3E",
+      "orange": "#ED8B00",
+      "blue": "#009CDE",
+      "green": "#00B140",
+      "yellow": "#FFD100",
+      "silver": "#919D9D",
+      "ink": "#1A1919",
+      "paper": "#ffffff",
+      "casing": "#ffffff",
+      "park": "#CDE0A0",
+      "park_label": "#263C10",
+      "water": "#8DC3E0",
+      "apron": "#5B6470",
+      "beltway": "#BFC8BD",
+      "beltway_label": "#6F7A6F",
+      "boundary": "#8C968C",
+      "landmark": "#4A524A",
+      "commercial": "#FAEFBE",
+      "commercial_label": "#5E3D00"
+    },
+    "label_diagonal": {
+      "angle": 37.75,
+      "perpendicular": -52.25,
+      "note": "the two rotations used for dense label runs; -52.25 = 37.75 - 90. 37.75 also matches the Potomac west-bank angle."
+    },
+    "label": {
+      "distance": 4.0,
+      "distance_note": "The default label gap, in px of white paper, used wherever a corridor or run does not declare `distance` of its own. `distance` is a GAP, not an offset from the corridor axis: it is the clearance between the leading edge of the block of type and the FURTHEST-PROTRUDING ink at the station, along the label's own offset direction. Two obstructions are measured and the larger wins — (a) the station's own marker's outer edge (dot r + stroke/2 = 12.0, terminal 17.875, interchange outer ring 27.421875, capsule bar half-width 27.425; a multi-platform station uses its extreme dot on the label's side) and (b) the outer casing edge of the band of lines the station sits in, which is the outermost slot the station's own lines run in plus half the casing width (26/2 + 2 = 15). The block's own optical half-depth, `baseline_dy + extra/2` projected onto the offset direction, is solved out too, so a wrapped label keeps the same gap a single-line one has (the block-centring lift would otherwise spend half its extra advance on it). One number therefore reads as the same white gap under a plain dot, an interchange ring, a terminal circle and a capsule alike, and on a far slot as on the mean one — which is what a per-corridor offset from the axis could not do: on `W` the Orange-only stops sat 24 px further off their dots than the Orange/Silver ones. See SPEC.md §6.2. In the ring frame the band term is just the casing half-width, the station's own line running through its dot; a CONCENTRIC NEIGHBOUR of that ring is not counted, which is why `CORE` — three rings 28 apart — declares a `distance` of its own.",
+      "baseline_dy": 5.0,
+      "rule_a_degenerate_dot": 0.1,
+      "aim_degenerate_dot": 0.1,
+      "aim_note": "A label's gap fixes where its base point sits ACROSS the corridor; where it sits ALONG the corridor is `ds` plus a derived slide, the one that hugs the NEAR END of the label's FIRST LINE to its own station's dot. Which end is near is `text-anchor`'s answer, and the two anchors want different geometry. END-anchored, the block finishes on the base point and runs back up the reading line away from the station, so aiming it is putting that READING LINE through the dot centre — solve (aimed - dot)·down = 0. `W` needs it: type turned -52.25° and hung 36 px below the band reads back up into the corridor 27.9 px further on, so a label that finishes square under its dot aims a half-span past it and the whole rank reads as if it belonged to the next station along. START-anchored, the block BEGINS on the base point, so the same reading-line rule solves for the far intersection: on `E` (type at 37.75° above a horizontal corridor) it stood the anchor 66 px down the line PAST the dot and shoved the whole rank outward, worst at the map edge. A start anchor wants to begin DIRECTLY BELOW its own dot in the corridor frame instead — solve (aimed - dot)·along = 0 — which stands the first letter square under the marker and leaves `distance` alone to say how far off it the words sit. The dot's perpendicular foot on the baseline is not that point either: it is measured across the type rather than across the corridor, and on `E` it left the same rank about 25 px back up the corridor from its stations. Middle-anchored type keeps the reading-line rule. `aimed` is the FIRST line's optical centre, base - (extra/2)·down, not the base point: the base point centres the WHOLE block, which a wrapped label carries half its extra advance further down, and a slanted reading line taken from there lands short of the dot by that drop over the tangent. On `W` that left the three subtitled labels - Vienna, Dunn Loring, West Falls Church - 7 px back down the corridor from their own dots while the five single-line labels of the same rank aimed true. Aiming the first line puts a wrapped label exactly where a single-line one at the same station would sit; the lift is 0 for a single-line label, so nothing else moves. The slide is solved in the same fixed point as the gap and moves the base point along the corridor only, so the white gap of `distance` is untouched by construction. It applies to the two modes whose reading line is straight: `straight` and `radial`. Concentric type is set on a circle about the map centre, and a circle offset from a station never passes through it whatever the slide — the counterpart there is angular (the anchor at the dot's own θ), which a ring station has by construction and a spoke station cannot have at all, so concentric labels are left where the gap puts them. The end rule divides by the sine of the angle between the type and the corridor and the start rule by `along·along` = 1, so only the first has a denominator that can vanish; the straight modes are still held OBLIQUE to the corridor, `aim_degenerate_dot` being the magnitude below which either the sine or the cosine is declared degenerate and no slide is made. Type reading ALONG its corridor (|along·down| below it) is already square beside its marker and sliding it only slides it down its own reading line: L’Enfant Plaza on the east trunk and New Carrollton on its radial exit. Type reading ACROSS it (|along·reading| below it) is set square across the corridor, its `distance` — which acts along the reading direction there — has already answered where the words start, and its radial offset carries them nowhere along the corridor to correct: the seven `outer-green` radial labels, which read across their ring, and Rosslyn and Smithsonian on the core arcs. Eight of the nine radial labels therefore carry no aim; Minnesota Av, the one oblique to its own corridor, does, as do 22 of the 25 straight ones - 23 aimed labels in all, which `--census` counts. See SPEC.md §6.2.",
+      "block_centring": "-extra/2",
+      "curve_default": "concentric",
+      "curve_pad_px": 6.0,
+      "curve_note": "`curve_default` is the label curve mode used wherever a corridor, run or station does not declare `curve`. The three modes: \"concentric\" sets each line of type on a circle segment about the map centre through that line's baseline point; \"radial\" sets it straight along the radius from the centre through that point, turned by the station's own angle normalised into (-90, 90] so the glyphs stay upright, which makes the arm read as a sunburst; \"straight\" is the flat text + `rotate` behaviour. Under \"concentric\" the arc's own tangent is the rotation, so `rotate` no longer turns any glyph — it survives only as the nominal reading direction rule A derives `side` from; under \"radial\" the radius supplies the rotation the same way, `side` still signs `distance`, and `align` is re-derived from the true radial reading direction so the text block always sits outward of the marker (`start` on the right half, `end` on the left, where the upright flip reverses the reading direction). Note that `distance` and `ds` are measured against the CORRIDOR, not against the reading direction, so changing a corridor's or run's `curve` changes which of the two ends up perpendicular to the type and therefore reads as a vertical offset of the words from their dot — re-examine both whenever `curve` changes (SPEC.md §6.7). `curve_pad_px` is the slack added to the estimated advance of each line so that a text run can never outgrow its arc and be truncated; the estimate itself comes from generate.py's ADVANCE_PER_MILLE table (Helvetica-Bold advances as an Inter proxy) times ADVANCE_SAFETY.",
+      "note": "Placement constants shared by every label. `baseline_dy` centres the 14 px/700 cap height on the dot line (cap height 10.2, half 5.1, drawn as 5) and is applied along the label's own down direction, so it rotates with the text — radially inward or outward under `curve` = concentric, where down is the radial, and tangentially under `curve` = radial, where down is the tangent. `block_centring` lifts a multi-line label by half the advance of the lines after the first, keeping the block centred on the dot. `rule_a_degenerate_dot` is the |cos| below which the outward radial is too close to perpendicular to the reading direction for rule A to decide a side; those corridors/runs must declare `side` (generate.py enforces it)."
+    }
+  },
+  "rings": [
+    {
+      "id": "potomac-bulge",
+      "r": 180.0,
+      "fraction_of_R": "R/4",
+      "name": "Potomac tidal-basin bulge (water fill edge)",
+      "basis": "grid"
+    },
+    {
+      "id": "red-inner",
+      "r": 184.0,
+      "fraction_of_R": "core-blue - 28",
+      "name": "Red inner circle (Metro Center arc)",
+      "basis": "derived"
+    },
+    {
+      "id": "potomac-trail",
+      "r": 189.2,
+      "fraction_of_R": "potomac-bulge + 9.2",
+      "name": "Potomac west-bank trail arc",
+      "basis": "derived"
+    },
+    {
+      "id": "yards-inner",
+      "r": 478.0,
+      "fraction_of_R": "anacostia-bank-inner - 30",
+      "name": "The Yards area, inner rim: 30 inside the bank strip's inner edge, and 16.5 outside the descenders of Navy Yard-Ballpark's concentric label (r = 461.5)",
+      "basis": "derived"
+    },
+    {
+      "id": "anacostia-bank-inner",
+      "r": 508.0,
+      "fraction_of_R": "anacostia - 32",
+      "name": "Inner edge of the Anacostia's green bank strip (the 64-wide park band about the 540 ring), and The Yards area's outer rim",
+      "basis": "derived"
+    },
+    {
+      "id": "dc-boundary-south",
+      "r": 664.0,
+      "fraction_of_R": "outer-green + 32",
+      "name": "DC boundary south of Congress Heights: 17 outside the Green arc's casing (647), down to the Potomac",
+      "basis": "derived"
+    },
+    {
+      "id": "dc-boundary-outer",
+      "r": 691.5,
+      "fraction_of_R": "silver spur arc + 45.5",
+      "name": "DC boundary past Deanwood and Minnesota Av: half-way between the casing (661) of the Silver line's 646 arc and the Beltway (720)",
+      "basis": "derived"
+    },
+    {
+      "id": "dc-boundary",
+      "r": 590.0,
+      "fraction_of_R": "between the last DC and the first Maryland station on the Red and Green lines",
+      "name": "DC boundary, the one radius of all its arcs: 2 inside Friendship Heights' dot, whose edge is at 588; 17 outside the casing of the Red line's 558 arc; 18 outside the Anacostia park band (572) and 13 inside the New Carrollton pair's casing (603). It is 4.6 outside the top of Fort Totten's marker (585.4) and runs along the top of Takoma's label",
+      "basis": "derived"
+    },
+    {
+      "id": "rock-creek",
+      "r": 381.0,
+      "fraction_of_R": "midway between Dupont Circle's and Woodley Park's label lines",
+      "name": "Rock Creek valley band. The Red line's north-west arm is radial here, and its station labels are concentric arcs that reach out east of it like the teeth of a comb. 381 is the middle of the free gap between two of those teeth: Dupont Circle's title ends at r = 365.7 and Woodley Park's subtitle starts at r = 394.6, so a 12-wide band on this ring keeps 9.3 and 7.6 of paper off them.",
+      "basis": "derived"
+    },
+    {
+      "id": "core-blue",
+      "r": 212.0,
+      "fraction_of_R": "core - 28",
+      "name": "Core ring - Blue slot",
+      "basis": "derived"
+    },
+    {
+      "id": "core",
+      "r": 240.0,
+      "fraction_of_R": "R/3",
+      "name": "Core ring - shared axis (Silver slot); core-ring station ring, and the grid-pinned member of the nested stack",
+      "basis": "grid"
+    },
+    {
+      "id": "core-orange",
+      "r": 268.0,
+      "fraction_of_R": "core + 28",
+      "name": "Core ring - Orange slot",
+      "basis": "derived"
+    },
+    {
+      "id": "yellow",
+      "r": 296.0,
+      "fraction_of_R": "core-orange + 28",
+      "name": "Core ring - Yellow slot (fourth nested band)",
+      "basis": "derived"
+    },
+    {
+      "id": "yg-seam",
+      "r": 310.0,
+      "fraction_of_R": "(yellow + green)/2",
+      "name": "Yellow/Green seam: Gallery Place and Archives, and the outer radius of the Arlington Cemetery wedge",
+      "basis": "derived"
+    },
+    {
+      "id": "green",
+      "r": 324.0,
+      "fraction_of_R": "yellow + 28",
+      "name": "Core ring - Green slot (fifth and outermost nested band)",
+      "basis": "derived"
+    },
+    {
+      "id": "arboretum-inner",
+      "r": 450.0,
+      "fraction_of_R": "5R/8",
+      "name": "National Arboretum inner rim. 5R/8 = 450, the clean fraction 90 inside the Anacostia ring: deep enough for the wedge to read as a park, and its lower corner - at 349.5 deg since the wedge was moved up the river to make room for RFK Stadium - is 67 above the east trunk's orange casing edge at y = 985.",
+      "basis": "grid"
+    },
+    {
+      "id": "major",
+      "r": 558.0,
+      "fraction_of_R": "31R/40",
+      "name": "Major ring (Red outer arc, Fort Totten, Takoma, Brookland-CUA). Enlarged from 7R/10 = 504 to put the three arc stations out where West Hyattsville used to sit (s = 557.966 on the trunk); 31R/40 = 558 lands 0.034 from that measurement, so the ring stays on the fraction grid",
+      "basis": "grid"
+    },
+    {
+      "id": "anacostia",
+      "r": 540.0,
+      "fraction_of_R": "3R/4",
+      "name": "Anacostia river arc",
+      "basis": "grid"
+    },
+    {
+      "id": "nc-arc-orange",
+      "r": 618.0,
+      "fraction_of_R": "outer-green - 14",
+      "name": "Rerouted Orange NE arc (Minnesota Av - Landover), the inner slot of the midway pair",
+      "basis": "derived"
+    },
+    {
+      "id": "outer-green",
+      "r": 632.0,
+      "fraction_of_R": "79R/90",
+      "name": "The orbit of the two outer arms: the Green arc (Southern Av - Branch Av) and, at its mean slot, the Orange/Silver NE arc (Minnesota Av - Landover). 79R/90 = 632 is 20 outside the earlier 17R/20 = 612, which gives the white between the arms and the Anacostia park band (572) room for the DC boundary: the Orange/Silver pair's inner casing edge is at 603 and the Green arc's at 617. The pair's outer edge at 661 keeps 59 off the Beltway (720), and the radial station labels of the NE arm now reach the Beltway line",
+      "basis": "grid"
+    },
+    {
+      "id": "nc-arc-silver",
+      "r": 646.0,
+      "fraction_of_R": "outer-green + 14",
+      "name": "Rerouted Silver NE arc (Minnesota Av - Landover), the outer slot of the midway pair",
+      "basis": "derived"
+    },
+    {
+      "id": "blue-arc",
+      "r": 660.3239,
+      "fraction_of_R": "the south axis's Blue slot at King St-Old Town's s",
+      "name": "Blue King St turn: the radius at which the Blue line leaves the south corridor for the Franconia spoke. DERIVED and not free - the corridor's Blue slot stands 38 west of centre and King St-Old Town sits at s = 659.2296 on `south-leg`, so the corner is at sqrt(38^2 + 659.2296^2) = 660.3239, theta 93.2991. Move the run and this ring follows. The rule is not of the `base +/- delta` form `check_grid` re-derives, so like `yg-seam` it carries its statement in prose",
+      "basis": "derived"
+    },
+    {
+      "id": "dulles-arc",
+      "r": 746.58085,
+      "fraction_of_R": "half the stand-off the turn used to keep from the Beltway",
+      "name": "Silver Dulles turn: Greensboro and Spring Hill both ride it, the first where `tysons-leg` cuts it (branch neg, s = -31.8808, a half-McLean-step past Tysons) and the second at the far end of the arc. 26.58085 outside the Beltway - half the 53.1617 it stood off before - so the turn still happens outside the ring but hugs it. Not of the `base +/- delta` form `check_grid` re-derives, so like `yg-seam` it states its rule in prose",
+      "basis": "derived"
+    },
+    {
+      "id": "beltway",
+      "r": 720.0,
+      "fraction_of_R": "R",
+      "name": "Capital Beltway",
+      "basis": "grid"
+    }
+  ],
+  "axes": {
+    "red-nw": {
+      "origin": [1000, 1000],
+      "angle": 231.0,
+      "slots": {"mid": 0},
+      "note": "Red north-west spoke (Shady Grove)"
+    },
+    "red-ne": {
+      "origin": [1000, 1000],
+      "angle": 309.0,
+      "slots": {"mid": 0},
+      "note": "Red north-east spoke (Brookland-CUA); also Gallery Place / Metro Center"
+    },
+    "north": {
+      "origin": [1000, 1000],
+      "angle": 270.0,
+      "slots": {"mid": 0},
+      "note": "Red north spoke (Takoma - Glenmont)"
+    },
+    "ne-diagonal": {
+      "origin": [1000, 1000],
+      "angle": 288.5,
+      "slots": {"yellow": -14, "mid": 0, "green": 14},
+      "note": "Yellow/Green north-east diagonal (Greenbelt)"
+    },
+    "green-se": {"origin": [1000, 1000], "angle": 49.5, "slots": {"mid": 0}, "note": "Green south-east radial leg"},
+    "west-trunk": {
+      "origin": [1000, 1042],
+      "angle": 180.0,
+      "slots": {"orange": 14, "mid": 0, "silver": -14},
+      "note": "West trunk corridor, axis y=1042 (Orange y=1028 / Silver y=1056)"
+    },
+    "east-trunk": {
+      "origin": [1000, 1028],
+      "angle": 0.0,
+      "slots": {"orange": -28, "silver": 0, "blue+silver": 14, "blue": 28},
+      "note": "East trunk corridor, axis y=1028 (Orange y=1000 / Silver y=1028 / Blue y=1056); the Orange slot coincides with the horizontal through the centre, which is where every core arc terminates"
+    },
+    "south": {
+      "origin": [976, 1000],
+      "angle": 90.0,
+      "slots": {"yellow": -14, "mid": 0, "blue": 14},
+      "note": "South corridor, axis x=976 (Blue x=962 / Yellow x=990). Blue takes the WEST slot and Yellow the EAST one: north of Pentagon Blue turns west onto the core ring and Yellow leaves north-east up the Yellow ring, so with this ordering the two diverge without crossing, and the Franconia branch — which also leaves westward — no longer has to cut across the Yellow leg. The slot NAMES are load-bearing (`lines`, station `at.slot`, the Yellow arc target and the Blue join all reference them), so the swap is expressed here, in the offsets, and everything else re-derives."
+    },
+    "nc-diagonal": {
+      "origin": [1520, 1014],
+      "angle": 315.0,
+      "slots": {"orange": -14, "mid": 0, "silver": 14},
+      "note": "Orange/Silver north-east diagonal, east trunk out to Minnesota Av on the midway ring, where the branch turns left onto its concentric arc"
+    },
+    "nc-exit": {
+      "origin": [1000, 1000],
+      "angle": 335.6884,
+      "slots": {"orange": -14, "mid": 0, "silver": 14},
+      "note": "Radial exit from the rerouted Orange/Silver arc out to New Carrollton on the Beltway. The angle is DERIVED from the arc, not authored. The arc's inner end is Minnesota Av - the ring crossing of an OFFSET axis, hence the corner where the two lines leave `nc-diagonal` for the ring, and a point that swings as `outer-green` moves: 648 put it at theta=350.6413, 612 put it at 353.0963, and 632 - the radius the Branch Av arm now also has - puts it at 351.6884. From there the arc steps at 4 deg, the step the Branch Av arm takes on this same ring, so the two outer arcs read at one spacing - 44.12 px between stations at r=632. Four steps carry Deanwood, Cheverly and Landover to 347.6884, 343.6884 and 339.6884 and land this exit at 335.6884; move the ring and the whole ladder re-solves off the new corner. The dependency between this exit and the Anacostia river band used to run the other way: the exit was pinned to the band's north-east terminus at theta=330.6441, which forced 5.6138 deg steps, nearly twice Branch Av's. The step won, and the BAND now follows the exit - `geo.water.anacostia` and `geo.parks.park-anacostia` were shortened 3.5498 deg at that end, from 330.6441 to 334.1939, which is this angle plus the corridor's own half width (see the water arc's `from_angle_note`). The alignment is the same one, read in the opposite direction; it was only ever alignment, the band ending at r=572 and this exit starting outside 618, so the two never touched. Slot signs match `nc-diagonal`: Orange stays on the left of travel, hence the inner ring on the arc and n=-14 here."
+    },
+    "dulles-leg": {
+      "origin": [272.19304098, 833.62693732],
+      "angle": 217.7534,
+      "slots": {"mid": 0},
+      "note": "Silver Dulles arm, PARALLEL TO THE POTOMAC and anchored at Spring Hill, which is the arc's far end and this axis's origin, so the run starts at s = 0. 217.7534 is the river's west-bank angle (37.7534) turned outbound; `constants.label_diagonal.angle` carries the same 37.75. The arm is deliberately NOT radial: on a radial the angle and the arc's sweep are one number, so the arc could not be set independently - and the arc is set, at half its old length. Freed of that, the step returns to 37.5 from the 32.5 it was compressed to when the spoke pointed near due west and Ashburn's ink crossed the page edge; at 217.7534 Ashburn stands at (64.65, 672.91), 46.77 clear of it."
+    },
+    "tysons-leg": {
+      "origin": [283.2085, 932.1031],
+      "angle": 39.6186,
+      "slots": {"mid": 0},
+      "note": "Silver Tysons -> East Falls Church leg. Origin, angle and length 194.2948 are all DERIVED from the Tysons corner on the Beltway (theta 185.4111) and the west-trunk Silver slot at s=567.125; McLean carries the leg's one explicit page spacing."
+    },
+    "blue-franconia": {
+      "origin": [1000, 1000],
+      "angle": 106.5,
+      "slots": {"mid": 0},
+      "note": "Blue Franconia branch, a RADIAL spoke from the map centre at 106.5 - on the 1.5 deg angle grid and the nearest grid angle to where Van Dorn St already stood (107.225). Built like `nc-exit`: the line runs in from Franconia-Springfield at s = 800 (the Beltway plus 80), crosses the Beltway at Van Dorn St, and meets the `blue-arc` ring at 660.3239, where it turns onto the arc and sweeps 13.2009 deg ccw to the south corridor's Blue slot at theta 93.2991 - King St-Old Town's own latitude, so the turn happens at the station rather than 9.5299 north of it as the old straight join did. It replaces a VERTICAL axis at x=786.7894 whose offset was solved to open the Van Dorn -> Eisenhower Av gap to 1.3x its previous value; that derivation is gone with the axis, and the gap is now whatever the two pins make it. Van Dorn moves 9.11 and Franconia-Springfield 14.05."
+    }
+  },
+  "runs": {
+    "red-nw-spoke": {
+      "axis": "red-nw",
+      "slot": "mid",
+      "s0": 312.0,
+      "step": 48.0,
+      "count": 14,
+      "note": "Beltway passes BETWEEN Medical Center and Grosvenor-Strathmore."
+    },
+    "red-north-spoke": {
+      "axis": "north",
+      "slot": "mid",
+      "s0": 558.0,
+      "step": 96.0,
+      "count": 2,
+      "note": "Beltway passes BETWEEN Silver Spring and Forest Glen."
+    },
+    "red-north-outer": {
+      "axis": "north",
+      "slot": "mid",
+      "s0": 748.0,
+      "step": 48.0,
+      "count": 3,
+      "note": "a run of its own rather than the tail of `red-north-spoke`: the Glenmont arm is deliberately open inside the Beltway and compressed outside it, and one arithmetic run cannot express both spacings. s0 = beltway + 28."
+    },
+    "red-ne-spoke": {
+      "axis": "red-ne",
+      "slot": "mid",
+      "s0": 390,
+      "step": 42,
+      "count": 5,
+      "note": "both ends pinned, so the step is solved from them: the run picks up where Gallery Place sits on `yg-seam` (310) and its last station, Brookland-CUA, is held on the major ring (558), which divides the remainder into five equal steps of 49.6."
+    },
+    "ne-diagonal-inner": {
+      "axis": "ne-diagonal",
+      "slot": "mid",
+      "s0": 364,
+      "step": 36,
+      "count": 5,
+      "label_default": {"side": "left", "ds": -1},
+      "note": "the outer end is pinned, so the step is solved from it: Mt Vernon Sq carries the arm's explicit page spacing at s = 350 and Fort Totten sits on the major ring at 558, which divides the remainder into five equal steps of 41.6 - the last of them landing on Fort Totten itself, so the arm reads at one spacing all the way out. rule A is degenerate on this spoke (tangential type), so `side` must be declared; left sends the Mt Vernon Sq to Georgia Av-Petworth stack west, away from the Red spoke, while the outer half of the diagonal reads east."
+    },
+    "ne-diagonal-outer": {
+      "axis": "ne-diagonal",
+      "slot": "mid",
+      "s0": 612,
+      "step": 36,
+      "count": 3,
+      "label_default": {"ds": 1},
+      "note": "the three stations OUTSIDE Fort Totten. s0 is West Hyattsville's own page spacing, not a pin: Fort Totten rides the major ring at 558 and the 52 out to 610 is wider than this run's 36, which is why the arm needs two runs."
+    },
+    "west-trunk-inner": {"axis": "west-trunk", "slot": "mid", "s0": 308.625, "step": 64.625, "count": 5},
+    "west-trunk-outer": {
+      "axis": "west-trunk",
+      "slot": "orange",
+      "s0": 567.125,
+      "step": 76.1652,
+      "count": 4,
+      "note": "both ends pinned, so the step is solved from them: s0 is East Falls Church's s on the trunk and the far end is the Beltway cut by the Orange slot, sqrt(720^2 - 28^2) = 719.4554, which halves into two steps of 76.1652. Vienna rides one step past the Beltway at i 3, s = 795.6206, which is what makes the arm read at ONE spacing all the way out; it used to sit at an explicit 762.0, only 42.5446 past Dunn Loring against this run's 76.1652. Indices 0 and 2 carry no station of their own - East Falls Church is placed by `west-trunk-inner` i 4 on the mean slot and Dunn Loring by `at_ring` beltway - but both land on the run's own arithmetic, which is what pins the two ends."
+    },
+    "east-trunk-inner": {
+      "axis": "east-trunk",
+      "slot": "silver",
+      "s0": 352,
+      "step": 34,
+      "count": 4,
+      "label_default": { "ds": 2 }
+    },
+    "east-trunk-outer": {
+      "axis": "east-trunk",
+      "slot": "blue+silver",
+      "s0": 576.0,
+      "step": 36.0,
+      "count": 4,
+      "note": "`ds` 0.0: the along-corridor placement is the derived aim, and the run's wrapped Addison Rd / Seat Pleasant block gets its block-centring lift back out of the gap rather than out of a hand nudge."
+    },
+    "south-leg": {
+      "axis": "south",
+      "slot": "mid",
+      "s0": 295.0254,
+      "step": 60.7007,
+      "count": 9,
+      "note": "one even ladder the whole way, Pentagon to Huntington, on two pins. s0 = Pentagon = the Yellow ring (296) cut by the south axis CENTRELINE, sqrt(296^2 - 24^2) = 295.0254. The outer pin is EISENHOWER AV ON THE BELTWAY: the axis's Yellow slot cuts r=720 at sqrt(720^2 - 10^2) = 719.93055, and Eisenhower is the seventh step, so step = (719.93055 - 295.0254)/7 = 60.700736, carried at 60.7007 - which lands it 0.0003 inside the ring, 0.0003 px. Huntington is not pinned at all now: it rides one more step to 780.6310 and the Yellow line's free end follows it there. It used to sit at 768.27, level with Franconia-Springfield on the map's bottom baseline; that pairing is what this spacing costs."
+    },
+    "dulles-leg": {
+      "axis": "dulles-leg",
+      "slot": "mid",
+      "s0": 0.0,
+      "step": 37.5,
+      "count": 8,
+      "note": "s0 = the Beltway, i.e. Greensboro is the crossing point and the innermost station on the straight arm; the run steps OUTWARD from there, so Ashburn lands at 720 + 8*37.5 = 1020. Tysons is not on this run - it is a ring station on the Beltway at the far end of the concentric link (see `stations`)."
+    },
+    "green-se-inner": {
+      "axis": "green-se",
+      "slot": "mid",
+      "s0": 396.8657,
+      "step": 56.8657,
+      "count": 2,
+      "note": "the leg join, and the inner half of a spoke that is deliberately UNEVEN: close at both ends and open across the river. s0 sets Waterfront 72.8657 out from the Green ring (324) and the step carries Navy Yard-Ballpark 56.8657 further, to 453.7314, where the arm stops short of the Anacostia park band (508 - 572). That dot's ink ends at 465.73, 42.3 clear of the band's inner edge, and the 124.8657 on to Anacostia is the river crossing - the gap is the point, not a spacing failure. The earlier ladder solved three equal steps of 82.8657 from the ring to Anacostia and left only 6.3 of white between Navy Yard-Ballpark and the band, which is what this replaces. `curve` concentric sets Waterfront's and Navy Yard-Ballpark's type off the spoke rather than out along it; rule A derives `right` for them, the flank opposite `green-se-outer`'s declared left. `ds` 0.0 is what concentric wants - a slide there acts ACROSS the type and would lift the words off their own dots.",
+      "label_default": {"ds": 0.0, "curve": "concentric"}
+    },
+    "green-se-outer": {
+      "axis": "green-se",
+      "slot": "mid",
+      "s0": 584.0,
+      "step": 46.7455,
+      "count": 2,
+      "label_default": {"side": "left", "ds": 0.0, "curve": "concentric"},
+      "note": "the outer half, past the river, and a run rather than two loose {axis, s} stations so that Anacostia and Congress Heights have somewhere to declare their label side and curve. s0 = 584 puts Anacostia just clear of the park band's outer edge of 572: the dot's ink reaches back to 572.0. At the earlier 578.5971 it crossed the band by 5.4. The 46.7455 step is solved BACKWARDS from Congress Heights, which holds 1.2545 inside the arm's ring: when `outer-green` and the Congress Heights - Branch Av arm on it were moved out by 20, from 612 to 632, Congress Heights went with it to 630.7455 and Anacostia did not. `curve` concentric because radial type cannot separate two stations that share an angle - theirs lay 0.1 deg apart on one another. `side` left is declared against rule A, which would put both on top of Southern Av, and it is the flank opposite `green-se-inner`'s derived right, which is what keeps the spoke's four labels clear of each other. `ds` 0.0 is what concentric wants."
+    }
+  },
+  "corridors": {
+    "CORE": {
+      "name": "Core ring (Blue/Orange/Silver)",
+      "label_default": {"side": "left", "distance": 9.0, "ds": 3.66, "rotate": 0.0},
+      "note": "`side` left is declared because rule A would send Federal Triangle straight into Archives; reading inward over the Mall is what the ring wants. The `distance` of 9.0 is the one corridor gap of its own: a concentric NEIGHBOUR ring is not part of a station's band, and these seven stations sit in a stack of three rings 28 apart."
+    },
+    "OUTR": {"name": "Yellow/Green seam ring", "label_default": {"ds": 17.017, "rotate": 0.0}},
+    "REDC": {"name": "Red inner circle", "label_default": {"ds": -36.401, "rotate": 0.0}},
+    "W": {
+      "name": "West trunk (Vienna – Rosslyn)",
+      "label_default": {"ds": 0.0, "rotate": -52.25, "curve": "straight"},
+      "note": "`curve` straight: at theta ~172-178 deg a concentric arc stands almost vertical, so eight labels would rise through the band they belong to; the -52.25 slant hangs them in one diagonal rank clear below it. Rule A derives `left`, hence end-anchored type reading up-right into its own station. `ds` 0.0 because the along-corridor slide is now the derived aim, and a rank is aimed, not nudged."
+    },
+    "E": {
+      "name": "East trunk (L’Enfant Plaza – Downtown Largo)",
+      "label_default": {"ds": 0.0, "rotate": 37.75, "curve": "straight"},
+      "note": "`curve` straight for the same reason as `W`: at theta ~0-6 deg the core arcs stand near-vertical and eleven labels would rise through their own band; the 37.75 slant ranks them below it. Rule A derives `right`, hence start-anchored type reading down-right out of its station. `ds` 0.0 — the slide is the derived aim."
+    },
+    "S": {
+      "name": "South corridor (Pentagon – Huntington)",
+      "label_default": {"side": "left", "ds": 0.0, "rotate": 0.0},
+      "note": "`side` left is declared because rule A is near-degenerate (axis 24 px west of centre, ~2 deg margin)."
+    },
+    "NE": {
+      "name": "Yellow/Green north-east diagonal (Greenbelt)",
+      "label_default": {"side": "right", "rotate": {"axis": "ne-diagonal"}},
+      "note": "rule A is degenerate here (tangential type on a radial spoke) so `side` must be declared; right sends the outer stack east."
+    },
+    "RNE": {
+      "name": "Red north-east spoke",
+      "label_default": {"side": "right", "ds": -0.038, "rotate": {"axis": "red-ne"}},
+      "note": "rule A is degenerate (tangential type on a radial spoke) so `side` is declared; right reads east off the spoke."
+    },
+    "RN": {
+      "name": "Red north spoke (Glenmont)",
+      "label_default": {"side": "right", "ds": 0.0, "rotate": 0.0},
+      "note": "rule A is degenerate — a due-north spoke under unrotated text — so `side` is declared; right reads the Glenmont arm east off its own spoke."
+    },
+    "MJR": {
+      "name": "Major ring – red arc (Takoma)",
+      "label_default": {"side": "right", "ds": 23.838, "rotate": 0.0},
+      "note": "rule A is degenerate — due north under unrotated text — so `side` is declared; right keeps this label on the same flank as the rest of the Red north arm."
+    },
+    "RNW": {
+      "name": "Red north-west spoke (Shady Grove)",
+      "label_default": {"side": "right", "rotate": 0.0},
+      "note": "not degenerate — rule A resolves `left` here. `side` right is declared against it so the fourteen Shady Grove labels read inboard, off the far side of their own spoke, the way the Glenmont arm does."
+    },
+    "SNW": {
+      "name": "Silver north-west spoke (Ashburn)",
+      "label_default": {"side": "right", "rotate": -52.25, "curve": "straight"},
+      "note": "`side` right is declared against rule A, which would throw the Dulles arm's labels back across their own dots and down the leg. `curve` straight for the same reason `MJS` takes it: without it the arm's labels default to concentric and ignore this `rotate`."
+    },
+    "MJS": {
+      "name": "Silver Tysons run",
+      "label_default": {"side": "right", "ds": 0.0, "rotate": -52.25, "curve": "straight"},
+      "note": "`side` right is declared against rule A, which would throw these labels back across their own dots and down the leg, as it would on `SNW`. `curve` straight is declared here rather than per station: with no curve these labels fall to the default concentric, which derives its own turn off an arc and ignores `rotate`, so they read at a different angle from Vienna and Dunn Loring, whose `W` sets straight. `ds` 0 for the same reason it is 0 on `W`: type set ACROSS its corridor is aim-degenerate (|along.reading| = 0.033 here, under the 0.1 threshold), so no derived slide opposes `ds` and any value in it is a raw shift along the leg."
+    },
+    "GSE": {
+      "name": "Green south-east spoke (Branch Av)",
+      "label_default": {"ds": 0.0, "rotate": 0.0, "curve": "radial"},
+      "note": "`curve` radial: the four `outer-green` ring stations of the Branch Av arm sit 4 deg apart at one radius, where concentric type piles up; a sunburst separates them by angle. `ds` 0.0 is what that mode wants — under `radial` a slide acts ACROSS the type on a ring station, so the clearance is `distance`'s job alone."
+    },
+    "MJOS": {
+      "name": "Orange/Silver New Carrollton branch: diagonal out to Minnesota Av, concentric arc to Landover, radial exit to New Carrollton",
+      "label_default": {"distance": 16.0, "rotate": 0.0, "curve": "radial"},
+      "note": "`curve` radial: Deanwood, Cheverly and Landover are ring stations 4 deg apart at one radius, where concentric type piles up into a single run-on string; a sunburst separates them by angle, as it does for GSE's four `outer-green` stations, whose 4 deg step these now share. The two frames disagree about this arm's band, so the two AXIS-placed stations carry a `distance` of 2 against the corridor's 16. Minnesota Av and New Carrollton read the whole band off their axis slots - 14 out to the Silver slot plus 15 of casing, an `extent` of 29 - while the three RING stations read only their own dot, an `extent` of 15, the ring frame counting no concentric neighbour (see `band_offsets`). That rule is right for GSE, where Green really does run on `outer-green`, and wrong here: this arm's lines run on `nc-arc-orange` (618) and `nc-arc-silver` (646) while the dots sit on 632, a ring with no ink on it. Giving the three the missing 14 was tried and pushed every label across the Beltway, so the two give it back instead and all five stand 31 off their dots. The two corridor-frame stations (Minnesota Av, New Carrollton) take the same mode, `curve` being independent of frame - it re-derives `rotate` from each base point's own theta whether that point comes off an axis or off a ring. `ds` 0.0 is what that mode wants: under `radial` a slide acts ACROSS the type on a ring station, so the clearance is `distance`'s job alone, and one number would otherwise mean two different things inside one corridor."
+    },
+    "MJB": {
+      "name": "Blue Franconia branch",
+      "label_default": {"ds": 0.75, "rotate": 0.0},
+      "note": "the branch is a RADIAL spoke now, so its type is set ACROSS the spoke, not along it - the default `concentric`, as `RNW` and the other radial spokes take. `curve` radial was tried and is wrong here for the reason it is right on `MJOS`: radial type reads out along the outward radial, which on a spoke IS the line, so Van Dorn St read down its own track and through Franconia-Springfield's terminal. New Carrollton can carry it because it sits at the far END of its spoke, with open paper beyond."
+    }
+  },
+  "lines": [
+    {
+      "id": "red",
+      "name": "Red line",
+      "colour_key": "red",
+      "colour": "#BF0D3E",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "red-nw",
+          "slot": "mid",
+          "from": {"s": 936.0},
+          "to": {"ring": "red-inner"}
+        },
+        {"kind": "arc", "ring": "red-inner", "to": {"angle": 309.0}, "dir": "cw"},
+        {
+          "kind": "straight",
+          "axis": "red-ne",
+          "slot": "mid",
+          "from": {"prev": true},
+          "to": {"ring": "major"}
+        },
+        {"kind": "arc", "ring": "major", "to": {"angle": 270.0}, "dir": "ccw"},
+        {"kind": "straight", "axis": "north", "slot": "mid", "from": {"prev": true}, "to": {"s": 844}}
+      ]
+    },
+    {
+      "id": "blue",
+      "name": "Blue line",
+      "colour_key": "blue",
+      "colour": "#009CDE",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "blue-franconia",
+          "slot": "mid",
+          "from": {"s": 780.695},
+          "to": {"ring": "blue-arc"}
+        },
+        {"kind": "arc", "ring": "blue-arc", "to": {"axis": "south", "slot": "blue"}, "dir": "ccw"},
+        {
+          "kind": "straight",
+          "axis": "south",
+          "slot": "blue",
+          "from": {"prev": true},
+          "to": {"ring": "core-blue"}
+        },
+        {"kind": "arc", "ring": "core-blue", "to": {"angle": 360.0}, "dir": "cw"},
+        {"kind": "riser", "axis": "east-trunk", "to_slot": "blue"},
+        {
+          "kind": "straight",
+          "axis": "east-trunk",
+          "slot": "blue",
+          "from": {"prev": true},
+          "to": {"ring": "beltway"}
+        }
+      ]
+    },
+    {
+      "id": "orange",
+      "name": "Orange line",
+      "colour_key": "orange",
+      "colour": "#ED8B00",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "west-trunk",
+          "slot": "orange",
+          "from": {"s": 795.6206},
+          "to": {"ring": "core-orange"}
+        },
+        {"kind": "arc", "ring": "core-orange", "to": {"angle": 360.0}, "dir": "cw"},
+        {
+          "kind": "straight",
+          "axis": "east-trunk",
+          "slot": "orange",
+          "from": {"prev": true},
+          "to": {"axis": "nc-diagonal", "slot": "orange"}
+        },
+        {
+          "kind": "straight",
+          "axis": "nc-diagonal",
+          "slot": "orange",
+          "from": {"prev": true},
+          "to": {"ring": "nc-arc-orange"}
+        },
+        {"kind": "arc", "ring": "nc-arc-orange", "to": {"axis": "nc-exit", "slot": "orange"}, "dir": "ccw"},
+        {
+          "kind": "straight",
+          "axis": "nc-exit",
+          "slot": "orange",
+          "from": {"prev": true},
+          "to": {"ring": "beltway"}
+        }
+      ]
+    },
+    {
+      "id": "silver",
+      "name": "Silver line",
+      "colour_key": "silver",
+      "colour": "#919D9D",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "dulles-leg",
+          "slot": "mid",
+          "from": {"s": 262.5},
+          "to": {"s": 0.0}
+        },
+        {"kind": "arc", "ring": "dulles-arc", "to": {"axis": "tysons-leg", "slot": "mid", "branch": "neg"}, "dir": "ccw"},
+        {"kind": "straight", "axis": "tysons-leg", "slot": "mid", "from": {"prev": true}, "to": {"axis": "west-trunk", "slot": "silver", "s": 567.125}},
+        {
+          "kind": "straight",
+          "axis": "west-trunk",
+          "slot": "silver",
+          "from": {"prev": true},
+          "to": {"ring": "core"}
+        },
+        {"kind": "arc", "ring": "core", "to": {"angle": 360.0}, "dir": "cw"},
+        {"kind": "riser", "axis": "east-trunk", "to_slot": "silver"},
+        {
+          "kind": "straight",
+          "axis": "east-trunk",
+          "slot": "silver",
+          "from": {"prev": true},
+          "to": {"ring": "beltway"}
+        }
+      ]
+    },
+    {
+      "id": "silver-new-carrollton-spur",
+      "name": "Silver · New Carrollton spur",
+      "note": "the inner stub is coincident with the main Silver line - same axis, same slot - so it is never seen; s0 only has to sit outboard of that line's riser onto the slot (s = 240) and inboard of the `nc-diagonal` branch point, and 330 is inside Federal Center SW at 349.91.",
+      "colour_key": "silver",
+      "colour": "#919D9D",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "east-trunk",
+          "slot": "silver",
+          "from": {"s": 330.0},
+          "to": {"axis": "nc-diagonal", "slot": "silver"}
+        },
+        {
+          "kind": "straight",
+          "axis": "nc-diagonal",
+          "slot": "silver",
+          "from": {"prev": true},
+          "to": {"ring": "nc-arc-silver"}
+        },
+        {"kind": "arc", "ring": "nc-arc-silver", "to": {"axis": "nc-exit", "slot": "silver"}, "dir": "ccw"},
+        {
+          "kind": "straight",
+          "axis": "nc-exit",
+          "slot": "silver",
+          "from": {"prev": true},
+          "to": {"ring": "beltway"}
+        }
+      ]
+    },
+    {
+      "id": "yellow",
+      "name": "Yellow line",
+      "colour_key": "yellow",
+      "colour": "#FFD100",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "ne-diagonal",
+          "slot": "yellow",
+          "from": {"ring": "beltway"},
+          "to": {"ring": "yellow"}
+        },
+        {
+          "kind": "arc",
+          "ring": "yellow",
+          "to": {"axis": "south", "slot": "yellow", "branch": "pos"},
+          "dir": "cw"
+        },
+        {"kind": "straight", "axis": "south", "slot": "yellow", "from": {"prev": true}, "to": {"s": 780.631}}
+      ]
+    },
+    {
+      "id": "green",
+      "name": "Green line",
+      "colour_key": "green",
+      "colour": "#00B140",
+      "casing": true,
+      "segments": [
+        {
+          "kind": "straight",
+          "axis": "ne-diagonal",
+          "slot": "green",
+          "from": {"ring": "beltway"},
+          "to": {"ring": "green"}
+        },
+        {"kind": "arc", "ring": "green", "to": {"angle": 49.5}, "dir": "cw"},
+        {
+          "kind": "straight",
+          "axis": "green-se",
+          "slot": "mid",
+          "from": {"prev": true},
+          "to": {"ring": "outer-green"}
+        },
+        {"kind": "arc", "ring": "outer-green", "to": {"angle": 33.5}, "dir": "ccw"}
+      ]
+    }
+  ],
+  "stations": [
+    {
+      "name": "Rosslyn",
+      "id": "rosslyn",
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "interchange",
+      "at": {"ring": "core", "angle": 180.0},
+      "label": {
+        "title": ["Rosslyn"],
+        "override": {"distance": 16, "curve": "straight"},
+        "note": "at theta 180 the core ring's own arc stands near-vertical, so a concentric label would rise straight through the band this station sits in; `curve` straight ranks horizontal type beside the dot instead, and `distance` lifts it clear of the interchange ring."
+      }
+    },
+    {
+      "name": "Foggy Bottom-GWU",
+      "id": "foggy-bottom-gwu",
+      "marks": ["hospital"],
+      "marks_line": 1,
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "core", "angle": 213.0},
+      "tick": true,
+      "label": {
+        "title": ["Foggy Bottom", "GWU"],
+        "subtitle": ["Kennedy Center"],
+        "override": {"side": "right", "ds": 18, "distance": 28, "curve": "straight"},
+        "note": "`curve` straight for the same reason as Rosslyn's — a near-vertical arc through its own band — with `distance` ranking the three-line block clear of the three-ring stack. `side` right is the only per-station side in the spec: `CORE`'s left would lay this block on top of Farragut West's, which shares its slant; right reads it into the ring's white interior. `ds` 18 slides the block up the ring tangent (9.8 right, 15.1 up), so the subtitle clears both the National Mall's top edge at y = 920 and the north bank trail that runs under the label's left end: about 2 of paper between the subtitle and the trail's green."
+      }
+    },
+    {
+      "name": "Farragut West",
+      "id": "farragut-west",
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "core", "angle": 222.0},
+      "tick": true,
+      "label": {
+        "title": ["Farragut", "West"],
+        "override": {"align": "start", "ds": -24, "distance": 62, "curve": "straight"},
+        "note": "`curve` straight against a near-vertical arc at theta 222, `distance` ranking the block clear of the three-ring stack, `align` start hanging it forward of its own dot and `ds` sliding it off Foggy Bottom-GWU along the ring tangent. The slide is a measured hand nudge on top of the derived aim, not a compensation for it: -24 sets the block 5.4 right and 5.9 up of where -32 had it."
+      }
+    },
+    {
+      "name": "McPherson Sq",
+      "id": "mcpherson-sq",
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "core", "angle": 270},
+      "tick": true,
+      "label": {
+        "title": ["McPherson Sq"],
+        "override": {"align": "middle", "ds": 0, "distance": -69},
+        "note": "the one core override that stays concentric. `align` middle centres the block on its own station rather than trailing it off one end, and the negative `distance` carries that centre outside the ring, clear of Metro Center's capsule. A middle anchor has no near end, so this label is degenerate for the aim and `ds` 0 leaves it where the gap puts it."
+      }
+    },
+    {
+      "name": "Federal Triangle",
+      "id": "federal-triangle",
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "core", "angle": 337.5},
+      "tick": true,
+      "label": {
+        "title": ["Federal Triangle"],
+        "override": {"ds": 2.92, "distance": 28, "curve": "straight"},
+        "note": "19 deg from Smithsonian is not room for two concentric arcs on one ring, and both stood near-vertical through their own band. `curve` straight ranks this one horizontally left of its dot at `distance`; the label is aimed, so `ds` is a measured slide off its own dot line and no more."
+      }
+    },
+    {
+      "name": "Smithsonian",
+      "id": "smithsonian",
+      "corridor": "CORE",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "core", "angle": 356.7},
+      "tick": true,
+      "label": {
+        "title": ["Smithsonian"],
+        "subtitle": ["National Mall"],
+        "override": {"ds": 14, "distance": 27, "curve": "straight"},
+        "note": "the other half of the Federal Triangle pair, and straight for the same reason. At theta 356.7 its radius is all but horizontal, so horizontal type reads ACROSS its own tangent: the aim is degenerate here and `ds` is the whole of what places the block along the ring. `ds` 14 drops the block 17 below its old place, off the National Mall: the title's caps start at y = 991.4, 3.4 below the Mall's bottom edge at 988, and the subtitle's baseline is at 1014.6."
+      }
+    },
+    {
+      "name": "Arlington Cemetery",
+      "id": "arlington-cemetery",
+      "corridor": "CORE",
+      "lines": ["blue"],
+      "marker": "dot",
+      "at": {"ring": "core-blue", "angle": 135.0},
+      "label": {
+        "title": ["Arlington", "Cemetery"],
+        "override": {"distance": 6, "align": "middle"},
+        "note": "`align` middle centres the two-line block on its own station instead of trailing it off one end, and `ds` 0 puts that centre on the dot's own radius. Stays concentric, on the park side of the Blue ring, at `CORE`'s gap."
+      }
+    },
+    {
+      "name": "Gallery Place",
+      "id": "gallery-place",
+      "corridor": "OUTR",
+      "lines": ["red", "green", "yellow"],
+      "marker": "interchange",
+      "at": {"ring": "yg-seam", "angle": 309.0},
+      "label": {"title": ["Gallery Place"], "subtitle": ["Chinatown"]}
+    },
+    {
+      "name": "Archives",
+      "id": "archives",
+      "corridor": "OUTR",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"ring": "yg-seam", "angle": 337.5},
+      "label": {"title": ["Archives"], "subtitle": ["Navy Mem’l-", "Penn Quarter"], "override": {"ds": 0, "distance": 16, "align": "middle"}}
+    },
+    {
+      "name": "Metro Center",
+      "id": "metro-center",
+      "corridor": "REDC",
+      "lines": ["red", "blue", "orange", "silver"],
+      "marker": "capsule",
+      "at": {
+        "capsule": {
+          "axis": "red-ne",
+          "slot": "mid",
+          "from": {"s": 211.425},
+          "to": {"ring": "core"},
+          "note": "the bar runs halfway through the outermost line at each end, the way the L\u2019Enfant Plaza bar does. `red-ne` passes through the centre on the mean slot, so every ring crossing is s = r: the Red arc is at 184 and the round cap reaches casing/2 = 27.425 back past the inner dot, which therefore sits at 184 + 27.425 = 211.425 and lands the cap on Red's centreline. The outer end needs no such offset - held on `core` at 240, its cap tip reaches 267.425, already 0.575 short of the Orange slot at 268, the same margin the bar's flanks keep off their neighbours."
+        }
+      },
+      "label": {
+        "title": ["Metro Center"],
+        "override": {"align": "end", "curve": "straight", "distance": 12, "ds": -70},
+        "note": "`curve` straight because the concentric arc ran through this station's own capsule. `align` end finishes the two-line block just clear of the capsule's LOWER circle, down and to the left of it. `distance` and `ds` are carried together because the `red-ne` corridor frame sits 39 deg off vertical and a screen-vertical placement has to be resolved into both frame axes; neither number is a coordinate. The block is aimed, so its `ds` is a hand slide measured from the derived hug, not the whole placement."
+      }
+    },
+    {
+      "name": "Court House",
+      "id": "court-house",
+      "corridor": "W",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "west-trunk-inner", "i": 0},
+      "label": {"title": ["Court House"]}
+    },
+    {
+      "name": "Clarendon",
+      "id": "clarendon",
+      "corridor": "W",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "west-trunk-inner", "i": 1},
+      "label": {"title": ["Clarendon"]}
+    },
+    {
+      "name": "Virginia Sq-GMU",
+      "id": "virginia-sq-gmu",
+      "corridor": "W",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "west-trunk-inner", "i": 2},
+      "label": {"title": ["Virginia Sq-GMU"]}
+    },
+    {
+      "name": "Ballston-MU",
+      "id": "ballston-mu",
+      "corridor": "W",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "west-trunk-inner", "i": 3},
+      "label": {"title": ["Ballston-MU"]}
+    },
+    {
+      "name": "East Falls Church",
+      "id": "east-falls-church",
+      "marks": ["parking"],
+      "corridor": "W",
+      "lines": ["orange", "silver"],
+      "marker": "interchange",
+      "at": {"run": "west-trunk-inner", "i": 4},
+      "label": {"title": ["East Falls Church"]}
+    },
+    {
+      "name": "West Falls Church",
+      "id": "west-falls-church",
+      "marks": ["parking"],
+      "corridor": "W",
+      "lines": ["orange"],
+      "marker": "dot",
+      "at": {"run": "west-trunk-outer", "i": 1},
+      "label": {"title": ["West Falls Church"], "subtitle": ["VT"]}
+    },
+    {
+      "name": "Dunn Loring",
+      "id": "dunn-loring",
+      "marks": ["parking"],
+      "corridor": "W",
+      "lines": ["orange"],
+      "marker": "dot",
+      "at": {"axis": "west-trunk", "slot": "orange", "at_ring": "beltway"},
+      "label": {"title": ["Dunn Loring"], "subtitle": ["Merrifield"]}
+    },
+    {
+      "name": "Vienna",
+      "id": "vienna",
+      "marks": ["parking"],
+      "corridor": "W",
+      "lines": ["orange"],
+      "marker": "terminal",
+      "at": {"run": "west-trunk-outer", "i": 3},
+      "terminal_letters": ["O"],
+      "label": {"title": ["Vienna"], "subtitle": ["Fairfax-GMU"]}
+    },
+    {
+      "name": "L’Enfant Plaza",
+      "id": "lenfant-plaza",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver", "green", "yellow"],
+      "marker": "capsule",
+      "at": {
+        "capsule": {
+          "axis": "east-trunk",
+          "slot": "silver",
+          "from": {"s": 240.0},
+          "to": {"s": 295.3629},
+          "note": "the bar spans the corridor it interchanges. It starts where the core station axis reads as a distance along the trunk (s = core = 240). The outer end is set so the round cap LANDS ON the Green centreline the way the bar's flanks land on Blue's and Orange's: the cap reaches casing/2 = 27.425 past the end dot, and Green cuts this slot line at sqrt(324^2 - 28^2) = 322.7879, so the dot sits at 322.7879 - 27.425 = 295.3629. Halfway through Green along the bar, halfway through Blue and Orange across it."
+        }
+      },
+      "label": {
+        "title": ["L’Enfant", "Plaza"],
+        "override": {"align": "end", "rotate": 0.0, "curve": "straight", "distance": -45.0, "ds": -42},
+        "note": "`rotate` 0 cancels `E`'s 37.75 so the block reads horizontally beside the capsule instead of down the trunk's diagonal rank, and `align` end finishes it just left of the capsule's left edge. `distance` and `ds` are one vector read in the corridor's (perp, along): the negative gap cancels most of the frame's vertical offset: -55 lands the block on the capsule's own centreline, and -45 sets it 10 below that, which keeps 11.2 between its caps (from y = 1025.8) and the Smithsonian subtitle above. The block still ends above the capsule's lower edge (y = 1055.4). Type set along its own horizontal corridor carries no aim, so nothing is solved underneath these two numbers. This is also the only label that reaches `side`'s outward-radial fallback, its offset being exactly across the reading direction."
+      }
+    },
+    {
+      "name": "Federal Center SW",
+      "id": "federal-center-sw",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-inner", "i": 0},
+      "tick": true,
+      "label": {"title": ["Federal Center SW"]}
+    },
+    {
+      "name": "Capitol South",
+      "id": "capitol-south",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-inner", "i": 1},
+      "tick": true,
+      "label": {"title": ["Capitol South"]}
+    },
+    {
+      "name": "Eastern Market",
+      "id": "eastern-market",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-inner", "i": 2},
+      "tick": true,
+      "label": {"title": ["Eastern Market"]}
+    },
+    {
+      "name": "Potomac Av",
+      "id": "potomac-av",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-inner", "i": 3},
+      "tick": true,
+      "label": {"title": ["Potomac Av"]}
+    },
+    {
+      "name": "Stadium-Armory",
+      "id": "stadium-armory",
+      "corridor": "E",
+      "lines": ["blue", "orange", "silver"],
+      "marker": "interchange",
+      "at": {"axis": "east-trunk", "slot": "silver", "s": 496.0, "note": "off `east-trunk-inner`, which would put it at 482: the interchange ring needs 8 more than the run's step gives it."},
+      "label": {"title": ["Stadium-Armory"]}
+    },
+    {
+      "name": "Benning Rd",
+      "id": "benning-rd",
+      "corridor": "E",
+      "lines": ["blue", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-outer", "i": 0},
+      "label": {"title": ["Benning Rd"]}
+    },
+    {
+      "name": "Capitol Heights",
+      "id": "capitol-heights",
+      "marks": ["parking"],
+      "corridor": "E",
+      "lines": ["blue", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-outer", "i": 1},
+      "label": {"title": ["Capitol Heights"]}
+    },
+    {
+      "name": "Addison Rd",
+      "id": "addison-rd",
+      "marks": ["parking"],
+      "corridor": "E",
+      "lines": ["blue", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-outer", "i": 2},
+      "label": {
+        "title": ["Addison Rd"],
+        "subtitle": ["Seat Pleasant"],
+        "override": {"ds": 8},
+        "note": "a `ds` nudge along the trunk; the even run step leaves the slanted blocks of this trio too little room."
+      }
+    },
+    {
+      "name": "Morgan Blvd",
+      "id": "morgan-blvd",
+      "marks": ["parking"],
+      "corridor": "E",
+      "lines": ["blue", "silver"],
+      "marker": "dot",
+      "at": {"run": "east-trunk-outer", "i": 3},
+      "label": {
+        "title": ["Morgan Blvd"],
+        "override": {"ds": 10},
+        "note": "paired with Addison Rd's nudge — the two slide outward together to open the stack."
+      }
+    },
+    {
+      "name": "Downtown Largo",
+      "id": "downtown-largo",
+      "marks": ["parking"],
+      "corridor": "E",
+      "lines": ["blue", "silver"],
+      "marker": "terminal",
+      "at": {
+        "dots": [
+          {"axis": "east-trunk", "slot": "silver", "at_ring": "beltway", "line": "silver"},
+          {"axis": "east-trunk", "slot": "blue", "at_ring": "beltway", "line": "blue"}
+        ]
+      },
+      "terminal_letters": ["S", "B"],
+      "label": {
+        "title": ["Downtown Largo"],
+        "override": {"ds": 16.0, "distance": -2},
+        "note": "moved off the Beltway with `ds`, not `distance`. The block starts on the ring - base r 723.28 against an outer edge of 723 - and `E`\u2019s offset runs down the east-trunk normal, due SOUTH, which at theta 3.3 is very nearly the TANGENT of the ring: 24 more of `distance` buys 3.1 px of clearance. `ds` slides along the trunk, due east, which here is 99.3 per cent radial, so 12 of it buys 12.2 and carries the whole block outside the ring."
+      }
+    },
+    {
+      "name": "Pentagon",
+      "id": "pentagon",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "interchange",
+      "at": {"run": "south-leg", "i": 0},
+      "label": {"title": ["Pentagon"]}
+    },
+    {
+      "name": "Pentagon City",
+      "id": "pentagon-city",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 1},
+      "label": {"title": ["Pentagon City"]}
+    },
+    {
+      "name": "Crystal City",
+      "id": "crystal-city",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 2},
+      "label": {"title": ["Crystal City"]}
+    },
+    {
+      "name": "Ronald Reagan Washington National Airport",
+      "id": "ronald-reagan-washington-national-airport",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 3},
+      "label": {"title": ["Ronald Reagan", "Washington National Airport"]}
+    },
+    {
+      "name": "Potomac Yard",
+      "id": "potomac-yard",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 4},
+      "label": {"title": ["Potomac Yard"], "subtitle": ["VT"]}
+    },
+    {
+      "name": "Braddock Rd",
+      "id": "braddock-rd",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 5},
+      "label": {"title": ["Braddock Rd"]}
+    },
+    {
+      "name": "King St-Old Town",
+      "id": "king-st-old-town",
+      "corridor": "S",
+      "lines": ["blue", "yellow"],
+      "marker": "interchange",
+      "at": {"run": "south-leg", "i": 6},
+      "label": {"title": ["King St-Old Town"], "override": {"ds": 22.0, "distance": -8}}
+    },
+    {
+      "name": "Eisenhower Av",
+      "id": "eisenhower-av",
+      "corridor": "S",
+      "lines": ["yellow"],
+      "marker": "dot",
+      "at": {"run": "south-leg", "i": 7, "slot": "yellow"},
+      "label": {
+        "title": ["Eisenhower Av"],
+        "override": {"ds": 12.0},
+        "note": "off the Beltway with `ds`, not `distance`. This station sits ON the ring, where the ring runs nearly EAST-WEST, and `S`\u2019s offset runs down the south axis normal, due west - the ring\u2019s own tangent - so `distance` slides the words along the Beltway however far it is pushed. `ds` runs north-south, across it. The block straddled the ring at ds 0; +24 drops it clear by 11.3. Negative was tried and rejected: at -24 the block\u2019s east end laps King St-Old Town\u2019s interchange ring by 0.42."
+      }
+    },
+    {
+      "name": "Huntington",
+      "id": "huntington",
+      "marks": ["parking"],
+      "corridor": "S",
+      "lines": ["yellow"],
+      "marker": "terminal",
+      "at": {"run": "south-leg", "i": 8, "slot": "yellow"},
+      "terminal_letters": ["Y"],
+      "label": {"title": ["Huntington"]}
+    },
+    {
+      "name": "Mt Vernon Sq",
+      "id": "mt-vernon-sq",
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-inner", "i": 0},
+      "label": {"title": ["Mt Vernon Sq"], "subtitle": ["7th St-Convention Center"]}
+    },
+    {
+      "name": "Shaw-Howard U",
+      "id": "shaw-howard-u",
+      "marks": ["hospital"],
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-inner", "i": 1},
+      "label": {"title": ["Shaw-Howard U"]}
+    },
+    {
+      "name": "U St",
+      "id": "u-st",
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-inner", "i": 2},
+      "label": {"title": ["U St"], "subtitle": ["African-Amer Civil War", "Mem’l/Cardozo"]}
+    },
+    {
+      "name": "Columbia Heights",
+      "id": "columbia-heights",
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-inner", "i": 3},
+      "label": {"title": ["Columbia Heights"]}
+    },
+    {
+      "name": "Georgia Av-Petworth",
+      "id": "georgia-av-petworth",
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-inner", "i": 4},
+      "label": {"title": ["Georgia Av-Petworth"]}
+    },
+    {
+      "name": "Fort Totten",
+      "id": "fort-totten",
+      "marks": ["parking"],
+      "corridor": "NE",
+      "lines": ["green", "yellow", "red"],
+      "marker": "interchange",
+      "at": {"axis": "ne-diagonal", "slot": "mid", "at_ring": "major"},
+      "label": {
+        "title": ["Fort Totten"],
+        "override": {"ds": 21},
+        "note": "a nudge along the `NE` corridor to carry this label clear of the Beltway ring, tuned by eye rather than derived."
+      }
+    },
+    {
+      "name": "West Hyattsville",
+      "id": "west-hyattsville",
+      "marks": ["parking"],
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-outer", "i": 0},
+      "label": {"title": ["West Hyattsville"]}
+    },
+    {
+      "name": "Hyattsville Crossing",
+      "id": "hyattsville-crossing",
+      "marks": ["parking"],
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-outer", "i": 1},
+      "label": {"title": ["Hyattsville Crossing"]}
+    },
+    {
+      "name": "College Park-U of Md",
+      "id": "college-park-u-of-md",
+      "marks": ["parking"],
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "dot",
+      "at": {"run": "ne-diagonal-outer", "i": 2},
+      "label": {"title": ["College Park-U of Md"]}
+    },
+    {
+      "name": "Greenbelt",
+      "id": "greenbelt",
+      "marks": ["parking"],
+      "corridor": "NE",
+      "lines": ["green", "yellow"],
+      "marker": "terminal",
+      "at": {
+        "dots": [
+          {"axis": "ne-diagonal", "slot": "yellow", "at_ring": "beltway", "line": "yellow"},
+          {"axis": "ne-diagonal", "slot": "green", "at_ring": "beltway", "line": "green"}
+        ]
+      },
+      "terminal_letters": ["Y", "G"],
+      "label": {
+        "title": ["Greenbelt"],
+        "override": {"side": "right", "ds": 10.0},
+        "note": "a `ds` nudge along `NE` to clear the Beltway ring, as at Fort Totten. `side` right is stated on the station as well as on the corridor: rule A is degenerate on this spoke, and this terminal's two platforms straddle the axis, so the flank the block reads off is pinned here rather than left to inheritance."
+      }
+    },
+    {
+      "name": "Judiciary Sq",
+      "id": "judiciary-sq",
+      "corridor": "RNE",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-ne-spoke", "i": 0},
+      "label": {
+        "title": ["Judiciary Sq"],
+        "note": "a `ds` nudge up the spoke to set the block beside its own dot; the even 49.6 step leaves too little room below it for both this label and Gallery Place's."
+      }
+    },
+    {
+      "name": "Union Station",
+      "id": "union-station",
+      "corridor": "RNE",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-ne-spoke", "i": 1},
+      "label": {"title": ["Union Station"]}
+    },
+    {
+      "name": "NoMa-Gallaudet U",
+      "id": "noma-gallaudet-u",
+      "corridor": "RNE",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-ne-spoke", "i": 2},
+      "label": {"title": ["NoMa-Gallaudet U"]}
+    },
+    {
+      "name": "Rhode Island Av",
+      "id": "rhode-island-av",
+      "marks": ["parking"],
+      "corridor": "RNE",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-ne-spoke", "i": 3},
+      "label": {"title": ["Rhode Island Av"], "subtitle": ["Brentwood"]}
+    },
+    {
+      "name": "Brookland-CUA",
+      "id": "brookland-cua",
+      "corridor": "RNE",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-ne-spoke", "i": 4},
+      "label": {"title": ["Brookland-CUA"]}
+    },
+    {
+      "name": "Takoma",
+      "id": "takoma",
+      "marks": ["parking"],
+      "corridor": "MJR",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-north-spoke", "i": 0},
+      "label": {"title": ["Takoma"], "override": {"ds": 20.838}, "note": "`ds` 3 less than the corridor's 23.838, which puts the type 3 nearer the Red arc's casing and so further below the DC boundary."}
+    },
+    {
+      "name": "Silver Spring",
+      "id": "silver-spring",
+      "marks": ["parking"],
+      "corridor": "RN",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-north-spoke", "i": 1},
+      "label": {"title": ["Silver Spring"]}
+    },
+    {
+      "name": "Forest Glen",
+      "id": "forest-glen",
+      "marks": ["parking", "hospital"],
+      "corridor": "RN",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-north-outer", "i": 0},
+      "label": {"title": ["Forest Glen"]}
+    },
+    {
+      "name": "Wheaton",
+      "id": "wheaton",
+      "marks": ["parking"],
+      "corridor": "RN",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-north-outer", "i": 1},
+      "label": {"title": ["Wheaton"]}
+    },
+    {
+      "name": "Glenmont",
+      "id": "glenmont",
+      "marks": ["parking"],
+      "corridor": "RN",
+      "lines": ["red"],
+      "marker": "terminal",
+      "at": {"run": "red-north-outer", "i": 2},
+      "terminal_letters": ["R"],
+      "label": {"title": ["Glenmont"]}
+    },
+    {
+      "name": "Farragut North",
+      "id": "farragut-north",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 0},
+      "label": {"title": ["Farragut North"]}
+    },
+    {
+      "name": "Dupont Circle",
+      "id": "dupont-circle",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 1},
+      "label": {"title": ["Dupont Circle"]}
+    },
+    {
+      "name": "Woodley Park",
+      "id": "woodley-park",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 2},
+      "label": {"title": ["Woodley Park"], "subtitle": ["Zoo/Adams Morgan"]}
+    },
+    {
+      "name": "Cleveland Park",
+      "id": "cleveland-park",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 3},
+      "label": {"title": ["Cleveland Park"]}
+    },
+    {
+      "name": "Van Ness-UDC",
+      "id": "van-ness-udc",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 4},
+      "label": {"title": ["Van Ness-UDC"]}
+    },
+    {
+      "name": "Tenleytown-AU",
+      "id": "tenleytown-au",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 5},
+      "label": {"title": ["Tenleytown-AU"]}
+    },
+    {
+      "name": "Friendship Heights",
+      "id": "friendship-heights",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 6},
+      "label": {"title": ["Friendship Heights"]}
+    },
+    {
+      "name": "Bethesda",
+      "id": "bethesda",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 7},
+      "label": {"title": ["Bethesda"]}
+    },
+    {
+      "name": "Medical Center",
+      "id": "medical-center",
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 8},
+      "label": {"title": ["Medical Center"]}
+    },
+    {
+      "name": "Grosvenor-Strathmore",
+      "id": "grosvenor-strathmore",
+      "marks": ["parking"],
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 9},
+      "label": {"title": ["Grosvenor-Strathmore"]}
+    },
+    {
+      "name": "North Bethesda",
+      "id": "north-bethesda",
+      "marks": ["parking"],
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 10},
+      "label": {"title": ["North Bethesda"]}
+    },
+    {
+      "name": "Twinbrook",
+      "id": "twinbrook",
+      "marks": ["parking"],
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 11},
+      "label": {"title": ["Twinbrook"]}
+    },
+    {
+      "name": "Rockville",
+      "id": "rockville",
+      "marks": ["parking"],
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "dot",
+      "at": {"run": "red-nw-spoke", "i": 12},
+      "label": {"title": ["Rockville"]}
+    },
+    {
+      "name": "Shady Grove",
+      "id": "shady-grove",
+      "marks": ["parking"],
+      "corridor": "RNW",
+      "lines": ["red"],
+      "marker": "terminal",
+      "at": {"run": "red-nw-spoke", "i": 13},
+      "terminal_letters": ["R"],
+      "label": {"title": ["Shady Grove"]}
+    },
+    {
+      "name": "Tysons",
+      "id": "tysons",
+      "corridor": "MJS",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {
+        "axis": "tysons-leg",
+        "slot": "mid",
+        "s": 0.0,
+        "note": "the leg's own origin, which is this corner on the Beltway - the same point the station used to be given as {ring: beltway, angle: 185.4111}, and that angle is still what `tysons-leg` derives its origin from. Stated on the AXIS instead so the label reads in the leg's frame: as a ring station its frame was tangential to the Beltway, which hung its block differently from McLean's on the same straight. The angle is solved, not chosen: the leg from this corner to the west-trunk Silver slot at s = 567.125 passes West Falls Church (356.7098, 1028), and 185.4111 is the angle at which it clears that station's ink by exactly casing/2 + marker outer r = 15 + 12 = 27. Any corner nearer Dunn Loring drives the leg inside that marker."
+      },
+      "label": {"title": ["Tysons"]}
+    },
+    {
+      "name": "Greensboro",
+      "id": "greensboro",
+      "corridor": "MJS",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"axis": "tysons-leg", "slot": "mid", "at_ring": "dulles-arc", "branch": "neg", "note": "where the Ballston - Tysons leg meets the `dulles-arc` ring, one McLean-step past Tysons and 53.1617 outside the Beltway. `branch` neg takes the near crossing; the far one is at s = 1254.18, back down the leg the other way."},
+      "label": {
+        "title": ["Greensboro"],
+        "override": {"side": "left", "ds": -2.0},
+        "note": "matched to Vienna, the other terminal-end station on this leg: `curve` straight so `rotate` -52.25 is taken literally rather than derived off an arc, `side` left and `ds` 0 to sit the block the way `W` sits Vienna's. That is also what clears Spring Hill - halving the arc put the two 79.35 apart where they had been 158.70, and at MJS's own side/ds their blocks and Greensboro's block over Spring Hill's dot both overlapped."
+      }
+    },
+    {
+      "name": "Spring Hill",
+      "id": "spring-hill",
+      "corridor": "MJS",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 0},
+      "label": {
+        "title": ["Spring Hill"],
+        "override": {"side": "left", "ds": 12, "distance": 4},
+        "note": "declared against `MJS`'s right, so it reads on the inboard flank the way Greensboro does at the other end of the arc - the two turn stations face each other across it instead of both hanging off the same side."
+      }
+    },
+    {
+      "name": "Wiehle-Reston East",
+      "id": "wiehle-reston-east",
+      "marks": ["parking"],
+      "corridor": "MJS",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 1},
+      "label": {"title": ["Wiehle-Reston East"]}
+    },
+    {
+      "name": "Reston Town Center",
+      "id": "reston-town-center",
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 2},
+      "label": {"title": ["Reston Town Center"]}
+    },
+    {
+      "name": "Herndon",
+      "id": "herndon",
+      "marks": ["parking"],
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 3},
+      "label": {"title": ["Herndon"]}
+    },
+    {
+      "name": "Innovation Center",
+      "id": "innovation-center",
+      "marks": ["parking"],
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 4},
+      "label": {"title": ["Innovation Center"]}
+    },
+    {
+      "name": "Washington Dulles International Airport",
+      "id": "washington-dulles-international-airport",
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 5},
+      "label": {"title": ["Washington Dulles", "International Airport"]}
+    },
+    {
+      "name": "Loudoun Gateway",
+      "id": "loudoun-gateway",
+      "marks": ["parking"],
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"run": "dulles-leg", "i": 6},
+      "label": {"title": ["Loudoun Gateway"]}
+    },
+    {
+      "name": "Ashburn",
+      "id": "ashburn",
+      "marks": ["parking"],
+      "corridor": "SNW",
+      "lines": ["silver"],
+      "marker": "terminal",
+      "at": {"run": "dulles-leg", "i": 7},
+      "terminal_letters": ["S"],
+      "label": {"title": ["Ashburn"]}
+    },
+    {
+      "name": "McLean",
+      "id": "mclean",
+      "corridor": "MJS",
+      "lines": ["silver"],
+      "marker": "dot",
+      "at": {"axis": "tysons-leg", "slot": "mid", "s": 63.2914},
+      "label": {"title": ["McLean"]}
+    },
+    {
+      "name": "Waterfront",
+      "id": "waterfront",
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"run": "green-se-inner", "i": 0},
+      "label": {"title": ["Waterfront"]}
+    },
+    {
+      "name": "Navy Yard-Ballpark",
+      "id": "navy-yard-ballpark",
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"run": "green-se-inner", "i": 1},
+      "label": {"title": ["Navy Yard-Ballpark"]}
+    },
+    {
+      "name": "Anacostia",
+      "id": "anacostia",
+      "marks": ["parking"],
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"run": "green-se-outer", "i": 0},
+      "label": {"title": ["Anacostia"]}
+    },
+    {
+      "name": "Congress Heights",
+      "id": "congress-heights",
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"run": "green-se-outer", "i": 1},
+      "label": {"title": ["Congress Heights"]}
+    },
+    {
+      "name": "Southern Av",
+      "id": "southern-av",
+      "marks": ["parking"],
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 45.5},
+      "label": {"title": ["Southern Av"]}
+    },
+    {
+      "name": "Naylor Rd",
+      "id": "naylor-rd",
+      "marks": ["parking"],
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 41.5},
+      "label": {"title": ["Naylor Rd"]}
+    },
+    {
+      "name": "Suitland",
+      "id": "suitland",
+      "marks": ["parking"],
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 37.5},
+      "label": {"title": ["Suitland"]}
+    },
+    {
+      "name": "Branch Av",
+      "id": "branch-av",
+      "marks": ["parking"],
+      "corridor": "GSE",
+      "lines": ["green"],
+      "marker": "terminal",
+      "at": {"ring": "outer-green", "angle": 33.5},
+      "terminal_letters": ["G"],
+      "label": {"title": ["Branch Av"]}
+    },
+    {
+      "name": "Minnesota Av",
+      "id": "minnesota-av",
+      "marks": ["parking"],
+      "corridor": "MJOS",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"axis": "nc-diagonal", "slot": "mid", "at_ring": "outer-green"},
+      "label": {
+        "title": ["Minnesota Av"],
+        "override": {"distance": 2.0},
+        "note": "`distance` 2 is the corridor's 16 less the 14 that the AXIS frame counts and the RING frame does not, which levels this label with the three ring stations on the same arc - see `MJOS`."
+      }
+    },
+    {
+      "name": "Deanwood",
+      "id": "deanwood",
+      "marks": ["parking"],
+      "corridor": "MJOS",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 347.6884},
+      "label": {"title": ["Deanwood"]}
+    },
+    {
+      "name": "Cheverly",
+      "id": "cheverly",
+      "marks": ["parking"],
+      "corridor": "MJOS",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 343.6884},
+      "label": {"title": ["Cheverly"]}
+    },
+    {
+      "name": "Landover",
+      "id": "landover",
+      "marks": ["parking"],
+      "corridor": "MJOS",
+      "lines": ["orange", "silver"],
+      "marker": "dot",
+      "at": {"ring": "outer-green", "angle": 339.6884},
+      "label": {"title": ["Landover"]}
+    },
+    {
+      "name": "New Carrollton",
+      "id": "new-carrollton",
+      "marks": ["parking"],
+      "corridor": "MJOS",
+      "lines": ["orange", "silver"],
+      "marker": "terminal",
+      "at": {
+        "dots": [
+          {"axis": "nc-exit", "slot": "orange", "at_ring": "beltway", "line": "orange"},
+          {"axis": "nc-exit", "slot": "silver", "at_ring": "beltway", "line": "silver"}
+        ]
+      },
+      "terminal_letters": ["O", "S"],
+      "label": {
+        "title": ["New Carrollton"],
+        "override": {"distance": -4.0},
+        "note": "`distance` 2 is the corridor's 16 less the 14 that the AXIS frame counts and the RING frame does not, which levels this label with the three ring stations on the same arc - see `MJOS`."
+      }
+    },
+    {
+      "name": "Van Dorn St",
+      "id": "van-dorn-st",
+      "marks": ["parking"],
+      "corridor": "MJB",
+      "lines": ["blue"],
+      "marker": "dot",
+      "at": {"axis": "blue-franconia", "slot": "mid", "at_ring": "beltway"},
+      "label": {
+        "title": ["Van Dorn St"],
+        "override": {"ds": 12.0},
+        "note": "the same 24 Eisenhower Av carries, and for the same reason: this station sits ON the Beltway, and `MJB`\u2019s offset runs down the spoke\u2019s normal, which on a RADIAL axis is the ring\u2019s own tangent - so `distance` slides the words along the Beltway. `ds` runs out along the spoke, across the ring. At ds 0.75 the block sat at r 721.0, inside the ring\u2019s ink of 717..723; +24 carries it to 744.2."
+      }
+    },
+    {
+      "name": "Franconia-Springfield",
+      "id": "franconia-springfield",
+      "marks": ["parking"],
+      "corridor": "MJB",
+      "lines": ["blue"],
+      "marker": "terminal",
+      "at": {"axis": "blue-franconia", "slot": "mid", "s": 780.695, "note": "the same stand-off from the Beltway as Huntington, the other southern terminal: Huntington sits at r = 780.6950, 60.6950 outside the ring, and this spoke is radial so s = r. The two terminals therefore share a circle about the map centre."},
+      "terminal_letters": ["B"],
+      "label": {"title": ["Franconia-Springfield"]}
+    }
+  ],
+  "geo": {
+    "frame_note": "all literal coordinates below are in the 2000x2000 / centre (1000,1000) frame",
+    "parks": [
+      {
+        "id": "park-rock-creek",
+        "name": "Rock Creek Park",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 870,
+        "y": 384,
+        "width": 90,
+        "height": 210,
+        "rx": 14.248437,
+        "ry": 8.4940319,
+        "label": {
+          "id": "geo-label-rock-creek",
+          "lines": ["Rock", "Creek", "Park"],
+          "at": [915, 489],
+          "rotate": 0,
+          "note": "three horizontal lines centred on the rect's own centre; no line, station or station label lies inside the rect."
+        }
+      },
+      {
+        "id": "park-white-house",
+        "name": "White House",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 970.58533,
+        "y": 857.3172,
+        "width": 64,
+        "height": 76.930511,
+        "rx": 5.087852,
+        "ry": 5.611855
+      },
+      {
+        "id": "park-national-mall",
+        "name": "National Mall",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 885.03693,
+        "y": 920,
+        "width": 500.96307,
+        "height": 68,
+        "rx": 8.9974928,
+        "ry": 7,
+        "label": {
+          "id": "geo-label-national-mall",
+          "lines": ["NATIONAL MALL"],
+          "at": [1108, 954],
+          "rotate": 0,
+          "size_px": 10,
+          "letter_spacing": 1.0,
+          "note": "one line in the middle of the museum icons, on the Mall's own centre line (y = 954): the two rows of icons stand 19.5 above and 19.5 below it (y = 934.5 and 973.5), which leaves about 22 of green between them for the type - in capitals at its own `size_px` 10, 7.3 high, with a `letter_spacing` of 1.0 - the boundary names' 0.1 em - and the park font's regular weight. The line is about 87 long and is centred on the four columns, which are spread evenly, 41.3 apart, from x = 1046 - the first column stands at the corner of the White House lawn, whose east edge is x = 1034.6 - to x = 1170."
+        }
+      },
+      {
+        "id": "park-arlington-cemetery",
+        "name": "Arlington Cemetery",
+        "shape": "wedge",
+        "fill": "#CDE0A0",
+        "inner_ring": "core-blue",
+        "outer_ring": "yg-seam",
+        "from_angle": 117.0,
+        "to_angle": 156.0,
+        "fillet_r": 8.8020766,
+        "note": "a rounded wedge about the centre, generated from its two ring radii, its two edge angles and the fillet: it runs from the Blue core ring out to the Yellow/Green seam, and the 39 deg it spans is on the map's 1.5 deg angle grid and straddles the Arlington Cemetery spoke at 135. The four corners are filleted tangentially: a fillet centre sits at radius r + fillet inside and r - fillet outside, so each arc is inset from its edge angle by asin(fillet/(r +/- fillet)) and each radial edge runs between sqrt((r +/- fillet)^2 - fillet^2)."
+      },
+      {
+        "id": "park-anacostia",
+        "name": "Anacostia Park (both banks)",
+        "shape": "ring_arc",
+        "fill": "none",
+        "stroke": "#CDE0A0",
+        "stroke_width": 64,
+        "ring": "anacostia",
+        "from_angle": 332.7922,
+        "to_angle": 68.355,
+        "dir": "cw",
+        "linecap": "butt",
+        "note": "drawn behind the river band; the 64-wide green stroke minus the 40-wide white water casing leaves a 12-wide bank trail on each side. Its north-east terminus trails the water's by the same 0.0062 it always has, so the green butt stays tucked inside the white casing's cap"
+      },
+      {
+        "id": "park-potomac-north",
+        "name": "Potomac Park · north bank trail",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 12,
+        "linecap": "butt",
+        "construction": {"offset_from": "water.potomac.nw_arm.north_bank_edge", "offset": -9.2},
+        "from": [170.04066, 411.56681],
+        "to": [768.06, 863.03],
+        "angle": 37.0503
+      },
+      {
+        "id": "area-the-yards",
+        "name": "The Yards",
+        "shape": "wedge",
+        "fill": "#FAEFBE",
+        "inner_ring": "yards-inner",
+        "outer_ring": "anacostia-bank-inner",
+        "from_angle": 30.5,
+        "to_angle": 46.0,
+        "fillet_r": 8,
+        "label": {
+          "id": "geo-label-the-yards",
+          "lines": ["The Yards"],
+          "at": [1391.12, 1300.12],
+          "rotate": -52.5,
+          "fill": "#5E3D00",
+          "note": "one line along the area's mid ring (r = 493) at theta 37.5, about 20 clear of the anchor icon, turned to the ring's tangent there so it reads up and to the right, after the anchor icon; `fill` is the dark amber of The Wharf's name."
+        },
+        "note": "the Navy Yard riverfront - The Yards and its park - as a light amber area like The Wharf, because it is a business and leisure district and not only a park. A rounded wedge on the Anacostia's north-west bank, upstream of the Green line: a strip 30 deep against the inner edge of the river's green bank strip (r 478 - 508), 16.5 outside Navy Yard-Ballpark's label, from theta 30.5 to 46, which stops 1.75 deg (15) short of the Green line's casing. It is about 133 long."
+      },
+      {
+        "id": "area-the-wharf",
+        "name": "The Wharf",
+        "shape": "rect",
+        "fill": "#FAEFBE",
+        "x": 1147.5,
+        "y": 1286,
+        "width": 34,
+        "height": 137.4,
+        "rx": 8,
+        "ry": 8,
+        "label": {
+          "id": "geo-label-the-wharf",
+          "lines": ["The Wharf"],
+          "at": [1164.5, 1360.0],
+          "rotate": 90,
+          "fill": "#5E3D00",
+          "note": "one line reading top to bottom, below the anchor icon, as East Potomac Park's name reads across the channel; the ~57-long name at 12 px is centred in the free part of the strip, between the icon's foot (1312) and the strip's end (1423.4), and spans y 1332 - 1389: 20 below the icon and 34 above the strip's end, nearer the icon so the two read as one. `fill` overrides the park font's green with a dark brown (contrast about 8.5:1 on the area's fill)."
+        },
+        "note": "not a park: a business and shopping district, so it is a pale yellow area and not green - the light, slightly yellow tint that street maps give to commercial blocks. A 34 x 137.4 strip along the DC bank of the Washington Channel: as wide as the channel itself, its west edge 3.2 of paper off the south arm's east edge (x = 1144.3), as the bank trails keep, and its south end at y = 1423.4, 14 below East Potomac Park's. Its top is below the Yellow line's river crossing (corner about 10 off the casing); Waterfront station is 76 east of it. It lies in `geo.parks` only because that list holds every land area."
+      },
+      {
+        "id": "park-rock-creek-valley",
+        "name": "Rock Creek and Potomac Parkway",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 12,
+        "linecap": "butt",
+        "segments": [
+          {"kind": "straight", "from": [915, 588], "to": [915, 617.6075], "angle": 90.0},
+          {"kind": "fillet", "r": 14, "to": [904.5089, 631.1607], "tangent": "exact"},
+          {"kind": "arc", "ring": "rock-creek", "from_angle": 255.485, "to_angle": 215.0, "dir": "ccw"}
+        ],
+        "note": "the green valley of Rock Creek, from Rock Creek Park down to the Potomac at Georgetown Waterfront Park: the same 12-wide band as the bank trails, with no name of its own. It leaves the park rect's bottom edge (y = 594) at x = 915, the rect's own centre line - the axis the park's name and the zoo icon stand on - drops to a fillet of radius 14 and turns onto the `rock-creek` ring, which it follows counter-clockwise between Woodley Park's and Dupont Circle's labels. It crosses the Red line at theta 231, between those two stations - where the creek passes under the line on the ground - and ends at theta 215, inside Georgetown Waterfront Park, 26 from the bank, running down the park's east end with its east edge flush with the park's. Both ends are hidden in the parks' own green. The fillet is tangent to the vertical and to the ring: its centre is at (883, 622.7256), 381 + 14 from the map centre."
+      },
+      {
+        "id": "park-potomac-north-inner",
+        "name": "Potomac Park · north bank trail, Blue line to the National Mall",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 12,
+        "linecap": "butt",
+        "construction": {"offset_from": "water.potomac.nw_arm.north_bank_edge", "offset": -9.2},
+        "from": [814.2, 897.89],
+        "to": [890.39, 955.41],
+        "angle": 37.0503,
+        "note": "the north bank trail carried on past the core rings, above Roosevelt Island: the same line as `park-potomac-north` - 9.2 off the north bank edge, at the bank's own 37.0503 - from the Blue ring to the National Mall. It starts ON the Blue ring's centre line (r = 212), under the line, and ends 5 inside the Mall's west edge (x = 885), where its green is hidden; what shows is the stretch from the Blue casing's inner edge, about (826, 907), to the Mall. Foggy Bottom-GWU's label is slid up its ring by `ds` 18 so that its subtitle `Kennedy Center` stays about 2 clear of this trail's upper edge."
+      },
+      {
+        "id": "park-tidal-basin-east",
+        "name": "Potomac Park · Tidal Basin and Washington Channel east bank trail",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 12,
+        "linecap": "butt",
+        "construction": {"offset_from": "water.potomac.tidal_basin, then the south arm's east edge", "offset": 9.2},
+        "segments": [
+          {"kind": "straight", "from": [1050.8, 982], "to": [1056.05, 984.97]},
+          {"kind": "ellipse_arc", "rx": 211.3, "ry": 178.4, "rotation": -86.1, "sweep": 1, "to": [1154.06, 1170.7]},
+          {"kind": "straight", "to": [1153.48, 1253.1]}
+        ],
+        "note": "the DC-bank trail from the National Mall to the Yellow line, the same 12-wide green as the other bank trails and the same 9.2 outside the water edge (6 of half-width and 3.2 of paper). Round the Tidal Basin it is the basin's own ellipse with both radii grown by 9.2 - same centre, same rotation - which is within 0.42 of the true parallel curve. It starts inside the Mall, where its green is hidden, leaves the Mall's bottom edge at about x = 1061, and ends its curve at the ellipse's easternmost point, (1154.06, 1170.7), where it is vertical - beside the point where the basin's own edge is vertical; from there it runs straight down, easing 0.58 west to x = 1153.48, and ends ON the Yellow ring's centre line (r = 296, y = 1253.1), under the line. It keeps 23 or more off the Smithsonian and L'Enfant Plaza labels."
+      },
+      {
+        "id": "park-georgetown-waterfront",
+        "name": "Georgetown Waterfront Park",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 510.58,
+        "y": 702.88,
+        "width": 202,
+        "height": 44,
+        "rx": 8,
+        "ry": 8,
+        "rotate": 37.0503,
+        "rotate_note": "rotate turns the rect about its own centre; the generator emits it as an SVG rotate(angle cx cy).",
+        "label": {
+          "id": "geo-label-georgetown-waterfront",
+          "lines": ["Georgetown Waterfront"],
+          "at": [597.22, 714.04],
+          "rotate": 37.0503,
+          "note": "one line along the bank, on the park's centre line. The name is the place's - `Georgetown Waterfront`, like The Wharf and The Yards - and not only the park's; the park itself keeps the park green. The line is about 125 long at 12 px and is centred in the free part of the park, between its west end and the anchor icon at its east end: about 20 at each side."
+        },
+        "note": "a 202 x 44 rounded rect on the Potomac's north (DC) bank, turned to the bank's own 37.0503. Its river edge is the bank trail's: 3.2 of paper off the water. It runs from 438.6 to 640.6 along the bank from the arm's mouth - its west end set where the one-line name has 20 at each side - centre (611.58, 724.88), and covers the trail's 12-wide green over that length. Its east end is flush with the east edge of the Rock Creek valley band, which comes down that end of the park at a right angle to the bank - the creek meets the Potomac at the park's east end on the ground too - so the two make one L. The Farragut West label is about 35 east of it."
+      },
+      {
+        "id": "park-potomac-west",
+        "name": "Potomac Park · west bank trail",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 12,
+        "linecap": "butt",
+        "construction": {"offset_from": "water.potomac.nw_arm.west_bank_edge", "offset": 9.2},
+        "segments": [
+          {"kind": "straight", "from": [117.13339, 480.04925], "to": [806.9536, 1014.2364], "angle": 37.7537},
+          {"kind": "fillet", "r": 14, "to": [812.2729, 1023.562], "tangent": "exact"},
+          {"kind": "arc", "ring": "potomac-trail", "from_angle": 172.8461, "to_angle": 90.0, "dir": "ccw"},
+          {"kind": "cubic", "d": "c 6,0 10.75,5 10.75,12", "to": [1010.75, 1201.2]},
+          {"kind": "straight", "to": [1010.75, 1940]}
+        ],
+        "d": "m 117.13339,480.04925 689.8202,534.1872 a 14,14 0 0 1 5.3193,9.3256 A 189.2,189.2 0 0 0 1000,1189.2 c 6,0 10.75,5 10.75,12 v 640.52",
+        "note": "the 14-radius fillet is solved for exact tangency against the r=189.2 trail ring: the straight run ends 689.8202,534.1872 along from the start and the arc starts at theta=172.8461."
+      },
+      {
+        "id": "park-national-arboretum",
+        "name": "US National Arboretum",
+        "shape": "wedge",
+        "fill": "#CDE0A0",
+        "inner_ring": "arboretum-inner",
+        "outer_ring": "anacostia",
+        "from_angle": 337.5,
+        "to_angle": 349.5,
+        "fillet_r": 8,
+        "label": {
+          "id": "geo-label-national-arboretum",
+          "lines": ["National", "Arboretum"],
+          "at": [1469.52, 869.83],
+          "rotate": 0,
+          "note": "two horizontal lines below the tree icon. The icon is centred over the name, on x = 1469.5, and the stack is a little above the middle of the wedge, where it read as low. At 12 px the second line is about 50 wide and keeps about 8 to the wedge's west edge and 7 to the river bank."
+        },
+        "note": "west-bank park at the Anacostia's north end, same construction as the Arlington Cemetery wedge. Outer rim on the anacostia ring itself: 522-540 hides under the water band and 508-522 merges into the bank-trail green, so the park reads as the bank widening inland - which is what the real arboretum is. from 337.5 to 349.5: 12 deg on the map's 0.5 grid. The wedge was moved up the river to make room for RFK Stadium's icon below it; its lower inner corner (y = 918) is 67 above the east trunk's orange casing edge at y = 985. Its upper edge is inside the angle of the New Carrollton exit, which is no conflict: that exit starts at r = 618 and the wedge ends at 540."
+      },
+      {
+        "id": "park-kenilworth-gardens",
+        "name": "Kenilworth Park & Aquatic Gardens",
+        "shape": "wedge",
+        "fill": "#CDE0A0",
+        "inner_ring": "anacostia",
+        "outer_ring": "nc-arc-orange",
+        "from_angle": 340.0,
+        "to_angle": 347.5,
+        "fillet_r": 8,
+        "note": "east-bank counterpart of the arboretum, directly across the river. The inner half tucks under the water band; what shows is the outer bank green from 572 out to the Orange/Silver pair's casing edge at 603 - 31 deep, which holds the lotus icon and the DC boundary's dots. from 340 to 347.5: 7.5 deg on the map's 0.5 grid, directly across the river from the arboretum. It stops 0.2 deg short of Deanwood's angle (347.69); Deanwood's dot is out on the 632 ring, under the pair's casing, so it does not touch the green."
+      },
+      {
+        "id": "boundary-dc",
+        "name": "District of Columbia boundary",
+        "shape": "trail",
+        "stroke": "#8C968C",
+        "stroke_width": 3,
+        "linecap": "round",
+        "dasharray": "0.1 7",
+        "label_gap": 4,
+        "label_gap_except": ["friendship-heights", "takoma", "fort-totten"],
+        "segments": [
+          {"kind": "straight", "from": [494.27, 696.13], "to": [496.94, 691.73]},
+          {"kind": "arc", "ring": "dc-boundary", "from_angle": 211.5, "to_angle": 345.69, "dir": "cw"},
+          {"kind": "straight", "to": [1635.45, 837.91]},
+          {"kind": "straight", "from": [1635.45, 837.91], "to": [1670.04, 829.08]},
+          {"kind": "arc", "ring": "dc-boundary-outer", "from_angle": 345.69, "to_angle": 354.23, "dir": "cw"},
+          {"kind": "straight", "to": [1589.28, 1029.23]},
+          {"kind": "arc", "ring": "dc-boundary", "from_angle": 2.84, "to_angle": 47.0, "dir": "cw"},
+          {"kind": "straight", "to": [1452.85, 1485.62]},
+          {"kind": "arc", "ring": "dc-boundary-south", "from_angle": 47.0, "to_angle": 80.0, "dir": "cw"}
+        ],
+        "note": "the District's land boundary with Maryland, as a line of round dots, 3 across and 7 apart. It is not the real diamond - this map's distances are not the ground's - but a line made of the map's own rings. From the Potomac's north bank, just upstream of Georgetown Waterfront, it follows ONE ring about the map's centre, r = 590: round the north between Tenleytown-AU at 552 and Friendship Heights at 600, whose dot (in to 588) covers the line by 2, Takoma at 558 and Silver Spring at 654, Fort Totten at 558 and West Hyattsville at 612; over Kenilworth Park in the 31 of space between the Anacostia's park band (572) and the New Carrollton pair's casing (603), 18 from the first and 13 from the second, to theta 345.69 - half-way between Cheverly at 343.69 and Deanwood at 347.69. There it turns out along the radius, under the pair, to r = 691.5, half-way between the Silver line's casing (661) and the Beltway (720), and is a parallel of the Silver line past Deanwood and Minnesota Av, which are in the District: on the 691.5 ring to theta 354.23, where that ring meets the 45-degree line through the boundary's crossing of the east trunk. The radial is two straights: the second has its own `from`, under the Silver line and 5 dash periods and 0.2 (35.7) short of the corner, so the dash pattern starts again there and a dot ends 0.1 before the corner - on it to the eye, and whole, where a dash that went round the corner would be bent. From that sharp corner it is ONE straight, parallel to the Silver diagonal and 45.7 from its centre line, to the 590 ring at theta 2.84, under the east trunk and 17 from the centre of Benning Rd's dot, which hides the join with the trunk. Capitol Heights (613.4) is outside. From there it is the 590 ring again, with no step, down the east side, 18 outside the Anacostia's park band, to theta 47.0. There it steps out, between Southern Av at 45.5 and Congress Heights at 49.5 and the nearer to Southern Av, 4 from the edge of its dot, to r = 664, and runs down to the Potomac. Both ends run on under the water, which is drawn over the parks. West of the river there is no line: the Potomac is the boundary. The labels of Deanwood and Minnesota Av start at r = 663, so the line goes behind their first letters. Station labels that lie across the line are not avoided by the route: `label_gap` cuts the line instead - the generator leaves the dots out wherever the line comes within `label_gap` of a label. The labels of the stations in `label_gap_except` - Friendship Heights, Takoma and Fort Totten, which the line runs along and does not cross - make no gap. It is the last entry of `geo.parks`, so it is drawn over every park and under the water and the lines."
+      }
+    ],
+    "water": {
+      "potomac": {
+        "fill": "#8DC3E0",
+        "fill_rule": "nonzero",
+        "label": {
+          "id": "geo-label-potomac",
+          "lines": ["Potomac River"],
+          "at": [559.27, 763.5],
+          "rotate": 37.5,
+          "note": "straight type centred on `at`, the middle of the NW arm (the banks are at y = 719.0 and 812.9 at x = 562), turned 37.5 - the mean of the two bank angles on the 1.5 grid. `at` is 521.5 down the arm from its mouth - near half-way between the Beltway crossing (300) and the first line crossing at Rosslyn (750) - where it is centred on Georgetown Waterfront's name across the north bank and on Virginia's across the west bank."
+        },
+        "nw_arm": {
+          "kind": "quad",
+          "vertices": [
+            [165.74466, 419.87881],
+            [1097.67644, 1123.4228],
+            [1009.317, 1159.27],
+            [124.03401, 473.72774]
+          ],
+          "north_bank_edge": {"from": 0, "to": 1, "angle": 37.0503, "length": 1167.6776},
+          "west_bank_edge": {"from": 3, "to": 2, "angle": 37.7534, "length": 1119.6849},
+          "note": "the two long edges are NOT parallel (37.05 vs 37.75) — the arm is a slight wedge. Both were run 119.72 further up-river than the original tip, which puts the mouth 75.0 - two Dulles-arm steps - past where Ashburn projects onto the west bank, so the water reaches a little beyond the end of the Silver arm it runs parallel to"
+        },
+        "central_bulge": {
+          "kind": "ring_segment",
+          "ring": "potomac-bulge",
+          "from_angle": 79.659,
+          "to_angle": 175.8478,
+          "dir": "cw",
+          "close": "chord",
+          "fillet": 23.2,
+          "fillet_note": "rounds the land's corner where the arm's west bank meets the bulge, below Roosevelt Island: water fills the corner out to a circle of radius 23.2 that touches the bank line and the bulge ring from the land side. 23.2 is the bank trail's fillet (14) plus the trail's offset (9.2), so the water's edge and the trail turn about one centre and the paper between them keeps one width."
+        },
+        "tidal_basin": {
+          "kind": "ellipse_segment",
+          "from": [866, 1024.7],
+          "to": [1144.86, 1170.68],
+          "rx": 202.1,
+          "ry": 169.2,
+          "rotation": -86.1,
+          "label": {
+            "id": "geo-label-tidal-basin",
+            "lines": ["Tidal Basin"],
+            "at": [1002.6, 1035],
+            "rotate": 0,
+            "note": "horizontal type in the open water of the basin, centred on x = 1002.6: the axis of the White House and the Washington Monument above it, so the three stand on one vertical line. In height it is between the dome's top (y = 975) and the park band's top edge (y = 1095) at this x."
+          },
+          "note": "an elliptical segment on the DC bank, closed by its chord: 135 deg of an ellipse centred near (975.5, 1175.6), its long axis almost vertical. The dome's top reaches y = 973.5, so it covers 14.5 of the National Mall's south edge. The east end is the ellipse's own easternmost point, (1144.86, 1170.68), where its edge is vertical, so it runs into the south arm's straight east edge with no corner. Wound clockwise like the other sub-paths, so the nonzero fill does not cut a hole."
+        },
+        "south_arm": {
+          "kind": "path",
+          "label": {
+            "id": "geo-label-potomac-south",
+            "lines": ["Potomac River"],
+            "at": [1083.2, 1610],
+            "rotate": 90,
+            "note": "the river's name a second time, on the south arm: one line set along the river on the arm's centre line, reading top to bottom as East Potomac Park's and The Wharf's names do. It is well downstream of the Anacostia's mouth (y 1500 - 1560 on the arm's east side), so it cannot be read as the Anacostia's. It is inside the Capital Beltway: its centre, y = 1610, is in the upper part of the water between the Anacostia's mouth (down to y = 1560) and the Beltway's crossing (y = 1712), and the ~90-long name spans y 1565 - 1655, starting 5 below the mouth and ending 57 above the Beltway. King St-Old Town's connection badges are at the same height but on the arm's west side, 26 from the name."
+          },
+          "d": "M 1003.95308,1091.47495 L 1144.86,1170.68 L 1144.3184,1420 L 1144.3184,1940 1023.35,1940 1020.74589,1203.33 c -0.041,-13.6 -6.6,-23.33 -20.74589,-23.33 z",
+          "note": "vertical band, west edge x≈1021–1023.6, east edge x≈1144.3, ending at y = 1940, level with the bottom of the line and symbol keys, which leaves the canvas's 60 margin below it. The west edge keeps its own slight slant all the way down (1023 at y = 1841.5, 1023.35 at 1940); the west bank trail ends at the same y. The arm's top is one straight from its north-west corner to the Tidal Basin's east end, inside the basin's water, and its east edge starts at that end: from (1144.86, 1170.68) it eases 0.54 west over the next 250 to x = 1144.3184 and is vertical from y = 1420 down."
+        }
+      },
+      "anacostia": {
+        "kind": "ring_arc",
+        "ring": "anacostia",
+        "from_angle": 332.786,
+        "from_angle_note": "the north-east terminus is the New Carrollton exit corridor's ORANGE FLANK, the far side of the corridor from the river's own body, so the band runs the full width of the corridor and ends where its ink ends. `nc-exit` is a true radial from the map centre, so an offset n subtends atan(n/R): the orange casing edge at n = -(14 + 15) = -29, taken at the park band's outer edge of 572 - the point of the river nearest the corridor - subtends -2.9024 deg, so the terminus is 335.6884 - 2.9024 = 332.786. On the axis centreline the band stopped half a corridor width short of that; on the silver flank, 5.8047 deg short of it.",
+        "to_angle": 81.0197,
+        "dir": "cw",
+        "stroke": "#8DC3E0",
+        "stroke_width": 36,
+        "casing": {"stroke": "#ffffff", "stroke_width": 40},
+        "linecap": "butt",
+        "label": {
+          "id": "geo-label-anacostia",
+          "text": "Anacostia River",
+          "angle": 33.0,
+          "half_span": 12.0,
+          "note": "type on the river's own ring, centred at `angle`; `half_span` is only the length of the invisible carrier arc each side of it. The arc runs counter-clockwise, so in this south-east quadrant the type reads left to right and upward, with its top toward the map centre - a turn of about -57. 33 is the middle of the free reach upstream of the Green line crossing: the Stadium-Armory label's slanted tail leaves the band at about 17 deg and the Green casing edge meets it at 47.9. The ~105-wide text spans 27.5 - 38.5 deg."
+        }
+      }
+    },
+    "islands_note": "islands sit ON the water, so they are emitted after geo.water in their own group, unlike parks. The island rects carry no stroke: the green meets the water directly. `park-tidal-basin` is here for the same reason - it is a band of land on the water.",
+    "islands": [
+      {
+        "id": "island-roosevelt",
+        "name": "Theodore Roosevelt Island",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 811.35,
+        "y": 948.25,
+        "width": 60,
+        "height": 60,
+        "rx": 30,
+        "ry": 30,
+        "label": {
+          "id": "geo-label-roosevelt-island",
+          "lines": ["Theodore", "Roosevelt", "Island"],
+          "at": [841.35, 978.25],
+          "rotate": 0,
+          "size_px": 10,
+          "note": "the island's full name in three horizontal lines, centred on the island's own centre. Its own `size_px` is 10, in the park font's regular weight: the block is about 44 wide and 28 high, and the corners of the top line, `Theodore`, are the farthest out, about 25 from the centre, which leaves 5 inside the island's 30 radius."
+        },
+        "note": "a circle of radius 30 centred at (841.35, 978.25) in the NW arm, upstream of the Tidal Basin; the radius gives its three-line name at 10 px 5 of green all round. It keeps about 8.6 of water to the north bank, 10.3 to the west bank and 6.9 to the Blue ring's casing edge."
+      },
+      {
+        "id": "pool-lincoln-reflecting",
+        "name": "Lincoln Memorial Reflecting Pool",
+        "shape": "rect",
+        "fill": "#8DC3E0",
+        "x": 933,
+        "y": 951,
+        "width": 37.59,
+        "height": 6,
+        "rx": 0,
+        "ry": 0,
+        "note": "a strip of water on the National Mall between the Lincoln Memorial and the Washington Monument icons, on the Mall's centre line (y = 954): 37.6 x 6. It starts 12 east of the Lincoln Memorial icon and ends at x = 970.59, directly under the west corner of the White House park's green, 26 short of the Washington Monument icon. It is in this list, not in `geo.water`, only because this list is drawn ABOVE the parks, and the pool lies on the Mall's green."
+      },
+      {
+        "id": "island-east-potomac",
+        "name": "East Potomac Park",
+        "shape": "rect",
+        "fill": "#CDE0A0",
+        "x": 1054.9,
+        "y": 1095.7,
+        "width": 55.5,
+        "height": 313.7,
+        "rx": 12.6,
+        "ry": 15.4,
+        "label": {
+          "id": "geo-label-east-potomac",
+          "lines": ["East Potomac Park"],
+          "at": [1082.65, 1197.7],
+          "rotate": 90,
+          "note": "one line reading top to bottom on the island's centre line, in the middle of the free part between the Jefferson Memorial icon (bottom at y = 1130.45) and the Yellow line's casing edge (about y = 1265 on that line). The ~100-long text at 12 px spans y 1148 - 1248, 17 from each."
+        },
+        "note": "vertical 55.5 x 313.7 rounded rect, y 1095.7-1409.4, centred in the south arm: the arm runs from x = 1020.9 to 1144.3 (centre 1082.6), which leaves 34 of water on each side. Its north end runs up into the Tidal Basin and its south tip - Hains Point - ends 45.7 above the DCA apron."
+      },
+      {
+        "id": "park-tidal-basin",
+        "name": "West Potomac Park · Tidal Basin shore",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 34.7,
+        "linecap": "butt",
+        "segments": [
+          {"kind": "straight", "from": [902.7, 960], "to": [902.6, 1002.2]},
+          {"kind": "cubic", "d": "c 0.25,38.36 3.96,64.01 29.75,85.82 33.41,28.25 56.85,26.85 98.1,26.85", "to": [1030.45, 1114.87]}
+        ],
+        "note": "a hand-drawn green band that lies ON the Potomac arm, so it is emitted with the islands and not with the parks. It starts inside the National Mall at y = 960, above the north bank edge (y = 963.2 at the band's west side), so no water shows between the band and the Mall. It goes down and curves east to the top of East Potomac Park. The butt end stops 8 short, at x = 1030.45, and arrives horizontal; `park-tidal-basin-end` supplies the last 8 with rounded corners."
+      },
+      {
+        "id": "park-tidal-basin-end",
+        "name": "West Potomac Park · rounded east end",
+        "shape": "trail",
+        "stroke": "#CDE0A0",
+        "stroke_width": 16,
+        "linecap": "round",
+        "from": [1030.45, 1105.52],
+        "to": [1030.45, 1124.22],
+        "note": "a stroke cannot round its end's corners at less than half its width, so the band's east end is this second stroke laid ACROSS it: 16 wide with round caps, 8 back from the end, running the band's width less 8 at each side (1114.87 +/- 9.35). The union is the 34.7 band ending at x = 1038.45 with two corners of radius 8, the radius the other parks use."
+      }
+    ],
+    "beltway": {
+      "id": "capital-beltway",
+      "name": "Capital Beltway",
+      "kind": "ring",
+      "ring": "beltway",
+      "stroke": "#BFC8BD",
+      "stroke_width": 6,
+      "fill": "none",
+      "dasharray": "none",
+      "labels_note": "type OUTSIDE the ring, centred at `angle`. `offset` puts the caps' centre 13.1 outside the ring's centre line: 3 of ring half-width, 5 of paper, and 5.1 of half cap height. The ~150-wide bold text spans about 12 deg. The two copies sit in opposite quadrants.",
+      "labels": [
+        {
+          "id": "geo-label-capital-beltway-sw",
+          "text": "CAPITAL BELTWAY",
+          "angle": 139.5,
+          "half_span": 9.0,
+          "offset": 13.1,
+          "note": "139.5 is the middle of the free stretch 116 - 162 deg on the 1.5 grid. In the map's lower half the type runs counter-clockwise with its top toward the ring, so it reads left to right and upward."
+        },
+        {
+          "id": "geo-label-maryland-beltway",
+          "text": "MARYLAND",
+          "angle": 315.0,
+          "half_span": 6.0,
+          "offset": -13.1,
+          "note": "Maryland's name at the Beltway, the north-east counterpart of Virginia's in the south-west: the Beltway's own type, at the angle of the Beltway's north-east name and the same 13.1 off the ring, on its inner side."
+        },
+        {
+          "id": "geo-label-virginia-beltway",
+          "text": "VIRGINIA",
+          "angle": 139.5,
+          "half_span": 6.0,
+          "offset": -13.1,
+          "note": "Virginia's second name: the Beltway's own type, at the angle of the Beltway's south-west name and the same 13.1 off the ring, on its inner side - the two are a pair across the ring, as the District's and Maryland's names are across the boundary."
+        },
+        {
+          "id": "geo-label-capital-beltway-ne",
+          "text": "CAPITAL BELTWAY",
+          "angle": 315.0,
+          "half_span": 9.0,
+          "offset": 13.1,
+          "note": "315 is the middle of the free stretch 298 - 333 deg, between Greenbelt's label and New Carrollton. In the map's upper half the type runs clockwise with its top away from the ring, so it reads left to right and downward."
+        }
+      ],
+      "note": "r = R = 720; the grid is defined by this ring"
+    },
+    "boundary_labels": {
+      "note": "the names of the three jurisdictions, in the grey of the Beltway's name. The District's and Maryland's stand on the two sides of the boundary, each `offset` 8.5 off the line, as two groups whose names are centred on one radius. The south group is on the boundary's south ring (r = 664) at theta 69.0, in the one long stretch of the boundary that no station label crosses, between the end of Congress Heights' label (theta 62) and the Potomac (theta 77). The north group is on the main ring (r = 590) at theta 251.6, in the white between the labels of Friendship Heights and Tenleytown-AU and the west edge of Rock Creek Park; at the font's 12 the District's name in one line (160) is longer than that white, so it is two concentric lines, `DISTRICT OF` and `COLUMBIA`, 10.5 apart - 1.8 of white between the two lines of capitals. In the north-east every stretch of the ring is crossed by a slanted station label. Virginia has no boundary line - the Potomac is the boundary - so its name is there twice. One is straight type on the river's Virginia bank, parallel to the water (37.5) and 14 outside the bank's green; it, the river's name and Georgetown Waterfront's name are centred on one line across the river. The other is in the Beltway's type, inside the Beltway at its south-west name, and Maryland's name stands the same way at the Beltway's north-east name (`geo.beltway.labels`).",
+      "on_ring": [
+        {"id": "geo-label-district-of-columbia", "text": "DISTRICT OF COLUMBIA", "ring": "dc-boundary-south", "angle": 69.0, "half_span": 7.5, "offset": -8.5},
+        {"id": "geo-label-maryland", "text": "MARYLAND", "ring": "dc-boundary-south", "angle": 69.0, "half_span": 4.0, "offset": 8.5},
+        {"id": "geo-label-district-of-columbia-north", "text": "DISTRICT OF", "ring": "dc-boundary", "angle": 251.6, "half_span": 5.0, "offset": -8.5},
+        {"id": "geo-label-district-of-columbia-north-2", "text": "COLUMBIA", "ring": "dc-boundary", "angle": 251.6, "half_span": 4.0, "offset": -19.0},
+        {"id": "geo-label-maryland-north", "text": "MARYLAND", "ring": "dc-boundary", "angle": 251.6, "half_span": 4.0, "offset": 8.5}
+      ],
+      "straight": [
+        {"id": "geo-label-virginia", "lines": ["VIRGINIA"], "at": [516.32, 819.47], "rotate": 37.5}
+      ]
+    },
+    "landmarks": {
+      "note": "tiny pictograms of the map's landmarks, each a filled silhouette authored in its own frame - about 24 across, origin at its centre - and moved to `at` by a translate; an optional `scale` sizes one icon about that centre. They are one flat grey (contrast about 6:1 on park green, 8:1 on paper) and filled even-odd, so a sub-path inside the outline is a hole: columns, windows, the Pentagon's court. Pure geography - each `at` keeps at least 17 clear of every line casing, marker and station label.",
+      "fill": "#4A524A",
+      "fill_rule": "evenodd",
+      "items": [
+        {
+          "id": "landmark-us-capitol",
+          "name": "US Capitol",
+          "at": [1365, 954],
+          "scale": 1.5,
+          "d": "M -0.7,-8.06 L -0.42,-8.84 C -0.53,-9.39 -0.5,-10.17 -0.25,-10.64 C -0.44,-10.86 -0.44,-11.33 -0.22,-11.52 L 0.0,-12.13 L 0.22,-11.52 C 0.44,-11.33 0.44,-10.86 0.25,-10.64 C 0.5,-10.17 0.53,-9.39 0.42,-8.84 L 0.7,-8.06 Z M -1.49,-6.88 A 1.49,1.02 0 0 1 1.49,-6.88 H 1.64 V -6.57 H 1.25 V -4.93 L 1.8,-4.46 H -1.8 L -1.25,-4.93 V -6.57 H -1.64 V -6.88 Z M -0.84,-6.26 H -0.56 V -5.16 H -0.84 Z M -0.14,-6.26 H 0.14 V -5.16 H -0.14 Z M 0.56,-6.26 H 0.84 V -5.16 H 0.56 Z M -5.95,2.82 C -5.32,2.19 -5.09,1.25 -4.93,0.31 C -4.54,-2.35 -2.5,-4.15 0.0,-4.15 C 2.5,-4.15 4.54,-2.35 4.93,0.31 C 5.09,1.25 5.32,2.19 5.95,2.82 A 5.95,0.7 0 0 0 -5.95,2.82 Z M -4.57,0.39 A 0.19,0.19 0 0 1 -4.19,0.39 V 0.73 A 0.19,0.19 0 0 1 -4.57,0.73 Z M -3.47,0.01 A 0.19,0.19 0 0 1 -3.1,0.01 V 0.35 A 0.19,0.19 0 0 1 -3.47,0.35 Z M -2.38,-0.27 A 0.19,0.19 0 0 1 -2.0,-0.27 V 0.08 A 0.19,0.19 0 0 1 -2.38,0.08 Z M -1.28,-0.43 A 0.19,0.19 0 0 1 -0.91,-0.43 V -0.09 A 0.19,0.19 0 0 1 -1.28,-0.09 Z M -0.19,-0.49 A 0.19,0.19 0 0 1 0.19,-0.49 V -0.14 A 0.19,0.19 0 0 1 -0.19,-0.14 Z M 0.91,-0.43 A 0.19,0.19 0 0 1 1.28,-0.43 V -0.09 A 0.19,0.19 0 0 1 0.91,-0.09 Z M 2.0,-0.27 A 0.19,0.19 0 0 1 2.38,-0.27 V 0.08 A 0.19,0.19 0 0 1 2.0,0.08 Z M 3.1,0.01 A 0.19,0.19 0 0 1 3.47,0.01 V 0.35 A 0.19,0.19 0 0 1 3.1,0.35 Z M 4.19,0.39 A 0.19,0.19 0 0 1 4.57,0.39 V 0.73 A 0.19,0.19 0 0 1 4.19,0.73 Z M -7.35,6.56 V 4.69 A 7.35,2.03 0 0 1 7.35,4.69 V 6.56 L 6.1,6.16 V 4.25 A 0.47,0.47 0 0 0 5.16,4.25 V 5.91 L 4.22,5.71 V 3.81 A 0.47,0.47 0 0 0 3.29,3.81 V 5.54 L 2.35,5.42 V 3.59 A 0.47,0.47 0 0 0 1.41,3.59 V 5.33 L 0.47,5.29 V 3.52 A 0.47,0.47 0 0 0 -0.47,3.52 V 5.29 L -1.41,5.33 V 3.59 A 0.47,0.47 0 0 0 -2.35,3.59 V 5.42 L -3.29,5.54 V 3.81 A 0.47,0.47 0 0 0 -4.22,3.81 V 5.71 L -5.16,5.91 V 4.25 A 0.47,0.47 0 0 0 -6.1,4.25 V 6.16 Z M -9.07,10.72 V 8.29 A 9.07,2.5 0 0 1 9.07,8.29 V 10.72 L 7.98,10.52 V 8.76 A 0.47,0.47 0 0 0 7.04,8.76 V 10.37 L 6.1,10.24 V 8.21 A 0.47,0.47 0 0 0 5.16,8.21 V 10.13 L 4.22,10.03 V 7.89 A 0.47,0.47 0 0 0 3.29,7.89 V 9.96 L 2.35,9.9 V 7.72 A 0.47,0.47 0 0 0 1.41,7.72 V 9.86 L 0.47,9.84 V 7.67 A 0.47,0.47 0 0 0 -0.47,7.67 V 9.84 L -1.41,9.86 V 7.72 A 0.47,0.47 0 0 0 -2.35,7.72 V 9.9 L -3.29,9.96 V 7.89 A 0.47,0.47 0 0 0 -4.22,7.89 V 10.03 L -5.16,10.13 V 8.21 A 0.47,0.47 0 0 0 -6.1,8.21 V 10.24 L -7.04,10.37 V 8.76 A 0.47,0.47 0 0 0 -7.98,8.76 V 10.52 Z M -10.01,11.27 H 10.01 V 12.2 H -10.01 Z",
+          "note": "the Capitol's dome on a plinth, this map's own drawing: the statue as a small figure on a foot; the lantern - a cap, a cornice and a drum with three slots on a flared base; the dome, taller than a half circle and flared at its foot, with a row of nine windows; and two rings of columns as floating tiers, seven arched openings in the upper ring and nine in the lower, each 0.94 wide in this frame so that they stay open at map size. The frame is 20 across and 24.4 high. Inside the National Mall's east end, which stops at Capitol South's x = 1386: at `scale` 1.5 it is 30 across and 36.6 high. The Library of Congress is on the other side of the edge."
+        },
+        {
+          "id": "landmark-white-house",
+          "name": "White House",
+          "at": [1002.6, 877],
+          "d": "M -11,8 V 0 H -5.5 L 0,-4.5 L 5.5,0 H 11 V 8 Z M -3.1,1.5 h 1.2 v 5.5 h -1.2 z M -0.6,1.5 h 1.2 v 5.5 h -1.2 z M 1.9,1.5 h 1.2 v 5.5 h -1.2 z M -9.5,2.5 h 1.2 v 1.8 h -1.2 z M -7.3,2.5 h 1.2 v 1.8 h -1.2 z M 6.1,2.5 h 1.2 v 1.8 h -1.2 z M 8.3,2.5 h 1.2 v 1.8 h -1.2 z",
+          "note": "a low block with a pedimented portico: three gaps make its four columns, and two windows sit in each wing. In the part of the White House park that stands above the National Mall (y 857.3 - 920), in its upper part: the icon's ink keeps 15 below the park's top edge and 35 above the Mall's."
+        },
+        {
+          "id": "landmark-lincoln-memorial",
+          "name": "Lincoln Memorial",
+          "at": [909, 954],
+          "d": "M -12,9 V 7 H -10.5 V 5 H -9.4 V -3 H -10 V -6 H -7.5 V -8.5 H 7.5 V -6 H 10 V -3 H 9.4 V 5 H 10.5 V 7 H 12 V 9 Z M -7.6,-3 h 1.6 v 8 h -1.6 z M -4.2,-3 h 1.6 v 8 h -1.6 z M -0.8,-3 h 1.6 v 8 h -1.6 z M 2.6,-3 h 1.6 v 8 h -1.6 z M 6,-3 h 1.6 v 8 h -1.6 z",
+          "note": "a flat-roofed temple: six columns between a stepped base and an entablature with an attic, no pediment. At the National Mall's west end, 12 inside its west edge and on the Mall's centre line (y = 954), above the Tidal Basin's park band."
+        },
+        {
+          "id": "landmark-washington-monument",
+          "name": "Washington Monument",
+          "at": [1002.6, 949],
+          "scale": 1.5,
+          "d": "M 0,-12 L 1.8,-8.5 L 2.6,10 H 5 V 12 H -5 V 10 H -2.6 L -1.8,-8.5 Z",
+          "note": "an obelisk on a low base. On the White House's axis in the National Mall. At `scale` 1.5 it is 36 tall, the tallest icon on the Mall as the obelisk is on the ground - a little taller than the Capitol's 34.5; its centre is 5 above the Mall's centre line so its base keeps 6.5 above the Tidal Basin's dome (y = 973.5)."
+        },
+        {
+          "id": "landmark-pentagon",
+          "name": "Pentagon",
+          "at": [912, 1248],
+          "scale": 1.25,
+          "d": "M 0.0,-11.0 L 10.46,-3.4 L 6.47,8.9 L -6.47,8.9 L -10.46,-3.4 Z M 0.0,-8.5 L 8.08,-2.63 L 5.0,6.88 L -5.0,6.88 L -8.08,-2.63 Z M 0.0,-7.5 L 7.13,-2.32 L 4.41,6.07 L -4.41,6.07 L -7.13,-2.32 Z M 0.0,-5.0 L 4.76,-1.55 L 2.94,4.05 L -2.94,4.05 L -4.76,-1.55 Z",
+          "note": "a regular pentagon of radius 11 with its court of radius 5, and one thin pentagon slot (radius 7.5 to 8.5) through the middle of the wall: two of the building's five rings, with a line of light between them. At `scale` 1.25 it is 26 across and the slot is 1 wide. On paper north-west of the Pentagon station, between the Blue line and Arlington Cemetery."
+        },
+        {
+          "id": "landmark-national-cathedral",
+          "name": "Washington National Cathedral",
+          "at": [678, 674],
+          "d": "M -9,10 V -7 L -8,-11 L -7,-7 H -6 L -5,-11 L -4,-7 V -1 L 0,-6 L 4,-1 V -7 L 5,-11 L 6,-7 H 7 L 8,-11 L 9,-7 V 10 Z M -1.6,0.5 a 1.6,1.6 0 1 0 3.2,0 a 1.6,1.6 0 1 0 -3.2,0 z M -1.5,10 V 6.5 L 0,4.5 L 1.5,6.5 V 10 Z",
+          "note": "the Gothic west front: two towers with paired pinnacles, a gabled nave between them, a rose window and a pointed door. West of Cleveland Park, on the side of the Red line its labels leave free."
+        },
+        {
+          "id": "landmark-national-shrine",
+          "name": "Basilica of the National Shrine",
+          "at": [1296, 572],
+          "d": "M -10,10 V -8 L -8.25,-12 L -6.5,-8 V 2 H -3 A 5.5,5.5 0 0 1 8,2 H 10 V 10 Z M 2.1,-8 h 0.8 v 1.2 h 1.1 v 0.8 h -1.1 v 2.5 h -0.8 v -2.5 h -1.1 v -0.8 h 1.1 z",
+          "note": "the great dome with its cross, beside the tall campanile. West of the Red line between Rhode Island Av and Brookland-CUA, inside the turn the line makes toward Fort Totten."
+        },
+        {
+          "id": "landmark-library-of-congress",
+          "name": "Library of Congress",
+          "at": [1403, 968],
+          "scale": 0.8,
+          "d": "M 0,-5 C -3,-8 -8,-8 -11,-7 V 7 C -8,6 -3,6 0,9 C 3,6 8,6 11,7 V -7 C 8,-8 3,-8 0,-5 Z M -0.5,-3.5 h 1 v 10.5 h -1 z",
+          "note": "an open book, not the building: the Jefferson Building is a dome on a block and would read as a second Capitol. The slot is the gutter between the two pages. On paper just east of the National Mall, on the museums' south row (y = 968), below the Supreme Court's gavel and on its centre line (x = 1403). At `scale` 0.8 the book is 17.6 across: the Mall stops at Capitol South's x = 1386 and the book starts 8.2 past that edge, so the Mall's end separates the two icons. Its centre is 17 west of Eastern Market (x = 1420)."
+        },
+        {
+          "id": "landmark-jefferson-memorial",
+          "name": "Jefferson Memorial",
+          "at": [1082.65, 1121.45],
+          "d": "M -11,9 V 7.2 H -10.2 V -0.2 H -11 V -2.4 H -8.6 V -3.6 H -7.6 V -4.8 H -6.6 A 7.29,7.29 0 0 1 6.6,-4.8 H 7.6 V -3.6 H 8.6 V -2.4 H 11 V -0.2 H 10.2 V 7.2 H 11 V 9 Z M -9.0,0.5 h 1.543 v 6.7 h -1.543 z M -6.257,0.5 h 1.543 v 6.7 h -1.543 z M -3.514,0.5 h 1.543 v 6.7 h -1.543 z M -0.771,0.5 h 1.543 v 6.7 h -1.543 z M 1.972,0.5 h 1.543 v 6.7 h -1.543 z M 4.715,0.5 h 1.543 v 6.7 h -1.543 z M 7.458,0.5 h 1.543 v 6.7 h -1.543 z",
+          "note": "a rotunda in the memorial's own proportions, taken from a photograph: of the 22 width, the colonnade is 7.4 high (eight tall columns, seven gaps), the entablature above it 2.2 and the widest part, two attic steps come in to 0.78 and 0.69 of the width, and the dome is a low cap, 0.6 of the width across and only 4.2 high - a saucer and not a half circle. The low dome on the wide ring is what tells it from the Lincoln Memorial and from the Capitol. At the north end of East Potomac Park, on the island's centre line, with the same 16.75 of green above the dome as at each side of the base - the tip of the peninsula that faces the Tidal Basin."
+        },
+        {
+          "id": "landmark-national-zoo",
+          "name": "Smithsonian National Zoo",
+          "at": [915, 562],
+          "d": "M 0,0 C 3.5,0 7,4 7,7.5 C 7,10.5 4,11 0,10 C -4,11 -7,10.5 -7,7.5 C -7,4 -3.5,0 0,0 Z M -10.1,-2 a 2.6,2.6 0 1 0 5.2,0 a 2.6,2.6 0 1 0 -5.2,0 z M -5.8,-7 a 2.8,2.8 0 1 0 5.6,0 a 2.8,2.8 0 1 0 -5.6,0 z M 0.2,-7 a 2.8,2.8 0 1 0 5.6,0 a 2.8,2.8 0 1 0 -5.6,0 z M 4.9,-2 a 2.6,2.6 0 1 0 5.2,0 a 2.6,2.6 0 1 0 -5.2,0 z",
+          "note": "a paw print: one pad and four toes. In Rock Creek Park, where the zoo is, in the lower part of the rect - the end nearest Woodley Park - and 66 below the park's name."
+        },
+        {
+          "id": "landmark-national-arboretum",
+          "name": "US National Arboretum",
+          "at": [1469.52, 842.91],
+          "scale": 0.65,
+          "d": "M -2.6,11 C -1.8,9 -1.6,7 -1.6,4.2 A 3.8,3.8 0 0 1 -8,2 A 3.6,3.6 0 0 1 -9.5,-4 A 3.8,3.8 0 0 1 -5,-9 A 5.6,5.6 0 0 1 5,-9 A 3.8,3.8 0 0 1 9.5,-4 A 3.6,3.6 0 0 1 8,2 A 3.8,3.8 0 0 1 1.6,4.2 C 1.6,7 1.8,9 2.6,11 Z",
+          "note": "a broadleaf tree: a crown of seven lobes, 19 across, on a short trunk that flares at its foot - a plain disc on a stick read as a lollipop. At `scale` 0.65 it is about 12 across. In the arboretum wedge, centred over the park's name on x = 1469.5; icon and name are one stack a little above the wedge's middle."
+        },
+        {
+          "id": "landmark-kenilworth-gardens",
+          "name": "Kenilworth Park & Aquatic Gardens",
+          "at": [1550.11, 839.66],
+          "scale": 0.7,
+          "d": "M 0,8 C -4,8 -9,7 -12,2 C -9,1.5 -7.5,2.5 -6,3.5 C -8,0 -8,-3 -7,-6 C -4,-4.5 -2.5,-2 -2,0 C -1.8,-3 -1,-6 0,-8 C 1,-6 1.8,-3 2,0 C 2.5,-2 4,-4.5 7,-6 C 8,-3 8,0 6,3.5 C 7.5,2.5 9,1.5 12,2 C 9,7 4,8 0,8 Z",
+          "note": "a lotus flower of five petals, for the aquatic gardens, in the landmarks' own grey. It stands on the visible green of the Kenilworth wedge, the east bank between the river (558) and the DC boundary's dots (590): at r = 573, theta = 343.75, the middle of the wedge's angle span. `scale` 0.7 makes it about 17 across, which keeps 4.5 to the water and 9 to the dots."
+        },
+        {
+          "id": "landmark-the-wharf",
+          "name": "The Wharf",
+          "at": [1164.5, 1303.2],
+          "scale": 0.8,
+          "d": "M 1.1,-6.64 V -4.5 H 5 V -2.9 H 1.1 V 7.91 A 7,7 0 0 0 7,1 H 5.6 L 8.5,-3.5 L 11.4,1 H 10 A 10,10 0 0 1 -10,1 H -11.4 L -8.5,-3.5 L -5.6,1 H -7 A 7,7 0 0 0 -1.1,7.91 V -2.9 H -5 V -4.5 H -1.1 V -6.64 A 2.6,2.6 0 1 1 1.1,-6.64 Z M -1.2,-9 a 1.2,1.2 0 1 0 2.4,0 a 1.2,1.2 0 1 0 -2.4,0 z",
+          "note": "an anchor: ring, shank, stock, and two curved arms that end in flukes. The other waterfronts reuse this shape (`like`). In the amber `area-the-wharf` on the DC bank of the Washington Channel, above the area's name; at `scale` 0.8 the anchor is 18.2 across, and it keeps the same 7.9 of amber above it as at each side."
+        },
+        {
+          "id": "landmark-georgetown-waterfront",
+          "name": "Georgetown waterfront",
+          "like": "landmark-the-wharf",
+          "at": [670.65, 769.47],
+          "scale": 0.8,
+          "note": "the waterfront anchor, upright, at the east end of Georgetown Waterfront Park, where the boats are on the ground - the harbour is at the mouth of Rock Creek: on the park's centre line, 6 west of the Rock Creek band."
+        },
+        {
+          "id": "landmark-the-yards",
+          "name": "The Yards",
+          "like": "landmark-the-wharf",
+          "at": [1357.25, 1339.73],
+          "scale": 0.8,
+          "note": "the waterfront anchor in the amber `area-the-yards`, on its mid ring (r = 493) at theta 43.56 - the end nearest Navy Yard-Ballpark - before the area's name. The anchor is 18 across in the 30-deep strip."
+        },
+        {
+          "id": "landmark-rfk-stadium",
+          "name": "RFK Stadium",
+          "at": [1484, 954],
+          "scale": 1.2,
+          "d": "M -9.42,6.6 A 13.53,13.53 0 0 1 9.42,-6.6 A 13.53,13.53 0 0 1 -9.42,6.6 Z M -4.35,2.5 L -3.08,1.61 L -4.09,0.18 L -3.35,-0.34 L -2.35,1.09 L -1.45,0.46 L -2.45,-0.97 L -1.71,-1.49 L -0.71,-0.05 L 0.19,-0.68 L -0.81,-2.12 L -0.07,-2.63 L 0.93,-1.2 L 1.83,-1.83 L 0.83,-3.26 L 1.56,-3.78 L 2.57,-2.35 L 3.84,-3.24 L 4.35,-2.5 L 3.08,-1.61 L 4.09,-0.18 L 3.35,0.34 L 2.35,-1.09 L 1.45,-0.46 L 2.45,0.97 L 1.71,1.49 L 0.71,0.05 L -0.19,0.68 L 0.81,2.12 L 0.07,2.63 L -0.93,1.2 L -1.83,1.83 L -0.83,3.26 L -1.56,3.78 L -2.57,2.35 L -3.84,3.24 Z M 3.54,-7.68 L 5.01,-7.66 L 8.91,-2.09 L 8.42,-0.7 Z M -8.42,0.7 L -8.91,2.09 L -5.01,7.66 L -3.54,7.68 Z",
+          "note": "a football, for the team whose home the stadium was: a pointed oval 23 long and 12.8 across, tilted 35 deg, with a white stripe near each point and the laces along its middle - a seam crossed by four ties. At `scale` 1.2 it is about 28 long. On the Capitol's own y (954) - the stadium closes the east end of East Capitol Street, the Mall's axis carried on past the Capitol - on the Anacostia's west bank at r = 486, under the arboretum, which was moved up the river to clear it. It keeps 20 above the east trunk's Orange casing and 36 clear of Stadium-Armory's marker."
+        },
+        {
+          "id": "landmark-nationals-park",
+          "name": "Nationals Park",
+          "at": [1266.7, 1367.08],
+          "d": "M -11,0 a 11,11 0 1 0 22,0 a 11,11 0 1 0 -22,0 z M -6.77,-7.43 A 9.7,9.7 0 0 1 -6.77,7.43 L -7.66,6.36 A 8.3,8.3 0 0 0 -7.66,-6.36 Z M 6.77,-7.43 A 9.7,9.7 0 0 0 6.77,7.43 L 7.66,6.36 A 8.3,8.3 0 0 1 7.66,-6.36 Z",
+          "note": "a baseball: a disc with its two seams as curved slots. On Navy Yard-Ballpark's own orbit - r = 453.73 about the map centre - at theta 54, 4.5 deg (35.6 along the orbit) past the station at 49.5, on the side of the Green line its label leaves free. The ball keeps 9.6 off the line's casing."
+        },
+        {
+          "id": "landmark-audi-field",
+          "name": "Audi Field",
+          "at": [1237.07, 1386.87],
+          "d": "M -11,0 a 11,11 0 1 0 22,0 a 11,11 0 1 0 -22,0 z M -3.28,-9.02 L -1.13,-7.11 L 1.13,-7.11 L 3.28,-9.02 L 7.56,-5.91 L 6.42,-3.27 L 7.11,-1.13 L 9.59,0.34 L 7.96,5.37 L 5.09,5.09 L 3.27,6.42 L 2.65,9.23 L -2.65,9.23 L -3.27,6.42 L -5.09,5.09 L -7.96,5.37 L -9.59,0.34 L -7.11,-1.13 L -6.42,-3.27 L -7.56,-5.91 Z M 0.0,-4.4 L 4.18,-1.36 L 2.59,3.56 L -2.59,3.56 L -4.18,-1.36 Z",
+          "note": "a soccer ball: a ring, a pentagon at its centre, and the edges of the five pentagons around it. On the same orbit as the baseball and Navy Yard-Ballpark (r = 453.73), at theta 58.5, a further 4.5 deg on - Audi Field is south-west of Nationals Park at Buzzard Point. The two balls are 35.6 apart, centre to centre."
+        },
+        {
+          "id": "landmark-capital-one-arena",
+          "name": "Capital One Arena",
+          "at": [1196, 700],
+          "scale": 0.85,
+          "fill_rule": "nonzero",
+          "d": "M -10.06,-9.94 L -7.94,-12.06 L 7.52,3.4 L 12.7,3.4 A 1.8,1.8 0 0 1 12.7,7 L 7.7,7 C 7.2,7 6.6,6.7 6.1,6.22 Z M -6.1,6.22 C -6.6,6.7 -7.2,7 -7.7,7 L -12.7,7 A 1.8,1.8 0 0 1 -12.7,3.4 L -7.52,3.4 L 7.94,-12.06 L 10.06,-9.94 Z M -3.2,6.3 a 3.2,1.5 0 1 0 6.4,0 a 3.2,1.5 0 1 0 -6.4,0 z",
+          "note": "two crossed hockey sticks with a puck between their blades, for the Capitals. The sticks cross at a right angle - each is at 45 deg - with shafts 3 thick. Each stick is an L: its foot turns level through a rounded heel into a blade 3.6 deep and 8.4 long with a round tip, not a square block. The longer blades make the icon 29 across, so it is drawn at `scale` 0.85 to keep its old footprint. The sticks overlap where they cross, so this one icon is filled `nonzero` - both sticks are wound the same way and the crossing stays solid, where the even-odd rule of the other icons would cut a hole in it. The arena is at Gallery Place, but that interchange is ringed by lines and labels: the nearest free paper is 59 north of it, in the angle between the Green/Yellow and the Red line, 19 clear of both casings."
+        },
+        {
+          "id": "landmark-american-history-museum",
+          "name": "National Museum of American History",
+          "at": [1087.3, 934.5],
+          "scale": 0.65,
+          "d": "M -9,-11 H -7.5 V -10 H 10 V 0.8 H -7.5 V 11 H -9 Z M 0.3,-8.8 H 10 V -7.6 H 0.3 Z M 0.3,-6.4 H 10 V -5.2 H 0.3 Z M -6,-4 H 10 V -2.8 H -6 Z M -6,-1.6 H 10 V -0.4 H -6 Z",
+          "note": "a flag on its pole, for the Star-Spangled Banner the museum holds: a solid canton and four slots that leave five stripes. Its own `scale` is 0.65: a rectangle on a full-height pole fills the corners of its box, so at the row's 0.75 it looked larger than its round and pointed neighbours. The eight museums stand in two rows on the National Mall, at `scale` 0.75 but for this one and the Hirshhorn (0.85). The rows are at y = 934.5 and y = 973.5, 19.5 above and below the Mall's centre line, with the Mall's own name between them. The north row is the Mall's north side: four icons spread evenly from x = 1046 to 1170, 41.3 apart, in their order on the ground. The south row is its south side: four icons on the same four columns, also in their order on the ground. The single shapes on the Mall - Lincoln Memorial, reflecting pool and Capitol - sit on its centre line, y = 954; the Washington Monument's centre is 5 above it. This one is second in the north row."
+        },
+        {
+          "id": "landmark-smithsonian-castle",
+          "name": "Smithsonian Castle",
+          "at": [1087.3, 973.5],
+          "scale": 0.75,
+          "d": "M -9,11 V 2 H -9.6 V 0.8 H -8.6 C -7.6,-1.5 -6.2,-4.5 -5.7,-8 V -10.5 H -5.3 V -8 C -4.8,-4.5 -3.4,-1.5 -2.4,0.8 H -1.4 V 2 H -2 V 5.2 L 0.25,2 L 2.5,5.2 V -9 H 1.9 V -11 H 9.6 V -9 H 9 V 11 Z M 3.9,-1.5 V -6 A 0.7,0.7 0 0 1 5.3,-6 V -1.5 Z M 6.2,-1.5 V -6 A 0.7,0.7 0 0 1 7.6,-6 V -1.5 Z",
+          "note": "the Castle's two entrance towers, after the building itself: on the left the shorter tower under a steep spire with concave sides and a finial, on the right the taller tower with a flat, slightly wider head and two tall arched windows, and a small gable between them over the joined base. Second in the south row, between the Asian Art museum and the Hirshhorn as on the ground."
+        },
+        {
+          "id": "landmark-air-and-space-museum",
+          "name": "National Air and Space Museum",
+          "at": [1170, 973.5],
+          "scale": 0.75,
+          "d": "M 0,-12 C 3.5,-9 4.7,-5 4.7,0 V 4.6 L 8.8,10 V 12 H 4.6 L 3.4,9.5 H -3.4 L -4.6,12 H -8.8 V 10 L -4.7,4.6 V 0 C -4.7,-5 -3.5,-9 0,-12 Z M -2,-3 a 2,2 0 1 0 4,0 a 2,2 0 1 0 -4,0 z",
+          "note": "a rocket standing on its fins, with a porthole - not a plane, which is the airports' sign. In the south row at its east end, below the National Gallery of Art, on the last free paper before the core rings: about 18 short of the Blue ring's casing. The body is 7 across and the fins 13.2 at `scale` 0.75, wide enough to stand beside the Hirshhorn."
+        },
+        {
+          "id": "landmark-national-gallery-of-art",
+          "name": "National Gallery of Art",
+          "at": [1170, 934.5],
+          "scale": 0.75,
+          "d": "M 0,-9 C 6.5,-9 11,-5 11,0 C 11,3.5 8.5,5 6,5 C 4,5 3,6 3,7.5 C 3,9 2,10 0,10 C -6.5,10 -11,5.5 -11,0.5 C -11,-5 -6.5,-9 0,-9 Z M -7.5,-1 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 z M -4.5,-5 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 z M 0.5,-5.5 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 z M 5,-2 a 1.5,1.5 0 1 0 3,0 a 1.5,1.5 0 1 0 -3,0 z M -6.3,4.5 a 1.8,1.8 0 1 0 3.6,0 a 1.8,1.8 0 1 0 -3.6,0 z",
+          "note": "a painter's palette with four dabs of paint and a thumb hole, not the building: its dome and portico would read as another memorial. Last in the north row, directly above Air and Space, which it faces on the ground; about 7 short of the Blue ring's casing."
+        },
+        {
+          "id": "landmark-african-american-museum",
+          "name": "National Museum of African American History and Culture",
+          "at": [1046, 934.5],
+          "scale": 0.75,
+          "d": "M -10.5,-5.33 L 4,-6.6 L 10.5,-5.75 L 9.9,-2.81 H 10.2 L 9.6,0.14 H 9.9 L 9.3,3.08 L 8,3.1 V 5 H 11 V 6.2 H -11 V 5 H -7.2 V 3.1 L -8.6,3.12 L -9.5,0.3 H -9.1 L -10,-2.51 H -9.6 Z M 3.7,-5.9 H 4.3 V 2.6 H 3.7 Z M -8.6,-2.98 L 3.2,-3.7 L 3.2,-3 L -8.6,-2.28 Z M 4.8,-3.68 L 9.2,-3.28 L 9.2,-2.58 L 4.8,-2.98 Z M -8.1,-0.13 L 3.2,-0.52 L 3.2,0.18 L -8.1,0.57 Z M 4.8,-0.51 L 8.9,-0.29 L 8.9,0.41 L 4.8,0.19 Z",
+          "note": "the building's corona seen from a corner, so it reads as a solid block and not as a flat cup: a wide front face and a narrower side face meet at a vertical corner, marked by a slot at x = 4, and the roof line and the two tier joints fall away from that corner on both faces. Three tiers of equal height, each flaring outward as it rises, on a recessed glass base and a ground line. First in the north row, east of the corner the White House park's east edge (x = 1034.6) makes with the Mall's top edge."
+        },
+        {
+          "id": "landmark-natural-history-museum",
+          "name": "National Museum of Natural History",
+          "at": [1128.7, 934.5],
+          "scale": 0.75,
+          "d": "M -11.5,1.4 C -9,0.2 -6.8,-2.8 -4,-3.6 C -1.6,-4.4 0.8,-4.2 2.4,-3.2 C 4,-4.8 5.4,-7.6 6.4,-10 C 6.9,-11.3 8.6,-11.8 9.8,-11.4 C 11.2,-11 11.4,-9.6 10.2,-9.2 C 9.4,-9 8.8,-8.8 8.6,-8.2 C 7.8,-5.4 6.6,-2.4 5.4,0 V 9 H 2.6 V 4.4 C 1.2,3.8 -1,3.8 -2.4,4.4 V 9 H -5.2 V 3.2 C -7.2,3.2 -9.4,2.4 -11.5,1.4 Z",
+          "note": "a long-necked dinosaur in profile, for the fossil halls: a tail that tapers to the left and is held off the ground, a round body that stands on one leg below the hips and one below the shoulders, with the belly's curve between them, and a neck that rises to a small head at the upper right. Third in the north row, between American History and the National Gallery of Art."
+        },
+        {
+          "id": "landmark-asian-art-museum",
+          "name": "National Museum of Asian Art",
+          "at": [1046, 973.5],
+          "scale": 0.75,
+          "d": "M 0,-12 C 1.2,-12 1.8,-11.4 1.7,-10.6 C 3,-10 3.5,-8.8 3.5,-7.6 C 3.5,-6 2.8,-4.8 1.8,-4.2 L 1.8,-3.6 C 4,-3.4 6.2,-2.6 6.8,-1 C 7.6,1 7.8,3 7.4,4.6 C 9.5,5.2 11,6.4 11,7.8 C 11,9.4 8,10.5 4,10.8 L -4,10.8 C -8,10.5 -11,9.4 -11,7.8 C -11,6.4 -9.5,5.2 -7.4,4.6 C -7.8,3 -7.6,1 -6.8,-1 C -6.2,-2.6 -4,-3.4 -1.8,-3.6 L -1.8,-4.2 C -2.8,-4.8 -3.5,-6 -3.5,-7.6 C -3.5,-8.8 -3,-10 -1.7,-10.6 C -1.8,-11.4 -1.2,-12 0,-12 Z M 4.2,-0.6 C 5,1 5.2,2.6 4.8,4.2 L 3.4,3.8 C 3.8,2.2 3.8,0.8 3.4,-0.4 Z M -4.2,-0.6 C -5,1 -5.2,2.6 -4.8,4.2 L -3.4,3.8 C -3.8,2.2 -3.8,0.8 -3.4,-0.4 Z M -5.5,5.8 C -2,7 2,7 5.5,5.8 L 5.5,6.7 C 2,7.9 -2,7.9 -5.5,6.7 Z",
+          "note": "a seated Buddha, from the front, in meditation: the head with its top knot, the shoulders, the two arms held off the body by a thin slot each and meeting in the lap, and the crossed legs as a wide base with a curved slot above them. First in the south row, below the African American museum."
+        },
+        {
+          "id": "landmark-hirshhorn-museum",
+          "name": "Hirshhorn Museum",
+          "at": [1128.7, 973.5],
+          "scale": 0.85,
+          "d": "M -11,-4 A 11,3 0 0 1 11,-4 V 3 A 11,3 0 0 1 8.5,4.904 V 7.1 H 5.5 V 5.598 A 11,3 0 0 1 1.5,5.972 V 7.5 H -1.5 V 5.972 A 11,3 0 0 1 -5.5,5.598 V 7.1 H -8.5 V 4.904 A 11,3 0 0 1 -11,3 Z M -10.2,-4 A 10.2,3.6 0 0 0 10.2,-4 A 10.2,2.6 0 0 1 -10.2,-4 Z M -5.5,-4.2 a 5.5,1.4 0 1 0 11,0 a 5.5,1.4 0 1 0 -11,0 z M -3,1.6 H 3 V 2.6 H -3 Z",
+          "note": "the building as a cylinder seen from a little above, so it reads as round: an elliptical top with the open court as a hole in it, a curved slot along the front rim that parts the top from the wall, straight sides, the long balcony slot in the wall, and a curved foot on three short, thick piers. Third in the south row, between the Castle and Air and Space as on the ground."
+        },
+        {
+          "id": "landmark-national-portrait-gallery",
+          "name": "National Portrait Gallery",
+          "at": [1169.3, 684.2],
+          "scale": 1.0,
+          "d": "M -10,-10 H 10 V 10 H -10 Z M -8,-8 V 8 H 8 V -8 Z M -2.8,-3 a 2.8,2.8 0 1 0 5.6,0 a 2.8,2.8 0 1 0 -5.6,0 z M -5.5,8 C -5.5,3.6 -3,2 0,2 C 3,2 5.5,3.6 5.5,8 Z",
+          "note": "a framed portrait: a SQUARE frame, 20 x 20, with a head and shoulders inside it. On the Capital One Arena's own orbit - r = 358.35 about the map centre - at theta 298.2, about 5 deg (31 along the orbit) before the basketball at 303.16, which leaves 10 between the two icons. At `scale` 1.0 the frame is 20 x 20. The Green ring runs concentric here, so both keep the same 19.4 off its casing; the free arc of this orbit is 296 - 304 deg, between the Green/Yellow and the Red line."
+        },
+        {
+          "id": "landmark-supreme-court",
+          "name": "Supreme Court",
+          "at": [1403, 940],
+          "scale": 0.75,
+          "d": "M -6,11.5 V 9.5 H -0.9 V -7 H -10 V -8.5 H -0.9 V -9.28 A 1.6,1.6 0 1 1 0.9,-9.28 V -8.5 H 10 V -7 H 0.9 V 9.5 H 6 V 11.5 Z M -8,-7 L -12,2.2 H -4 Z M -8,-5 L -5.1,1.4 H -10.9 Z M -12.6,2.2 H -3.4 A 4.6,4.6 0 0 1 -12.6,2.2 Z M 8,-7 L 4,2.2 H 12 Z M 8,-5 L 10.9,1.4 H 5.1 Z M 3.4,2.2 H 12.6 A 4.6,4.6 0 0 1 3.4,2.2 Z",
+          "note": "the scales of justice: a post with a finial on a base, a beam across its top, and a pan hung from each end by two chains. On paper east of the National Mall's end, on the museums' north row (y = 940) and directly above the Library of Congress's book, 11 clear of it - the Court stands north of the Library, behind the Capitol, on the ground. The pair is one column, 6 past the Mall's east edge, inside the Mall's own height (y 920 - 988)."
+        }
+      ]
+    },
+    "airports": {
+      "note": "each airport is a grey apron with one white plane at `at`; the plane is one shape shared by all of them. Pure geography - they touch no station, line or label.",
+      "plane": {
+        "fill": "#ffffff",
+        "rotate": 45,
+        "d": "M 0,-12 C 1.2,-12 1.7,-9.5 1.7,-7.5 V -3 L 11.5,3.5 V 6 L 1.7,3 V 7.5 L 5,10.2 V 12 L 0,10.6 L -5,12 V 10.2 L -1.7,7.5 V 3 L -11.5,6 V 3.5 L -1.7,-3 V -7.5 C -1.7,-9.5 -1.2,-12 0,-12 Z",
+        "note": "a plane seen from above - fuselage, swept wings and tailplane - authored nose-up in its own frame, 23 across and 24 long with the origin at its centre. `rotate` 45 turns it to climb toward the upper right, the taking-off pose; turned, it is about 33 across."
+      },
+      "items": [
+        {
+          "id": "geo-airport-dca",
+          "name": "Ronald Reagan Washington National Airport",
+          "apron": {
+            "id": "airport-dca-apron",
+            "shape": "rect",
+            "fill": "#5B6470",
+            "x": 1021,
+            "y": 1455.1,
+            "width": 44,
+            "height": 44,
+            "rx": 8,
+            "ry": 8
+          },
+          "at": [1043, 1477.1],
+          "note": "a 44 x 44 apron on the Virginia bank, the same square as Dulles's so the two airports are one sign: its west edge at x = 1021 meets the south arm's west edge (x 1021.5-1021.9 here), and its centre (1043, 1477.1) is at the airport station's y. The plane at that centre keeps 5.4 off the apron on every side."
+        },
+        {
+          "id": "geo-airport-iad",
+          "name": "Washington Dulles International Airport",
+          "apron": {
+            "id": "airport-iad-apron",
+            "shape": "rect",
+            "fill": "#5B6470",
+            "x": 69,
+            "y": 739.5,
+            "width": 44,
+            "height": 44,
+            "rx": 8,
+            "ry": 8
+          },
+          "at": [91, 761.5],
+          "note": "a 44 x 44 apron on paper, south-west of the Dulles station (123.95, 718.83): its centre is 54 off the station along the Silver arm's normal, on the side the arm's labels leave free. The apron's nearest corner keeps 8 off the Silver casing edge."
+        }
+      ]
+    }
+  },
+  "service_patterns": {
+    "note": "the parts of a line that only some of its trains serve, as WMATA's own map marks them `Served by every other train`: the Yellow line north of Mt Vernon Sq, where every other train turns back, and the two east branches of the Silver line, which its trains take by turns. Each section is drawn right after its line - over the line's colour and under every line drawn later - as a second stroke of the line's own width in `stroke`, dashed by `dasharray`: white bars across the line, 2.5 wide, with 9 of the line's colour between them. A section's `segments` are in the lines' own vocabulary and repeat that part of the line's route, from the last station that every train serves.",
+    "stroke": "#ffffff",
+    "dasharray": "2.5 9",
+    "sections": [
+      {
+        "id": "yellow-north",
+        "line": "yellow",
+        "segments": [
+          {"kind": "straight", "axis": "ne-diagonal", "slot": "yellow", "from": {"s": 364}, "to": {"ring": "beltway"}}
+        ],
+        "note": "Mt Vernon Sq (s = 364, the first station of `ne-diagonal-inner`) to Greenbelt."
+      },
+      {
+        "id": "silver-largo",
+        "line": "silver",
+        "segments": [
+          {"kind": "straight", "axis": "east-trunk", "slot": "silver", "from": {"s": 496.0}, "to": {"ring": "beltway"}}
+        ],
+        "note": "Stadium-Armory (s = 496) to Downtown Largo."
+      },
+      {
+        "id": "silver-new-carrollton",
+        "line": "silver-new-carrollton-spur",
+        "segments": [
+          {"kind": "straight", "axis": "east-trunk", "slot": "silver", "from": {"s": 496.0}, "to": {"axis": "nc-diagonal", "slot": "silver"}},
+          {"kind": "straight", "axis": "nc-diagonal", "slot": "silver", "from": {"prev": true}, "to": {"ring": "nc-arc-silver"}},
+          {"kind": "arc", "ring": "nc-arc-silver", "to": {"axis": "nc-exit", "slot": "silver"}, "dir": "ccw"},
+          {"kind": "straight", "axis": "nc-exit", "slot": "silver", "from": {"prev": true}, "to": {"ring": "beltway"}}
+        ],
+        "note": "Stadium-Armory to New Carrollton: the spur's own route from s = 496."
+      }
+    ]
+  },
+  "connections": {
+    "note": "other railways a Metro station connects to, each as a small badge: a rounded rect in the service's colour with its name in white capitals. An item's badges are laid out as a row or a column centred on `at`, 3 apart. A column's badges have different widths, so `align` says which edge they share: `end` (right edges flush) for a stack to the left of its station, `start` (left edges flush) for a stack to its right - the flush edge is the one that faces the station - and `middle` for a stack above or below it. The colours are dark and muted on purpose, so no badge reads as a Metro line. Each `at` is the nearest free paper to its station: at least 4 clear of every line casing, marker, station label and landmark.",
+    "font": {"size_px": 8, "weight": 700, "fill": "#ffffff", "baseline_dy": 2.9},
+    "badge": {"height": 13, "rx": 3, "gap": 3},
+    "services": {
+      "amtrak": {"text": "AMTRAK", "width": 43, "fill": "#1F3A60"},
+      "marc": {"text": "MARC", "width": 33, "fill": "#084A4A"},
+      "vre": {"text": "VRE", "width": 26, "fill": "#7A1F2B"}
+    },
+    "items": [
+      {"station": "union-station", "services": ["amtrak", "marc", "vre"], "layout": "column", "align": "end", "at": [1235.9, 634.3], "note": "west of the Red line, 47 from the station, on the side its label leaves free"},
+      {"station": "new-carrollton", "services": ["amtrak", "marc"], "layout": "column", "align": "middle", "at": [1650.3, 647.9], "note": "a stack above the Orange terminal, centred on its x, about 10 clear of its ring"},
+      {"station": "king-st-old-town", "services": ["amtrak", "vre"], "layout": "column", "align": "start", "at": [1030, 1659.2], "note": "east of the station at its own y, across the line; it lies over the bank trail and the edge of the Potomac"},
+      {"station": "rockville", "services": ["amtrak", "marc"], "layout": "column", "align": "end", "at": [405.2, 333.9], "note": "south-west of the station, on the side its label leaves free"},
+      {"station": "silver-spring", "services": ["marc"], "layout": "row", "at": [964, 346], "note": "west of the station at its own y"},
+      {"station": "college-park-u-of-md", "services": ["marc"], "layout": "row", "at": [1169, 339.3], "note": "west of the station"},
+      {"station": "greenbelt", "services": ["marc"], "layout": "row", "at": [1215.1, 281], "note": "above the terminal"},
+      {"station": "lenfant-plaza", "services": ["vre"], "layout": "row", "at": [1185, 1059.5], "note": "under the station's label, its top 3 below the baseline of `Plaza` and its right edge on the label's own right edge, x = 1198"},
+      {"station": "crystal-city", "services": ["vre"], "layout": "row", "at": [1024, 1415.6], "note": "east of the station at its own y, across the line; it lies over the bank trail and the edge of the Potomac"},
+      {"station": "franconia-springfield", "services": ["vre"], "layout": "row", "at": [778.3, 1780.5], "note": "below the terminal"}
+    ]
+  },
+  "legend": {
+    "note": "the map's key, in the corners the circular diagram leaves free on the square canvas: the map's sign and title with WMATA's contact lines at the top left, the six lines, the service pattern and the accessibility line at the bottom left, the symbols and the credits at the bottom right and the north sign at the top right. Reference material sits below the map, where a reader goes to it second. Every sample in the symbol key is drawn from the same constants as the thing it stands for, so the key cannot drift from the map. A row's centre is `row_height` below the one above; type is set with its capitals centred on the row. A key's `heading_dy` lifts its heading off the row grid: -8 leaves about twice a row's white under the heading, so it reads as the block's title and not as its first row.",
+    "fill": "#1A1919",
+    "row_height": 36,
+    "fonts": {
+      "title": {"size_px": 64, "weight": 800},
+      "section": {"size_px": 22, "weight": 700},
+      "heading": {"size_px": 14, "weight": 700},
+      "text": {"size_px": 12, "weight": 400}
+    },
+    "title": {
+      "at": [60, 78],
+      "logo": {
+        "size": 104.8,
+        "dy": 40,
+        "gap": 22,
+        "d_box": 100,
+        "d": "M 0,100 V 0 H 36.28 L 50,50.7 L 63.72,0 H 100 V 100 H 74.95 V 32.08 L 62.52,100 H 37.48 L 25.05,32.08 V 100 Z M 25.03,100 A 24.97,24.97 0 0 1 74.97,100 Z",
+        "rings": {"centre": [50, 100], "bands": [[0, 24.97], [33.72, 63.61], [72.36, 120]]},
+        "note": "this map's own sign: a bold square M that is made of concentric rings over a tunnel - the map's idea and the station's vault in one figure. `d` is the clip outline in a 100-unit box, which it fills from edge to edge, in two sub-paths that wind the same way and so add up: the letter (stems 25 wide, a flat foot of the same width under the V, the V's notch down to 50.7) and a half disc of radius 25 on the middle of the base line, which makes the bottom ring a round tunnel mouth and not a keystone. The outline is not drawn; it clips three rings about `centre`, the middle of the base line, each given as its inner and outer radius: the tunnel, the ring over it, and a third that runs past the letter's top corners, so the upper half is two solid blocks with the V between them. The two white arcs are 8.7 wide, and each lies on a sharp point of the letter - the inner foot of the stems (r = 25) and the tips of the two white triangles under the diagonals (r = 72.36). The upper arc is that high so that the three dark parts are near one height on the sign's centre line - tunnel 25, middle ring 30, top blocks 28 - where a lower arc made it top-heavy. The sign is `size` wide and high and is drawn in the legend's ink. `size` 104.8 and `dy` 40 put its top on the top of the title's capitals (y = 65.6) and its bottom on the base line of the last header line (y = 170.4); the text starts `gap` to its right."
+      },
+      "text": "DC METRO",
+      "text_dx": -3,
+      "notes_dx": -0.46,
+      "align_note": "`text_dx`, `notes_dx` and `contact.dx` take out each line's own side bearing - the white a font leaves before a first letter, which grows with the type's size and differs by letter (D, I, M, S) - so the INK of all four header lines starts on one edge, x = 186.8, the header's `gap` from the logo.",
+      "text_dy": 10.85,
+      "first_dy": 88,
+      "note_dy": 18,
+      "notes": ["System Map, not to scale"],
+      "contact": {
+        "dx": -0.87,
+        "first_dy": 53,
+        "line_dy": 17,
+        "lines": [
+          "Information: 202-GO-METRO  |  TTY: 202-962-2033",
+          "Metro Transit Police: 202-962-2121  |  Text: MYMTPD (696873)"
+        ],
+        "note": "WMATA's contact lines, directly under the title and on the title's own left edge: the two lines of numbers. The title is as large as the space over the numbers lets it be. The title's `notes` line - what the map is - comes last, below them (`title.first_dy` 88). The block ends at about y = 177, 19 above the Shady Grove label, whose box starts at x = 425."
+      }
+    },
+    "lines": {
+      "at": [60, 1618],
+      "heading": "Lines",
+      "heading_dy": -8,
+      "dot_dx": 14,
+      "dot_r": 12,
+      "dot_stroke_width": 2.5,
+      "name_dx": 40,
+      "ends_dx": 138,
+      "service": {"kind": "service", "line": "silver", "width": 32, "height": 12, "text": "Served by every other train", "note": "the last row of the line key: a striped sample of `service_patterns` that starts on the key's left edge - 32 long, which is three 9s of the line's colour with two white bars between them - and its meaning in the legend's text type where the lines' names start."},
+      "rows": [
+        {"line": "red", "letter": "R", "name": "Red Line", "ends": "Shady Grove – Glenmont"},
+        {"line": "orange", "letter": "O", "name": "Orange Line", "ends": "Vienna – New Carrollton"},
+        {"line": "silver", "letter": "S", "name": "Silver Line", "ends": "Ashburn – Downtown Largo / New Carrollton"},
+        {"line": "blue", "letter": "B", "name": "Blue Line", "ends": "Franconia-Springfield – Downtown Largo"},
+        {"line": "yellow", "letter": "Y", "name": "Yellow Line", "ends": "Huntington – Mt Vernon Sq / Greenbelt"},
+        {"line": "green", "letter": "G", "name": "Green Line", "ends": "Branch Av – Greenbelt"}
+      ]
+    },
+    "symbols": {
+      "at": [1894, 1554.1],
+      "row_height": 30,
+      "heading": "Symbols",
+      "heading_dx": 46,
+      "heading_dy": -8,
+      "symbol_width": 46,
+      "symbol_align": "end",
+      "text_dx": -12,
+      "text_anchor": "end",
+      "note": "the line key's mirror image, set against the canvas's right margin: one narrow column of samples on the right, 46 wide and ending 60 from the canvas edge, each sample flush to the column's RIGHT edge (`symbol_align` end) - the margin that the heading, the rule and the credits also end on, as the line key's dots stand on the left margin; and one column of type to its left that ENDS on a common right edge (`text_anchor` end, `text_dx` -12). The white between a name and its sample is 12 at the widest sample, the AMTRAK badge at 43, and more at the narrower ones. The heading ends on the margin (`heading_dx`). No sample is wider than the column, which is why each railway has a row of its own and the landmarks are one example icon. Its own `row_height` 30 replaces the legend's 36: the samples and the type are smaller than the line key's, and 30 still keeps 4 between the two tallest samples, the station and the transfer station, which are in adjacent rows.",
+      "rows": [
+        {"kind": "station", "text": "Station"},
+        {"kind": "interchange", "scale": 0.5, "text": "Transfer station"},
+        {"kind": "mark", "mark": "parking", "text": "Parking"},
+        {"kind": "mark", "mark": "hospital", "text": "Hospital"},
+        {"kind": "connections", "services": ["amtrak"], "text": "Amtrak intercity trains"},
+        {"kind": "connections", "services": ["marc"], "text": "MARC commuter trains (Maryland)"},
+        {"kind": "connections", "services": ["vre"], "text": "VRE commuter trains (Virginia)"},
+        {"kind": "airport", "scale": 0.55, "text": "Airport"},
+        {"kind": "swatch", "fill": "#CDE0A0", "width": 36, "height": 18, "rx": 5, "text": "Park"},
+        {"kind": "swatch", "fill": "#8DC3E0", "width": 36, "height": 18, "rx": 5, "text": "Water"},
+        {"kind": "landmarks", "items": ["landmark-us-capitol"], "scale": 0.9, "step": 32, "text": "Landmarks, museums, venues"}
+      ]
+    },
+    "accessible": {
+      "at": [75.1, 1923],
+      "text": "Metro is accessible",
+      "text_dx": 27,
+      "icon": {
+        "scale": 1.4,
+        "d": "M -10.61,4.72 L -10.76,4.72 L -10.61,2.55 L -10.45,2.55 L -10.45,2.09 L -10.3,2.09 L -10.3,1.63 L -10.14,1.63 L -10.14,1.16 L -9.99,1.16 L -9.68,0.23 L -9.37,0.08 L -9.37,-0.23 L -8.9,-0.54 L -8.9,-0.85 L -8.13,-1.63 L -7.82,-1.63 L -7.51,-2.09 L -7.2,-2.09 L -7.05,-2.4 L -6.58,-2.55 L -6.43,-2.4 L -6.43,-0.7 L -6.89,-0.23 L -7.2,-0.23 L -7.51,0.08 L -7.51,0.39 L -7.97,0.7 L -7.97,1.01 L -8.28,1.16 L -8.28,1.47 L -8.59,1.78 L -8.59,2.25 L -8.75,2.25 L -8.75,2.71 L -8.9,2.71 L -8.9,3.48 L -9.06,3.48 L -9.06,5.03 L -8.9,5.03 L -8.9,5.81 L -8.75,5.81 L -8.75,6.27 L -8.44,6.58 L -8.44,7.05 L -8.13,7.2 L -7.82,7.97 L -6.58,9.21 L -6.27,9.21 L -6.12,9.52 L -5.81,9.52 L -5.19,9.99 L -4.72,9.99 L -4.72,10.14 L -2.09,10.3 L -2.09,10.14 L -1.32,10.14 L -1.32,9.99 L -0.85,9.99 L -0.85,9.83 L -0.39,9.83 L -0.39,9.68 L 0.08,9.52 L 0.08,9.37 L 0.7,9.21 L 1.94,7.97 L 1.94,7.66 L 2.25,7.51 L 2.25,7.2 L 2.71,6.58 L 2.71,6.12 L 2.86,6.12 L 2.86,5.65 L 3.02,5.65 L 3.02,5.19 L 3.17,5.19 L 3.33,5.96 L 3.48,5.96 L 4.1,7.51 L 3.95,7.51 L 3.64,8.44 L 3.33,8.59 L 3.33,8.9 L 1.78,10.45 L 1.47,10.45 L 1.32,10.76 L 1.01,10.76 L 1.01,10.92 L 0.7,10.92 L 0.7,11.07 L 0.39,11.07 L -0.23,11.54 L -0.7,11.54 L -0.7,11.69 L -2.25,11.85 L -2.25,12.0 L -3.79,12.0 L -3.79,11.85 L -4.72,11.85 L -4.72,11.69 L -5.81,11.54 L -5.81,11.38 L -7.05,10.92 L -7.2,10.61 L -7.51,10.61 L -7.97,9.99 L -8.28,9.99 L -8.75,9.52 L -8.75,9.21 L -9.21,8.9 L -9.21,8.59 L -9.52,8.44 L -9.52,8.13 L -9.83,7.97 L -9.83,7.66 L -10.14,7.35 L -10.45,5.81 L -10.61,5.81 Z M 5.19,6.58 L 3.02,1.78 L -5.03,1.78 L -5.34,-2.71 L -5.5,-2.71 L -5.5,-4.57 L -5.65,-4.57 L -5.65,-6.27 L -5.81,-6.27 L -5.81,-7.97 L -5.96,-7.97 L -5.96,-9.37 L -6.12,-9.37 L -6.12,-10.45 L -5.96,-10.45 L -5.81,-11.23 L -5.03,-11.85 L -3.48,-12.0 L -3.48,-11.85 L -2.86,-11.69 L -2.09,-10.76 L -2.09,-9.21 L -2.25,-9.21 L -2.25,-8.9 L -3.33,-7.97 L -4.26,-7.97 L -4.26,-7.51 L -4.1,-7.51 L -4.1,-5.65 L -3.95,-5.65 L -3.79,-3.02 L -1.94,-3.02 L 1.94,-3.02 L 1.94,-1.47 L -3.64,-1.47 L -3.48,0.23 L 4.1,0.23 L 4.26,0.7 L 4.41,0.7 L 4.41,1.16 L 4.57,1.16 L 4.57,1.47 L 4.72,1.47 L 4.72,1.78 L 5.19,2.4 L 5.19,2.86 L 5.34,2.86 L 5.34,3.17 L 5.81,3.79 L 5.81,4.26 L 5.96,4.26 L 5.96,4.57 L 6.12,4.57 L 6.12,4.88 L 6.58,5.5 L 6.58,5.96 L 6.74,5.96 L 6.74,6.27 L 7.2,6.89 L 7.2,7.35 L 7.51,7.51 L 7.51,7.35 L 7.82,7.35 L 8.13,7.05 L 8.59,7.05 L 8.59,6.89 L 8.9,6.89 L 9.52,6.43 L 9.99,6.43 L 9.99,6.27 L 10.3,6.43 L 10.3,6.89 L 10.76,7.51 L 10.61,7.82 L 10.3,7.82 L 9.68,8.28 L 9.21,8.28 L 9.21,8.44 L 8.9,8.44 L 8.28,8.9 L 7.82,8.9 L 7.82,9.06 L 7.51,9.06 L 6.89,9.52 L 6.43,9.37 L 6.43,9.06 L 6.27,9.06 L 6.27,8.75 L 5.81,8.13 L 5.81,7.66 L 5.65,7.66 Z"
+      },
+      "note": "the accessibility statement, directly below the line key at the bottom left: the wheelchair sign centred on `at`, with its left edge on the canvas's 60 margin, then a line of section type that starts `text_dx` to its right. The sign is the International Symbol of Access in the open form that transit maps use: a seated figure and the wheel as an open arc. It is a filled outline in a 24-unit box (21.5 across, 24 high), scaled by `scale`. The sign runs from y = 1906 to y = 1940, the canvas's bottom margin, 30 below the sample of the last row of the line key."
+    },
+    "credits": {
+      "at": [1940, 1916.6],
+      "anchor": "end",
+      "line_dy": 16,
+      "rule": {"dy": -13, "width": 238, "stroke_width": 0.75},
+      "fill": "#6F7A6F",
+      "lines": [
+        "\u00a9 2026 Max Rakhimov  \u00b7  CC BY-NC-SA 4.0",
+        "Not affiliated with WMATA"
+      ],
+      "note": "the copyright line and the disclaimer, below the symbol key at the bottom right, ending on the canvas's 60 margin (`anchor` end): two lines of legend text type in the grey of the Beltway's name, `line_dy` apart, the first centred on `at`, under a thin `rule` of the symbol key's width that sets them off from the key. The disclaimer is there because the map carries WMATA's logo, name and contact lines."
+    },
+    "north": {
+      "at": [1922.5, 98],
+      "ink": "#1A1919",
+      "d": "M 0,-38 L 17.5,14 L 0,5 L -17.5,14 Z",
+      "letter": "N",
+      "letter_px": 22,
+      "letter_dy": 37.0,
+      "note": "the north sign, in the top corner opposite the Metro sign: an ink arrow 52 tall and 35 across over an ink N, with no ring or disc. `at` is the arrow's centre. Its top is at y = 60 and its right point at x = 1940, so it keeps the same 60 from the top and the right edge of the canvas as every other block of the key keeps from its edges; with the N it runs down to y = 135."
+    }
+  },
+  "layers": [
+    {"id": "layer-page", "name": "1 · Page"},
+    {
+      "id": "layer-geography",
+      "name": "2 · Geography",
+      "contains": ["geo.parks", "geo.water", "geo.islands", "geo.airports", "geo.beltway", "geo.landmarks"]
+    },
+    {
+      "id": "layer-lines",
+      "name": "3 · Lines",
+      "contains": ["lines"],
+      "draw_order": ["silver", "silver-new-carrollton-spur", "orange", "blue", "yellow", "green", "red"],
+      "note": "`draw_order` lists `lines[].id` values; each one is drawn twice, white casing (30) first, then the coloured stroke (26). A later line therefore crosses an earlier one with a 2 px white gap."
+    },
+    {
+      "id": "layer-stations",
+      "name": "4 · Stations",
+      "contains": ["stations where marker in (dot, terminal)"]
+    },
+    {
+      "id": "layer-interchanges",
+      "name": "5 · Interchanges",
+      "contains": ["stations where marker in (interchange, capsule)"]
+    },
+    {"id": "layer-labels", "name": "6 · Labels", "contains": ["stations[].label", "connections"]},
+    {"id": "layer-legend", "name": "7 · Legend", "contains": ["legend"]}
+  ],
+  "checks": {
+    "note": "Only the bounds an assertion needs as a parameter are stored here; the rest of what a spec reader can assert without any SVG is carried by the generator alone. See SPEC.md \u00a79.",
+    "curve_geometry": {
+      "max_span_deg": 180.0,
+      "min_line_radius_px": 40.0,
+      "note": "asserted on every curved line of type: an arc stays a minor arc, and no line sits closer to the centre than min_line_radius_px (14 px of cap height would shear). min_line_radius_px binds radial labels too, on the base point each reads outward from; max_span_deg does not, a radius having no span."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor/backup files
+*.bak
+*~
+*.swp
+*.swo
+*.orig
+
+# Rendered/test outputs
+*.png
