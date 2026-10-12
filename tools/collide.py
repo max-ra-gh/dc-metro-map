@@ -104,19 +104,10 @@ def label_boxes(sp, st, lp):
 
 
 def markers(sp, placements):
-    k = sp.const
     out = []
     for st in sp.data["stations"]:
         pl = placements[st["id"]]
-        if st["marker"] == "interchange":
-            r = (k["interchange_dot"]["outer_r"]
-                 + k["interchange_dot"]["outer_stroke_width"] / 2)
-        elif st["marker"] == "terminal":
-            r = k["terminal_dot"]["r"] + k["terminal_dot"]["stroke_width"] / 2
-        elif st["marker"] == "capsule":
-            r = k["capsule"]["casing_stroke_width"] / 2
-        else:
-            r = k["station_dot"]["r"] + k["station_dot"]["stroke_width"] / 2
+        r = g.marker_outer_r(sp, st)
         pts = (list(pl["capsule"]) if "capsule" in st["at"]
                else [d["p"] for d in pl["dots"]])
         for p in pts:

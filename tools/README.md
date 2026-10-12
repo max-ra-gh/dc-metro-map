@@ -14,7 +14,7 @@ which must be on `PATH`.
 | script | what it measures |
 | --- | --- |
 | `collide.py` | label-vs-label and label-vs-marker overlaps, as oriented boxes. Curved counts read slightly high — an arc's box is its chord padded by the sagitta. |
-| `strokes.py` | each label's clearance from the nearest line-path casing ink, by flattening the 7 line paths at 0.5 px. Negative means the type sits inside the casing. |
+| `strokes.py` | each label's clearance from the nearest line-path casing ink, by flattening the 8 line paths at 0.5 px. Negative means the type sits inside the casing. |
 | `gaps.py` | the three terms of each station's label offset — `extent` (ink), `lift` (block depth spent across the corridor) and `gap` (the white that is left, i.e. `distance`). Per-corridor spread at the foot. |
 | `aim.py` | how far each label sits from the station it names along its aim direction — the quantity the aim rule drives to zero for the 19 straight labels. |
 | `measure.py` | the **rendered** white gap: rasterises the map twice at one crop and walks pixels. The check on whether the solved gap is the gap the eye reads. Needs Inkscape. |

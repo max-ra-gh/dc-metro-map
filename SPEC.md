@@ -122,6 +122,9 @@ arithmetic sequence cannot say that.
   "segments": [ … ] }
 ```
 
+A line may carry its own `stroke_width` and `casing_width`, which replace `constants.line`'s. The
+Purple line does: it is light rail and not Metro, so it is drawn thinner (14 in an 18 casing).
+
 Segments are an **ordered, point-continuous** list. Four kinds:
 
 | kind | meaning |
@@ -158,21 +161,33 @@ line's colour and under every line drawn later, as a second stroke of the line's
 dashed by `dasharray`: white bars across the line. Ids are `service-<section>`. The legend's line
 key ends with a sample of the same pattern (`legend.lines.service`).
 
+**Lines of other railways** are in `lines` too: the MARC and Amtrak line from Union Station to BWI
+(`marc-bwi`) and VRE's Manassas Line from King St-Old Town (`vre-manassas`). Such a line has
+`"casing": false`, its own `stroke_width`, a `dasharray` and a `linecap`, so it is a thin dashed
+line in its operator's colour, and it is first in `draw_order`, under every Metro line. It starts at
+the end of the row of connection badges under a station's name, on that row's own ring. Its stations
+are `ticks`: short strokes across the line at a point of a ring (`ring`, `angle`) or of a straight
+part (`axis`, `s`), each with an optional name (`label`: an offset, an `align` and a `rotate`) in
+`constants.fonts.place` and optional operator badges (`connections`: `dx`, `dy` to the middle of the row,
+`services`, and a `fill` for a service whose badge has the line's colour). A line can also have `badges` ON it: a
+point as a tick's, the `services` and a `rotate`. The legend's line key has one row for each operator (`legend.lines.samples`), below the `service` row: its `lines`, drawn
+one above the other `pitch` apart.
+
 ### 4.1 Join constructions
 
 * **Point-continuity bend.** Every corner on a metro line is a hard corner: the two segments share an
-  endpoint exactly and nothing is rounded. `stroke-linejoin` is `round`, so the 26-wide stroke
-  supplies the visual radius (13).
+  endpoint exactly and nothing is rounded. `stroke-linejoin` is `round`, so the 20-wide stroke
+  supplies the visual radius (10).
 * **Riser.** Where a core-ring arc meets a trunk, the arc terminates at the slot line that passes
   through the centre and a short perpendicular riser drops to the line's own slot; a line already on
   that slot needs none.
 * **Slot-line intersection.** Where two straight corridors meet at an angle, the corner is the
-  intersection of the *offset* lines, not of the axes: the two lines turn at `n = ±14` about the
+  intersection of the *offset* lines, not of the axes: the two lines turn at `n = ±11` about the
   shared corner.
 * **Fillets (r = 14).** Not used on metro lines at all. The one true fillet in the drawing belongs to
-  a geo trail and is solved for **exact tangency** (`spec.json.geo`); its radius equals the slot
-  offset.
-* **Casing.** Every line is drawn twice: white `stroke-width: 30`, then the colour at `26`. Same `d`,
+  a geo trail and is solved for **exact tangency** (`spec.json.geo`).
+* **Casing.** Every Metro line is drawn twice: white `stroke-width: 24`, then the colour at `20` (or the
+  line's own two widths). Same `d`,
   same order, casing first. Layer draw order is `layers[].draw_order`, so a later line crosses an
   earlier one with a 2 px white gap.
 * **Sliver.** Green bank trails run parallel to water edges with a paper gap: the trail centreline
@@ -199,16 +214,19 @@ key ends with a sample of the same pattern (`legend.lines.service`).
 * `{"dots": [ … ]}` — a multi-platform terminal, one placement per line
 * `{"capsule": {axis, slot, from, to}}` — a bar between two platform dots on one axis
 
-`marker` ∈ `dot` | `interchange` | `terminal` | `capsule`.
+`marker` ∈ `dot` | `minor` | `interchange` | `terminal` | `capsule`. `minor` is the small dot of a
+station that only the Purple line serves: the station dot at half its size, on a black `ear`, a bar
+across the line through the dot (`constants.minor_dot.ear`). A label's gap is from the ear's end.
 
-**Marker geometry lives once in `constants`** — `station_dot`, `interchange_dot`, `terminal_dot`,
-`capsule` — and never per station. A terminal is filled with its line's colour and carries a white
+**Marker geometry lives once in `constants`** — `station_dot`, `minor_dot`, `interchange_dot`,
+`terminal_dot`, `capsule` — and never per station. A terminal is filled with its line's colour and carries a white
 letter; a capsule's two bar widths are *derived* from the interchange ring's radius and stroke, and
 `constants.capsule.derivation` records how.
 
 **Ticks.** A station with `"tick": true` carries a white, round-capped tick (`constants.station_tick`)
 drawn perpendicular to the line through the dot and centred on it: radial on a ring, normal to the
-axis on a straight. A tick is white on white paper and puts down no ink, which is why nothing
+axis on a straight. A station's own `tick_angle` replaces that direction (Federal Triangle and
+Smithsonian: 0, horizontal, as the National Mall and their names are). A tick is white on white paper and puts down no ink, which is why nothing
 measures clearance from it (§6.5).
 
 ---
@@ -230,6 +248,15 @@ so line breaks are authored, not computed. Most stations carry text alone. The f
 `label.override` are design decisions about one label each, and each says why in its own
 `label.note`, beside the numbers it explains. Placement otherwise lives in
 `corridors[].label_default`, `runs[].label_default` and `constants.label`.
+
+A corridor's `font` names the entry of `constants.fonts` that its titles are set in, in place of
+`primary`. The three Purple line corridors use `minor`. The font's own `wrap_dy` and `baseline_dy`
+(half its cap height) then replace the primary font's and `constants.label.baseline_dy` in every
+rule below.
+
+A corridor's `halo` - or one station's own (the stations whose names cross the Beltway) - is the width of a paper-coloured outline drawn under its letters
+(`paint-order: stroke`), for names that cross other ink. The Purple line's dense rank has it,
+because its names cross the Beltway.
 
 ### 6.1 The frame
 
@@ -300,7 +327,7 @@ label's own offset direction and the **further** one wins:
 | # | obstruction | measured as |
 | --- | --- | --- |
 | a | the station's **own marker**, at its extreme dot on the label's side | its outer edge — `r + stroke_width/2` for a dot, terminal or interchange ring, half the bar width for a capsule, all off `constants` |
-| b | the **outer casing edge of the band** the station sits in | outermost slot its own lines run in, `+ casing_width/2 = 15` (= half the 26 stroke plus the 2 px casing lip) |
+| b | the **outer casing edge of the band** the station sits in | outermost slot its own lines run in, `+ casing_width/2 = 15` (= half the 26 stroke plus the 2 px casing lip); the widest casing of the station's own lines, so 9 at a Purple-only station |
 
 The **`half·|down·perp|` term** gives back what optical centring would otherwise spend: only the part
 of the block's half-depth that points *across* the corridor eats into the gap. Because `down` is a
@@ -536,11 +563,22 @@ so percentages are safe.
 ### 6.8 Rail connections
 
 `spec.json.connections` lists the other railways a station connects to - Amtrak, MARC, VRE. Each
-service is a badge: a rounded rect in the service's colour with its name in white capitals
-(`services`, `badge`, `font`). An item names its `station` and its `services`, and its badges are laid
-out as a `row` or a `column` centred on `at`; a column's `align` (`start`, `middle`, `end`) says which
-edge its badges share. They are emitted last in the labels layer, in
-`<g id="connections">`, with ids `connection-<station>-<service>`.
+service is a badge in the service's colour with its name in white capitals (`services`, `badge`,
+`font`). A badge is part of its station's label and has no co-ordinates: an item names its `station`
+and its `services`, and the generator puts the badges at that label. There are three places:
+
+* **`left` / `right`** - in the label's own line, before or after the name, beyond the marks when
+  it is on their side. The badge is drawn as a station mark is (§6.9): a bar of Inter's filled
+  squares, stepped so that their strokes join into one bar of the service's `width`, and the name
+  drawn back over its middle (`connections.inline`, `services[].text_width`). The renderer spaces it
+  against the name, and on a `<textPath>` it follows the curve. Ids are
+  `connection-<station>-<service>`, on the first `<tspan>`.
+* **`bottom`** - a row of rounded rects under the last line of type, `badge.below_dy` from its
+  baseline to their middle, on the edge the label is anchored to and turned with the label. They are
+  emitted last in the labels layer, in `<g id="connections">`, with the same ids.
+
+The default is `bottom`. An item's `place` selects the line. An item's `shift` moves a `bottom` row
+along the label, in px in its reading direction (New Carrollton: -9.1).
 
 ### 6.9 Station marks
 
@@ -561,8 +599,8 @@ mark is not cut off. The tspans carry ids `mark-<station>-<mark>`.
 
 `spec.json.legend` is the map's key, emitted last in its own layer, `<g id="layer-legend">`
 (`--layers legend`). It uses the four corners that the circular diagram leaves free on the square
-canvas: the title at the top left, the six lines at the bottom left, the symbols at the bottom right
-and the north sign at the top right. The title block also carries the contact lines. Each block has an `at` and rows `row_height` apart (the symbol key has a tighter one of its own, and is set flush right: `text_anchor`, `symbol_align`). A line row
+canvas: the title at the top left, the seven lines at the bottom left, the symbols at the bottom right
+and the north sign at the top right. The title block also carries the contact lines. Each block has an `at` and rows `row_height` apart (the line key and the symbol key each have a tighter one of their own; the symbol key is also set flush right: `text_anchor`, `symbol_align`). A line row
 names a `line` and takes its colour from it; a symbol row has a `kind` and is drawn from the same
 constants as the thing on the map it stands for - the station dot, the interchange marker, the
 station marks, the connection badges, the airport apron and plane, the landmark paths - so the key
@@ -583,9 +621,18 @@ parks, water, trails, the beltway ring that defines the grid — is recorded on 
 `spec.json.geo`, with its derivation in the object's `note`.
 
 **Landmarks** are tiny filled pictograms in `geo.landmarks.items`: each carries its own path `d`,
-authored about 24 across with the origin at its centre, and is moved to `at` by a translate; an optional `scale` sizes one icon about its centre. They
+authored about 24 across with the origin at its centre, and is moved to `at` by a translate; an optional `scale` sizes one icon about its centre, and an optional `rotate` turns it about that centre. An optional `halo` (`stroke`, `stroke_width`) is an outline under the shape, in the colour of the ground, that covers other ink round it (the Kenilworth lotus, on the DC boundary's dots). They
 share one fill and are filled even-odd, so a sub-path inside the outline is a hole. They are emitted
 in `<g id="geo-landmarks">`, above the Beltway and below the geography names.
+
+**Road shields** on the Beltway (`geo.beltway.shields`) are one shape drawn at each place in `at` (an
+`angle`, an `offset` from the ring and a `rotate`): coloured `parts` in the shield's own frame, a `text`
+(the road's number, made narrower by `squeeze`) and a `scale`.
+
+**Airports** (`geo.airports.items`) are a grey apron with a white plane. An item with a `code` has
+its three letters inside the apron, under a smaller plane (`geo.airports.code`). An airport with no
+Metro station - BWI and Manassas - also has its name (`label`, in `constants.fonts.place`) and the
+badges of the railways that go there (`connections`), above the apron.
 
 **Water, park and Beltway names** are geography, not station labels: a river, basin, park or island carries
 a `label` on its own object in `spec.json.geo`, and they are emitted last in the geography layer, in
@@ -606,11 +653,12 @@ starts a new sub-path, and with it the dash pattern, which is how a dot is put e
 corner.
 
 **Jurisdiction names** are in `geo.boundary_labels` (`constants.fonts.boundary`,
-`<g id="geo-labels-boundary">`): `on_ring` labels are type on a ring, `offset` off it, and
+`<g id="geo-labels-boundary">`): `on_ring` labels are type on a ring, `offset` off it, centred at `angle` or, with `align`
+`start` or `end`, starting or ending there, and
 `straight` ones are plain blocks. The District's and Maryland's stand on the two sides of the
 boundary, in the north-west and the south-east. Virginia has no line - the Potomac is the
-boundary - so its name is on the river's Virginia bank; `VIRGINIA` and `MARYLAND` are also set
-inside the Beltway beside its own name (`geo.beltway.labels`).
+boundary - so its name is on the river's Virginia bank; `VIRGINIA` and `MARYLAND` are also in the
+Beltway's own two names, outside the ring (`geo.beltway.labels`).
 
 ---
 

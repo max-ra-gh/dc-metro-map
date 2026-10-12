@@ -7,8 +7,10 @@ rings and spokes around one centre, and the Capital Beltway is the outer ring.
 - **[DC-Metro.svg](DC-Metro.svg)**: the same map as SVG. It looks right only where the Inter font is
   installed.
 
-The map shows all 98 stations and 6 lines, the sections that every other train serves, parking and
-hospitals, the Amtrak, MARC and VRE connections, the two airports, the District boundary, rivers and
+The map shows all 98 Metro stations and 6 lines, the Purple Line light rail and its 21 stations (it
+opens in 2028), the sections that every other train serves, parking and
+hospitals, the Amtrak, MARC and VRE connections, the commuter rail lines to BWI and Manassas, four
+airports, the District boundary, rivers and
 parks, and about 30 landmark icons.
 
 This map is not official. It is not affiliated with or endorsed by WMATA.

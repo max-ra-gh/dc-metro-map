@@ -73,6 +73,15 @@ def axis_basis(axis):
     return (math.cos(a), math.sin(a)), (-math.sin(a), math.cos(a))
 
 
+def line_point(sp, at):
+    """A point of a ring (`ring`, `angle`) or of an axis (`axis`, `s`), and the
+    unit vector across the line there."""
+    if "ring" in at:
+        a = math.radians(float(at["angle"]))
+        return polar(sp.centre, sp.ring(at["ring"]), float(at["angle"])), (math.cos(a), math.sin(a))
+    return axis_point(sp.axis(at["axis"]), 0.0, float(at["s"])), axis_basis(sp.axis(at["axis"]))[1]
+
+
 def axis_point(axis, n, s):
     d, nrm = axis_basis(axis)
     o = axis["origin"]
@@ -451,10 +460,37 @@ def label_default(sp, st):
     return d
 
 
+def label_font(sp, st):
+    """The type a station's title is set in: the font its corridor names, a key
+    of `constants.fonts`, or the primary one."""
+    return sp.const["fonts"][sp.corridor(st["corridor"]).get("font", "primary")]
+
+
+def halo_attrs(sp, st):
+    """A paper-coloured outline under the letters of a corridor or a station
+    with `halo`, its stroke width, for names that cross other ink."""
+    width = st.get("halo", sp.corridor(st["corridor"]).get("halo"))
+    if not width:
+        return []
+    return [("stroke", sp.const["colours"]["paper"]), ("stroke-width", fmt(width)),
+            ("stroke-linejoin", "round"), ("paint-order", "stroke")]
+
+
+def label_baseline_dy(sp, st):
+    """Half the cap height of the station's title font, which centres the caps
+    on the label's base point."""
+    return float(label_font(sp, st).get("baseline_dy", sp.const["label"]["baseline_dy"]))
+
+
+def line_width(sp, line, key):
+    """A line's own `stroke_width` or `casing_width`, or the one all lines share."""
+    return float(line.get(key, sp.const["line"][key]))
+
+
 def label_lines(sp, st, wrap_dy):
     """Every line of a label as (text, size_px, weight, dy), `dy` the advance
     from the previous line and 0 for the first."""
-    prim = sp.const["fonts"]["primary"]
+    prim = label_font(sp, st)
     sec = sp.const["fonts"]["secondary"]
     lines = [(part, prim["size_px"], prim["weight"], 0.0 if i == 0 else wrap_dy)
              for i, part in enumerate(st["label"]["title"])]
@@ -534,8 +570,11 @@ def marker_outer_r(sp, st):
         return float(c["r"]) + float(c["stroke_width"]) / 2.0
     if marker == "capsule":
         return float(cst["capsule"]["casing_stroke_width"]) / 2.0
-    c = cst["station_dot"]
-    return float(c["r"]) + float(c["stroke_width"]) / 2.0
+    c = cst["minor_dot" if marker == "minor" else "station_dot"]
+    edge = float(c["r"]) + float(c["stroke_width"]) / 2.0
+    if "ear" in c:
+        edge = max(edge, (float(c["ear"]["length"]) + float(c["ear"]["stroke_width"])) / 2.0)
+    return edge
 
 
 def band_offsets(sp, st, placed):
@@ -569,7 +608,7 @@ def obstruction_extent(sp, st, placed, perp, nsign, p0):
     marker = ((ex[0] - p0[0]) * w[0] + (ex[1] - p0[1]) * w[1]
               + marker_outer_r(sp, st))
     band = (max(nsign * o for o in band_offsets(sp, st, placed))
-            + float(sp.const["line"]["casing_width"]) / 2.0)
+            + max(line_width(sp, sp.line(lid), "casing_width") for lid in st["lines"]) / 2.0)
     return max(marker, band)
 
 
@@ -790,13 +829,13 @@ def label_placement(sp, st, placed):
     nsign = (1.0 if side == "right" else -1.0) * (1.0 if pu > 0 else -1.0)
     p0 = label_origin(sp, st, placed, perp, nsign)
     ds = float(d.get("ds", 0.0))
-    wrap = float(d.get("wrap_dy", sp.const["fonts"]["primary"]["wrap_dy"]))
+    wrap = float(d.get("wrap_dy", label_font(sp, st)["wrap_dy"]))
     extra = label_extra(sp, st, wrap)
     lift = extra / 2.0
-    dv = float(sp.const["label"]["baseline_dy"]) - lift
+    dv = label_baseline_dy(sp, st) - lift
     gap = float(d.get("distance", sp.const["label"]["distance"]))
     ext = obstruction_extent(sp, st, placed, perp, nsign, p0)
-    half = float(sp.const["label"]["baseline_dy"]) + lift
+    half = label_baseline_dy(sp, st) + lift
     # `distance` is the white paper between the ink and the LEADING EDGE of the
     # block, not between the ink and the base point. Centring puts the
     # block's optical centre on the base point, so that edge sits `half` back
@@ -863,25 +902,89 @@ def label_placement(sp, st, placed):
     }
 
 
+CONNECTION_PLACES = ("left", "right", "bottom")
+
+
+def connection(sp, st):
+    """The station's entry in `connections.items`, or None."""
+    return next((item for item in sp.data["connections"]["items"]
+                 if item["station"] == st["id"]), None)
+
+
+def connection_place(sp, st, lp):
+    """Where a station's connection badges stand at its label: in a row at the
+    `bottom` of the block, which is the default, or in the line of type, `left`
+    or `right` of the name, where the item's `place` says so."""
+    item = connection(sp, st)
+    place = item.get("place", "bottom")
+    if place not in CONNECTION_PLACES:
+        raise SpecError("%s: connection place %r is not one of %s"
+                        % (st["id"], place, list(CONNECTION_PLACES)))
+    return place
+
+
+def inline_services(sp, st):
+    """The services whose badges are set in the station's own label line."""
+    item = connection(sp, st)
+    if not item or item.get("place", "bottom") == "bottom":
+        return []
+    return item["services"]
+
+
+def badge_glyphs(sp, key):
+    """A connection badge in the form of a station mark, so it can be set in a
+    label line: a bar of the font's filled squares in the service's colour, as
+    wide as the drawn badge, and the service's name drawn back over its middle.
+    Adjacent squares are stepped so that their strokes join into one bar."""
+    con = sp.data["connections"]
+    service, inline = con["services"][key], con["inline"]
+    box = inline["box"]
+    size, stroke = float(box["size_px"]), float(box["stroke_width"])
+    advance = float(inline["box_advance_em"]) * size
+    ink = [float(v) * size for v in inline["box_ink_em"]]
+    left = stroke / 2.0 - ink[0]
+    solo = ink[1] - ink[0] + stroke
+    width, text_width = float(service["width"]), float(service["text_width"])
+    count = max(math.ceil(width / solo), 2)
+    return {
+        "text": service["text"], "size_px": con["font"]["size_px"],
+        "fill": service.get("text_fill", con["font"]["fill"]),
+        "box": {"text": box["text"], "size_px": size, "fill": service["fill"],
+                "stroke_width": stroke, "count": count,
+                "step_dx": (width - solo) / (count - 1) - advance},
+        "overlay_dx": -left + (width - text_width) / 2.0 - (width - solo + advance),
+        "lead_dx": left, "tail_dx": (width - text_width) / 2.0,
+        "rise": float(inline["rise"]),
+    }
+
+
 def marks_advance(sp, st):
-    """Room the station's inline marks take at the end of their label line."""
-    return len(st.get("marks", [])) * float(sp.const["station_marks"]["advance"])
+    """Room the station's inline marks and badges take at the end of their
+    label line."""
+    cst, con = sp.const["station_marks"], sp.data["connections"]
+    return (len(st.get("marks", [])) * float(cst["advance"])
+            + sum(float(con["services"][key]["width"]) + float(cst["gap"]) + 1.0
+                  for key in inline_services(sp, st)))
 
 
-def mark_tspans(st, key, mark, dx):
-    """One station feature mark (parking, hospital) as inline <tspan>s.
+def mark_tspans(st, key, mark, dx, prefix="mark", dy=0.0):
+    """One station feature mark (parking, hospital) or connection badge as
+    inline <tspan>s.
 
     A mark is a glyph of the label's own text run, so the renderer sets it
     against the name with the font it actually has - no width estimate comes
     into it - and on a <textPath> it follows the same orbit. A mark with a
     `box` is two glyphs: the box, a filled square of the same font, and the
-    letter drawn back over it by a negative dx. `features` sets the letter's
-    OpenType features.
+    letter drawn back over it by a negative dx. A box with a `count` is that
+    many squares, `step_dx` apart. `features` sets the letter's OpenType
+    features, and `rise` lifts the letter off the baseline; the caller owes the
+    same `dy` back to whatever follows.
     """
-    def tspan(glyph, shift, first):
+    def tspan(glyph, shift, first, drop=0.0):
         return "<tspan" + attrs([
-            ("id", "mark-%s-%s" % (st["id"], key) if first else None),
+            ("id", "%s-%s-%s" % (prefix, st["id"], key) if first else None),
             ("dx", fmt(shift) if shift else None),
+            ("dy", fmt(drop) if drop else None),
             ("font-size", "%spx" % fmt(glyph["size_px"])), ("font-weight", "700"),
             ("fill", glyph["fill"]),
             ("stroke", glyph["fill"] if "stroke_width" in glyph else "none"),
@@ -890,28 +993,42 @@ def mark_tspans(st, key, mark, dx):
             ("style", "font-feature-settings:%s" % glyph["features"] if "features" in glyph else None),
         ]) + ">" + esc(glyph["text"]) + "</tspan>"
     if "box" not in mark:
-        return tspan(mark, dx, True)
-    return tspan(mark["box"], dx, True) + tspan(mark, mark["overlay_dx"], False)
+        return tspan(mark, dx, True, dy)
+    box = mark["box"]
+    boxes = tspan(box, dx, True, dy) + "".join(
+        tspan(box, box["step_dx"], False) for _ in range(box.get("count", 1) - 1))
+    return boxes + tspan(mark, mark["overlay_dx"], False, -mark.get("rise", 0.0))
 
 
 def marked_line(sp, st, lp, line, part):
     """One label line's content: its text, with the station's marks after it -
     or before it when the label is end-anchored, so the marks always sit at the
-    end of the name away from the station."""
+    end of the name away from the station - and its inline connection badges
+    beyond the marks, or on the side their `place` names."""
     cst = sp.const["station_marks"]
-    keys = st.get("marks", []) if line == st.get("marks_line", 0) else []
-    if not keys:
+    if line != st.get("marks_line", 0):
         return esc(part)
-    run = [None] + keys if lp["align"] != "end" else keys[::-1] + [None]
-    out, owed = [], 0.0
-    for i, key in enumerate(run):
-        mark = cst["marks"][key] if key else {}
+    marks = [("mark", key, cst["marks"][key]) for key in st.get("marks", [])]
+    badges = [("connection", key, badge_glyphs(sp, key)) for key in inline_services(sp, st)]
+    if not marks and not badges:
+        return esc(part)
+    before, after = (marks[::-1], []) if lp["align"] == "end" else ([], marks)
+    if badges and connection_place(sp, st, lp) == "left":
+        before = badges + before
+    else:
+        after = after + badges
+    out, owed, drop = [], 0.0, 0.0
+    for i, item in enumerate(before + [None] + after):
+        mark = item[2] if item else {}
         dx = float(cst["gap"]) + owed + float(mark.get("lead_dx", 0.0)) if i else 0.0
-        if key:
-            out.append(mark_tspans(st, key, mark, dx))
+        if item:
+            out.append(mark_tspans(st, item[1], mark, dx, item[0], drop))
+        elif i:
+            out.append("<tspan" + attrs([("dx", fmt(dx)), ("dy", fmt(drop) if drop else None)])
+                       + ">" + esc(part) + "</tspan>")
         else:
-            out.append('<tspan dx="%s">%s</tspan>' % (fmt(dx), esc(part)) if i else esc(part))
-        owed = float(mark.get("tail_dx", 0.0))
+            out.append(esc(part))
+        owed, drop = float(mark.get("tail_dx", 0.0)), float(mark.get("rise", 0.0))
     return "".join(out)
 
 
@@ -1109,6 +1226,12 @@ def emit_geo_shape(sp, o, item, discs=None):
         o.line("<path" + attrs([
             ("id", item["id"]), ("d", wedge_d(sp, item)), ("fill", item["fill"]),
         ]) + " />")
+    elif shape == "polygon":
+        o.line("<path" + attrs([
+            ("id", item["id"]),
+            ("d", "M " + " L ".join(pt(p) for p in item["points"]) + " Z"),
+            ("fill", item["fill"]),
+        ]) + " />")
     elif shape == "trail":
         o.line("<path" + attrs([
             ("id", item["id"]),
@@ -1132,18 +1255,25 @@ def open_geo_labels(o, group_id, font):
 
 
 def emit_geo_ring_label(sp, o, lab, r, font):
-    """Type on a ring, its caps centred `offset` outside radius `r` at `angle`.
-    It reads left to right: clockwise with its top outward in the map's upper
-    half, counter-clockwise with its top toward the centre in the lower half."""
+    """Type on a ring, its caps centred `offset` outside radius `r`. It reads
+    left to right: clockwise with its top outward in the map's upper half,
+    counter-clockwise with its top toward the centre in the lower half. It is
+    centred at `angle`, or with `align` it starts (`start`) or ends (`end`)
+    there, so that the names of a group share an edge on one radius."""
     dy = float(font["baseline_dy"])
     r += float(lab.get("offset", 0.0))
     lower = math.sin(math.radians(float(lab["angle"]))) > 0
-    span = float(lab["half_span"]) * (1 if lower else -1)
-    d = ring_arc_d(sp, r + dy if lower else r - dy, lab["angle"] + span,
-                   lab["angle"] - span, "ccw" if lower else "cw")
+    turn = -1.0 if lower else 1.0
+    align = lab.get("align", "middle")
+    frac = {"start": 0.0, "middle": 0.5, "end": 1.0}[align]
+    span = 2.0 * float(lab["half_span"]) * turn
+    a0 = float(lab["angle"]) - span * frac
+    d = ring_arc_d(sp, r + dy if lower else r - dy, a0, a0 + span, "ccw" if lower else "cw")
     o.line('<defs><path id="%s-arc" d="%s"/></defs>' % (lab["id"], d))
-    o.line('<text id="%s"><textPath href="#%s-arc" startOffset="50%%">%s</textPath></text>'
-           % (lab["id"], lab["id"], esc(lab["text"])))
+    o.line("<text" + attrs([
+        ("id", lab["id"]), ("text-anchor", align if "align" in lab else None),
+    ]) + '><textPath href="#%s-arc" startOffset="%g%%">%s</textPath></text>'
+        % (lab["id"], frac * 100.0, esc(lab["text"])))
 
 
 def emit_geo_label(o, lab, font):
@@ -1161,10 +1291,9 @@ def emit_geo_label(o, lab, font):
         ("transform", "rotate(%s, %s, %s)" % (fmt(lab["rotate"]), x, y)
          if lab["rotate"] else None),
     ]) + ">")
-    for i, part in enumerate(lab["lines"]):
-        o.line("<tspan" + attrs([
-            ("x", x), ("dy", "0" if i == 0 else fmt(wrap)),
-        ]) + ">" + esc(part) + "</tspan>")
+    o.line("".join("<tspan" + attrs([
+        ("x", x), ("dy", "0" if i == 0 else fmt(wrap)),
+    ]) + ">" + esc(part) + "</tspan>" for i, part in enumerate(lab["lines"])))
     o.close("</text>")
 
 
@@ -1211,11 +1340,36 @@ def emit_geo(sp, o, placements):
     for airport in geo["airports"]["items"]:
         o.open('<g id="%s">' % airport["id"])
         emit_geo_shape(sp, o, airport["apron"])
+        code = geo["airports"].get("code") if "code" in airport else None
+        x, y = airport["at"]
         o.line("<path" + attrs([
             ("id", airport["id"] + "-plane"), ("d", plane["d"]), ("fill", plane["fill"]),
-            ("transform", "translate(%s) rotate(%s)"
-             % (pt(airport["at"]), fmt(plane["rotate"]))),
+            ("transform", "translate(%s) rotate(%s)" % (pt((x, y)), fmt(plane["rotate"]))
+             if not code else "translate(%s) rotate(%s) scale(%s)"
+             % (pt((x, y + float(code["plane_dy"]))), fmt(plane["rotate"]),
+                fmt(code["plane_scale"]))),
         ]) + " />")
+        if code:
+            o.line("<text" + attrs([
+                ("id", airport["id"] + "-code"), ("x", fmt(x)),
+                ("y", fmt(y + float(code["baseline_dy"]))), ("text-anchor", "middle"),
+                ("font-size", "%spx" % fmt(code["size_px"])),
+                ("font-weight", str(code["weight"])), ("fill", code["fill"]),
+                ("letter-spacing", code.get("letter_spacing")),
+            ]) + ">%s</text>" % esc(airport["code"]))
+        if "connections" in airport:
+            cx, cy = airport["connections"]["at"]
+            legend_symbol(sp, o, {"kind": "connections",
+                                  "services": airport["connections"]["services"]}, cx, cy)
+        if "label" in airport:
+            font = sp.const["fonts"][geo["airports"]["label_font"]]
+            o.open("<g" + attrs([
+                ("font-size", "%spx" % fmt(font["size_px"])), ("font-weight", str(font["weight"])),
+                ("fill", font["fill"]),
+                ("text-anchor", airport["label"].get("align", "middle")),
+            ]) + ">")
+            emit_geo_label(o, airport["label"], font)
+            o.close("</g>")
         o.close("</g>")
 
     belt = geo["beltway"]
@@ -1224,6 +1378,24 @@ def emit_geo(sp, o, placements):
         ("r", fmt(sp.ring(belt["ring"]))), ("fill", belt["fill"]),
         ("stroke", belt["stroke"]), ("stroke-width", fmt(belt["stroke_width"])),
     ]) + " />")
+    shield = belt.get("shields", {})
+    for i, at in enumerate(shield.get("at", [])):
+        p = polar(sp.centre, sp.ring(belt["ring"]) + float(at["offset"]), float(at["angle"]))
+        o.open('<g id="geo-beltway-shield-%d" transform="translate(%s) rotate(%s) scale(%s)">' % (
+            i + 1, pt(p), fmt(at["rotate"]), fmt(shield["scale"])))
+        for part in shield["parts"]:
+            o.line("<path" + attrs([
+                ("d", part["d"]), ("fill", part["fill"]), ("stroke", part.get("stroke")),
+                ("stroke-width", fmt(part["stroke_width"]) if "stroke_width" in part else None),
+                ("paint-order", "stroke" if "stroke" in part else None),
+            ]) + " />")
+        text = shield["text"]
+        o.line("<text" + attrs([
+            ("y", fmt(text["dy"])), ("text-anchor", "middle"),
+            ("font-size", "%spx" % fmt(text["size_px"])), ("font-weight", str(text["weight"])),
+            ("fill", text["fill"]), ("transform", "scale(%s 1)" % fmt(text["squeeze"])),
+        ]) + ">%s</text>" % esc(text["text"]))
+        o.close("</g>")
 
     marks = geo["landmarks"]
     o.open("<g" + attrs([
@@ -1235,7 +1407,12 @@ def emit_geo(sp, o, placements):
         o.line("<path" + attrs([
             ("id", item["id"]), ("d", shapes[item.get("like", item["id"])]),
             ("fill", item.get("fill")), ("fill-rule", item.get("fill_rule")),
+            ("stroke", item["halo"]["stroke"] if "halo" in item else None),
+            ("stroke-width", fmt(item["halo"]["stroke_width"]) if "halo" in item else None),
+            ("stroke-linejoin", "round" if "halo" in item else None),
+            ("paint-order", "stroke" if "halo" in item else None),
             ("transform", "translate(%s)" % pt(item["at"])
+             + (" rotate(%s)" % fmt(item["rotate"]) if "rotate" in item else "")
              + (" scale(%s)" % fmt(item["scale"]) if "scale" in item else "")),
         ]) + " />")
     o.close("</g>")
@@ -1250,7 +1427,8 @@ def emit_geo(sp, o, placements):
     font = sp.const["fonts"]["water"]
     open_geo_labels(o, "geo-labels-water", font)
     pot = geo["water"]["potomac"]
-    for lab in (pot["label"], pot["tidal_basin"]["label"], pot["south_arm"]["label"]):
+    for lab in (pot["label"], pot["nw_arm"]["label"], pot["tidal_basin"]["label"],
+                pot["south_arm"]["label"]):
         emit_geo_label(o, lab, font)
     emit_geo_ring_label(sp, o, ana["label"], ar, font)
     o.close("</g>")
@@ -1481,13 +1659,51 @@ def emit_lines(sp, o, resolved):
     for lid in draw_order(sp):
         ln = sp.line(lid)
         d = resolved[lid]["d"]
-        o.line("<path" + attrs([
-            ("id", "casing-line-" + lid), ("d", d),
-            ("stroke", c["casing_colour"]), ("stroke-width", fmt(c["casing_width"])),
-        ]) + " />")
+        if ln.get("casing", True):
+            o.line("<path" + attrs([
+                ("id", "casing-line-" + lid), ("d", d),
+                ("stroke", c["casing_colour"]),
+                ("stroke-width", fmt(line_width(sp, ln, "casing_width"))),
+            ]) + " />")
         o.line("<path" + attrs([
             ("id", "line-" + lid), ("d", d), ("stroke", ln["colour"]),
+            ("stroke-width", fmt(ln["stroke_width"]) if "stroke_width" in ln else None),
+            ("stroke-dasharray", ln.get("dasharray")), ("stroke-linecap", ln.get("linecap")),
         ]) + " />")
+        ticks = ln.get("ticks", {})
+        for i, at in enumerate(ticks.get("at", [])):
+            p, across = line_point(sp, at)
+            half = float(ticks["length"]) / 2.0
+            o.line("<path" + attrs([
+                ("id", "stop-%s-%d" % (lid, i + 1)),
+                ("d", "M %s L %s" % (pt((p[0] - across[0] * half, p[1] - across[1] * half)),
+                                     pt((p[0] + across[0] * half, p[1] + across[1] * half)))),
+                ("stroke", ln["colour"]), ("stroke-width", fmt(ticks["stroke_width"])),
+                ("stroke-linecap", "butt"),
+            ]) + " />")
+            if "label" in at:
+                font, lab = sp.const["fonts"][ticks["label_font"]], at["label"]
+                o.line("<text" + attrs([
+                    ("id", "stop-name-%s-%d" % (lid, i + 1)),
+                    ("x", fmt(p[0] + float(lab["dx"]))),
+                    ("y", fmt(p[1] + float(lab["dy"]) + float(font["baseline_dy"]))),
+                    ("text-anchor", lab.get("align", "start")),
+                    ("font-size", "%spx" % fmt(font["size_px"])),
+                    ("font-weight", str(font["weight"])), ("fill", font["fill"]),
+                    ("stroke", "none"),
+                    ("transform", "rotate(%s %s)" % (fmt(lab["rotate"]), pt(
+                        (p[0] + float(lab["dx"]), p[1] + float(lab["dy"]))))
+                     if lab.get("rotate") else None),
+                ]) + ">%s</text>" % esc(at["name"]))
+            if "connections" in at:
+                badges = at["connections"]
+                legend_symbol(sp, o, dict(badges, kind="connections"),
+                              p[0] + float(badges["dx"]), p[1] + float(badges["dy"]))
+        for at in ln.get("badges", []):
+            p = line_point(sp, at)[0]
+            o.open('<g transform="rotate(%s %s)">' % (fmt(at["rotate"]), pt(p)))
+            legend_symbol(sp, o, dict(at, kind="connections"), p[0], p[1])
+            o.close("</g>")
         for section in service["sections"]:
             if section["line"] == lid:
                 o.line("<path" + attrs([
@@ -1528,6 +1744,9 @@ def emit_marker(sp, o, st, placed):
                          ("data-cor", st["corridor"])]) + ">")
     if st.get("tick"):
         dx, dy = tick_direction(sp, placed)
+        if "tick_angle" in st:
+            turn = math.radians(float(st["tick_angle"]))
+            dx, dy = math.cos(turn), math.sin(turn)
         half = float(cst["station_tick"]["length"]) / 2.0
         p = placed["dots"][0]["p"]
         a = (p[0] - dx * half, p[1] - dy * half)
@@ -1539,9 +1758,21 @@ def emit_marker(sp, o, st, placed):
             ("stroke-linecap", cst["station_tick"]["linecap"]),
         ]) + " />")
 
-    if marker == "dot":
-        c = cst["station_dot"]
-        circle(o, "dot-" + sid, placed["dots"][0]["p"], c["r"], c["fill"],
+    if marker in ("dot", "minor"):
+        c = cst["station_dot" if marker == "dot" else "minor_dot"]
+        if "ear" in c:
+            dx, dy = tick_direction(sp, placed)
+            half = float(c["ear"]["length"]) / 2.0
+            p = placed["dots"][0]["p"]
+            o.line("<path" + attrs([
+                ("id", "ear-" + sid),
+                ("d", "M %s L %s" % (pt((p[0] - dx * half, p[1] - dy * half)),
+                                     pt((p[0] + dx * half, p[1] + dy * half)))),
+                ("fill", "none"), ("stroke", c["ear"]["stroke"]),
+                ("stroke-width", fmt(c["ear"]["stroke_width"])),
+                ("stroke-linecap", c["ear"]["linecap"]),
+            ]) + " />")
+        circle(o, marker + "-" + sid, placed["dots"][0]["p"], c["r"], c["fill"],
                c["stroke"], c["stroke_width"])
     elif marker == "terminal":
         c = cst["terminal_dot"]
@@ -1591,7 +1822,7 @@ def emit_marker(sp, o, st, placed):
 
 
 def emit_stations(sp, o, placements):
-    groups = [("layer-stations", ("dot", "terminal"), "stops"),
+    groups = [("layer-stations", ("dot", "terminal", "minor"), "stops"),
               ("layer-interchanges", ("interchange", "capsule"), "ix")]
     for lid, markers, prefix in groups:
         o.open('<g id="%s" data-name="%s">' % (lid, esc(layer_name(sp, lid))))
@@ -1620,8 +1851,14 @@ def emit_straight_label(sp, o, st, lp, shared):
     would buy nothing but a renderer dependency (librsvg drops textPath). The
     two modes differ only in where `rotate` came from, which label_placement
     has already settled.
+
+    The <tspan>s are written with nothing between them: white space there is a
+    space character at the end of the line before it, and it moves an end- or
+    middle-anchored line off its edge by its width.
     """
     sec = sp.const["fonts"]["secondary"]
+    font = label_font(sp, st)
+    own = font is not sp.const["fonts"]["primary"]
     x, y = fmt(lp["x"]), fmt(lp["y"])
     rot = None
     if abs(lp["rotate"]) > 1e-9:
@@ -1629,19 +1866,23 @@ def emit_straight_label(sp, o, st, lp, shared):
     o.open("<text" + attrs([
         ("id", "label-" + st["id"]), ("x", x), ("y", y),
         ("text-anchor", None if shared else lp["align"]), ("transform", rot),
+        ("font-size", "%spx" % fmt(font["size_px"]) if own else None),
+        ("font-weight", str(font["weight"]) if own else None),
         ("data-st", st["name"]), ("data-cor", st["corridor"]),
-    ]) + ">")
+    ] + halo_attrs(sp, st)) + ">")
+    lines = []
     for i, part in enumerate(st["label"]["title"]):
-        o.line("<tspan" + attrs([
+        lines.append("<tspan" + attrs([
             ("x", x), ("dy", "0" if i == 0 else fmt(lp["wrap_dy"])),
         ]) + ">" + marked_line(sp, st, lp, i, part) + "</tspan>")
     for i, part in enumerate(st["label"].get("subtitle", [])):
         dy = sec["first_dy"] if i == 0 else sec["subsequent_dy"]
-        o.line("<tspan" + attrs([
+        lines.append("<tspan" + attrs([
             ("x", x), ("dy", fmt(dy)),
             ("font-size", "%spx" % fmt(sec["size_px"])),
             ("font-weight", str(sec["weight"])),
         ]) + ">" + esc(part) + "</tspan>")
+    o.line("".join(lines))
     o.close("</text>")
 
 
@@ -1654,7 +1895,7 @@ def emit_curved_label(sp, o, st, lp, arcs, shared):
         ("id", "label-" + st["id"]),
         ("text-anchor", None if shared else lp["align"]),
         ("data-st", st["name"]), ("data-cor", st["corridor"]),
-    ]) + ">")
+    ] + halo_attrs(sp, st)) + ">")
     for i, arc in enumerate(arcs):
         second = arc["size"] != prim["size_px"] or arc["weight"] != prim["weight"]
         o.line("<text" + attrs([
@@ -1669,8 +1910,8 @@ def emit_curved_label(sp, o, st, lp, arcs, shared):
 def emit_labels(sp, o, placements):
     prim = sp.const["fonts"]["primary"]
     groups = [(cid, [st for st in sp.data["stations"] if st["corridor"] == cid])
-              for cid in corridor_order(sp, ("dot", "terminal", "interchange",
-                                             "capsule"))]
+              for cid in corridor_order(sp, ("dot", "terminal", "minor",
+                                             "interchange", "capsule"))]
     placed = {st["id"]: label_placement(sp, st, placements[st["id"]])
               for _, group in groups for st in group}
     arcs = {st["id"]: label_arcs(sp, st, placed[st["id"]])
@@ -1699,13 +1940,15 @@ def emit_labels(sp, o, placements):
             else:
                 emit_straight_label(sp, o, st, lp, shared)
         o.close("</g>")
-    emit_connections(sp, o)
+    emit_connections(sp, o, placed)
     o.close("</g>")
 
 
-def emit_connections(sp, o):
-    """Rail-connection badges: one rounded rect per service with its name in
-    it, laid out as a row or a column centred on the item's `at`."""
+def emit_connections(sp, o, placed):
+    """The connection badges that stand at the BOTTOM of their station's label:
+    one rounded rect per service with its name in it, in a row under the last
+    line of type, on the edge the label is anchored to and turned with it. The
+    badges that stand in a label's line are part of that line (`marked_line`)."""
     con = sp.data["connections"]
     font, badge = con["font"], con["badge"]
     height, gap = float(badge["height"]), float(badge["gap"])
@@ -1713,29 +1956,33 @@ def emit_connections(sp, o):
         ("id", "connections"), ("font-size", "%spx" % fmt(font["size_px"])),
         ("font-weight", str(font["weight"])), ("text-anchor", "middle"),
     ]) + ">")
-    for item in con["items"]:
-        column = item["layout"] == "column"
-        services = [con["services"][key] for key in item["services"]]
-        sizes = [height if column else float(s["width"]) for s in services]
-        widest = max(float(s["width"]) for s in services)
-        offset = -(sum(sizes) + gap * (len(sizes) - 1)) / 2.0
-        for key, service, size in zip(item["services"], services, sizes):
-            along = offset + size / 2.0
-            width = float(service["width"])
-            shift = {"start": -1.0, "middle": 0.0, "end": 1.0}[item.get("align", "middle")]
-            cx = item["at"][0] + (shift * (widest - width) / 2.0 if column else along)
-            cy = item["at"][1] + (along if column else 0.0)
+    for st in sp.data["stations"]:
+        item = connection(sp, st)
+        lp = placed[st["id"]]
+        if not item or connection_place(sp, st, lp) != "bottom":
+            continue
+        point, down = label_baselines(sp, st, lp)[-1]
+        widths = [float(con["services"][key]["width"]) for key in item["services"]]
+        frac = {"start": 0.0, "middle": 0.5, "end": 1.0}[lp["align"]]
+        s = -frac * (sum(widths) + gap * (len(widths) - 1)) + float(item.get("shift", 0.0))
+        for key, width in zip(item["services"], widths):
+            service = con["services"][key]
+            a, b, c = (along_label(sp, lp, point, down, s + k * width, -float(badge["below_dy"]))
+                       for k in (0.0, 1.0, 0.5))
+            angle = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+            turn = "rotate(%s %s)" % (fmt(angle), pt(c)) if abs(angle) > 1e-9 else None
             o.line("<rect" + attrs([
-                ("id", "connection-%s-%s" % (item["station"], key)),
-                ("x", fmt(cx - width / 2.0)), ("y", fmt(cy - height / 2.0)),
+                ("id", "connection-%s-%s" % (st["id"], key)),
+                ("x", fmt(c[0] - width / 2.0)), ("y", fmt(c[1] - height / 2.0)),
                 ("width", fmt(width)), ("height", fmt(height)),
-                ("rx", fmt(badge["rx"])), ("fill", service["fill"]),
+                ("rx", fmt(badge["rx"])), ("fill", item.get("fill", {}).get(key, service["fill"])),
+                ("transform", turn),
             ]) + " />")
             o.line("<text" + attrs([
-                ("x", fmt(cx)), ("y", fmt(cy + float(font["baseline_dy"]))),
-                ("fill", font["fill"]),
+                ("x", fmt(c[0])), ("y", fmt(c[1] + float(font["baseline_dy"]))),
+                ("fill", service.get("text_fill", font["fill"])), ("transform", turn),
             ]) + ">%s</text>" % esc(service["text"]))
-            offset += size + gap
+            s += width + gap
     o.close("</g>")
 
 
@@ -1767,7 +2014,7 @@ def legend_symbol_half(sp, row):
     if kind == "airport":
         apron = sp.data["geo"]["airports"]["items"][0]["apron"]
         return float(apron["width"]) * float(row["scale"]) / 2.0
-    if kind in ("swatch", "service"):
+    if kind in ("swatch", "service", "line"):
         return float(row["width"]) / 2.0
     if kind == "landmarks":
         return (float(row["step"]) * (len(row["items"]) - 1) + 22.0 * float(row["scale"])) / 2.0
@@ -1797,7 +2044,9 @@ def legend_symbol(sp, o, row, cx, cy):
     elif kind == "connections":
         con = sp.data["connections"]
         font, badge = con["font"], con["badge"]
-        services = [con["services"][key] for key in row["services"]]
+        fills = row.get("fill", {})
+        services = [dict(con["services"][key], fill=fills.get(key, con["services"][key]["fill"]))
+                    for key in row["services"]]
         gap, height = float(badge["gap"]), float(badge["height"])
         x = cx - (sum(float(s["width"]) for s in services) + gap * (len(services) - 1)) / 2.0
         for service in services:
@@ -1810,7 +2059,7 @@ def legend_symbol(sp, o, row, cx, cy):
                 ("x", fmt(x + width / 2.0)), ("y", fmt(cy + float(font["baseline_dy"]))),
                 ("font-size", "%spx" % fmt(font["size_px"])),
                 ("font-weight", str(font["weight"])), ("text-anchor", "middle"),
-                ("fill", font["fill"]),
+                ("fill", service.get("text_fill", font["fill"])),
             ]) + ">%s</text>" % esc(service["text"]))
             x += width + gap
     elif kind == "airport":
@@ -1833,6 +2082,23 @@ def legend_symbol(sp, o, row, cx, cy):
             ("x", fmt(cx - w / 2.0)), ("y", fmt(cy - h / 2.0)), ("width", fmt(w)),
             ("height", fmt(h)), ("rx", fmt(row["rx"])), ("fill", row["fill"]),
         ]) + " />")
+        if "dash" in row:
+            dash = row["dash"]
+            o.line("<path" + attrs([
+                ("d", "M %s H %s" % (pt((cx - w / 2.0, cy)), fmt(cx + w / 2.0))),
+                ("stroke", dash["stroke"]), ("stroke-width", fmt(dash["stroke_width"])),
+                ("stroke-dasharray", dash["dasharray"]),
+                ("stroke-dashoffset", fmt(dash["offset"]) if "offset" in dash else None),
+            ]) + " />")
+    elif kind == "line":
+        half, top = float(row["width"]) / 2.0, cy - float(row["pitch"]) * (len(row["lines"]) - 1) / 2.0
+        for i, ln in enumerate(sp.line(lid) for lid in row["lines"]):
+            o.line("<path" + attrs([
+                ("d", "M %s H %s" % (pt((cx - half, top + i * float(row["pitch"]))), fmt(cx + half))),
+                ("stroke", ln["colour"]),
+                ("stroke-width", fmt(line_width(sp, ln, "stroke_width"))),
+                ("stroke-dasharray", ln.get("dasharray")), ("stroke-linecap", ln.get("linecap")),
+            ]) + " />")
     elif kind == "service":
         service, half = sp.data["service_patterns"], float(row["width"]) / 2.0
         d = "M %s H %s" % (pt((cx - half, cy)), fmt(cx + half))
@@ -1902,9 +2168,10 @@ def emit_legend(sp, o):
     light = set(letter["light_line_colour_keys"])
     o.open('<g id="legend-lines">')
     x, y = key["at"]
+    row_step = float(key.get("row_height", step))
     legend_text(o, fonts["section"], x, y + float(key.get("heading_dy", 0.0)), key["heading"])
     for i, row in enumerate(key["rows"]):
-        cy = y + (i + 1) * step
+        cy = y + (i + 1) * row_step
         line = sp.line(row["line"])
         circle(o, None, (x + float(key["dot_dx"]), cy), key["dot_r"], line["colour"],
                dot["stroke"], key["dot_stroke_width"])
@@ -1918,9 +2185,14 @@ def emit_legend(sp, o):
         ]) + ">%s</text>" % esc(row["letter"]))
         legend_text(o, fonts["heading"], x + float(key["name_dx"]), cy, row["name"])
         legend_text(o, fonts["text"], x + float(key["ends_dx"]), cy, row["ends"])
-    cy = y + (len(key["rows"]) + 1) * step
-    legend_symbol(sp, o, key["service"], x + float(key["service"]["width"]) / 2.0, cy)
-    legend_text(o, fonts["text"], x + float(key["name_dx"]), cy, key["service"]["text"])
+    for i, row in enumerate([key["service"]] + key.get("samples", [])):
+        cy = y + (len(key["rows"]) + 1 + i) * row_step
+        legend_symbol(sp, o, row, x + float(row["width"]) / 2.0, cy)
+        if "name" in row:
+            legend_text(o, fonts["heading"], x + float(key["name_dx"]), cy, row["name"])
+            legend_text(o, fonts["text"], x + float(key["ends_dx"]), cy, row["ends"])
+        else:
+            legend_text(o, fonts["text"], x + float(key["ends_dx"]), cy, row["text"])
     o.close("</g>")
 
     key = leg["symbols"]
@@ -2059,8 +2331,11 @@ def check_grid(sp, ck):
              sp.const["geo"]["trail_stroke_width"] / 2.0
              + sp.const["geo"]["trail_sliver"], 1e-9, "sliver rule broken")
     pitch = sp.const["trunk"]["slot_pitch"]
-    ck.close(sp.rings["yellow"]["r"] - sp.rings["core-orange"]["r"], pitch, 1e-9,
-             "yellow != core-orange + slot pitch")
+    group = sp.const["trunk"]["group_pitch"]
+    ck.close(sp.rings["yellow"]["r"] - sp.rings["core-orange"]["r"], group, 1e-9,
+             "yellow != core-orange + group pitch")
+    ck.close(sp.rings["core-blue"]["r"] - sp.rings["red-inner"]["r"], group, 1e-9,
+             "red-inner != core-blue - group pitch")
     ck.close(sp.rings["green"]["r"] - sp.rings["yellow"]["r"], pitch, 1e-9,
              "Yellow/Green pitch != slot pitch")
     ck.ok(sp.rings["yellow"]["r"] < sp.rings["green"]["r"],
@@ -2126,6 +2401,7 @@ def check_labels(sp, ck, placements):
                   + lab.get("subtitle", [])),
               "%s: label lines must be non-empty strings" % st["id"])
         lp = label_placement(sp, st, placements[st["id"]])
+        cap_half = label_baseline_dy(sp, st)
         if abs(lp["outward"]) < eps:
             ck.ok(lp["declared_side"],
                   "%s: rule A is degenerate here (|outward| = %.4f < %g) so the "
@@ -2146,7 +2422,7 @@ def check_labels(sp, ck, placements):
                (rows[0][0][1] + rows[-1][0][1]) / 2.0)
         v = rows[0][1]
         off = ((mid[0] - lp["base"][0]) * v[0] + (mid[1] - lp["base"][1]) * v[1])
-        if abs(off - baseline_dy) > 1e-6:
+        if abs(off - cap_half) > 1e-6:
             uncentred.append((st["id"], lp["curve"], off))
         # ... and where the words sit, read off those same baselines. The aimed
         # point is the FIRST line's optical centre -- `baseline_dy` up from its
@@ -2164,8 +2440,8 @@ def check_labels(sp, ck, placements):
         # checked.
         if lp["aim"] is not None:
             w = lp["along"] if lp["align"] == "start" else v
-            bx = rows[0][0][0] - baseline_dy * v[0]
-            by = rows[0][0][1] - baseline_dy * v[1]
+            bx = rows[0][0][0] - cap_half * v[0]
+            by = rows[0][0][1] - cap_half * v[1]
             miss = (bx - lp["aim"][0]) * w[0] + (by - lp["aim"][1]) * w[1]
             hand = lp["ds"] * (lp["along"][0] * w[0] + lp["along"][1] * w[1])
             if abs(miss - hand) > 1e-9:
@@ -2178,8 +2454,8 @@ def check_labels(sp, ck, placements):
         # the edge the ink sees, and it must sit `distance` clear of the
         # obstruction extent.
         w = (lp["nsign"] * lp["perp"][0], lp["nsign"] * lp["perp"][1])
-        edges = [(rows[0][0][0] - 2.0 * baseline_dy * rows[0][1][0],
-                  rows[0][0][1] - 2.0 * baseline_dy * rows[0][1][1]), rows[-1][0]]
+        edges = [(rows[0][0][0] - 2.0 * cap_half * rows[0][1][0],
+                  rows[0][0][1] - 2.0 * cap_half * rows[0][1][1]), rows[-1][0]]
         lead = min((p[0] - lp["origin"][0]) * w[0]
                    + (p[1] - lp["origin"][1]) * w[1] for p in edges)
         if abs(lead - lp["extent"] - lp["gap"]) > 1e-6:
@@ -2293,6 +2569,7 @@ ELEMENT_COUNTS = (
     ("<tspan> continuation lines", r"<tspan\b"),
     ("station groups", r'<g id="stop-'),
     ("plain dots", r'id="dot-'),
+    ("minor dots", r'id="minor-'),
     ("interchange circles", r'id="interchange-'),
     ("terminal circles", r'id="terminal-(?!letter-)'),
     ("terminal letters", r'id="terminal-letter-'),
