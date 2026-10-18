@@ -273,9 +273,13 @@ def resolve_line(sp, line):
             verts.append(end)
             cur, cur_axis = end, axis_id
         elif kind == "arc":
-            if cur is None:
-                raise SpecError("arc cannot open a path")
             r = sp.ring(seg["ring"])
+            if cur is None:
+                if "angle" not in seg.get("from", {}):
+                    raise SpecError("an arc opens a path only with a `from` angle")
+                cur = polar(sp.centre, r, float(seg["from"]["angle"]))
+                cmds.append("M " + pt(cur))
+                verts.append(cur)
             diag.append(("arc-on-ring", idx,
                          abs(math.dist(cur, sp.centre) - r)))
             t0 = angle_of(sp.centre, cur)
@@ -678,7 +682,7 @@ def aim_degenerate(sp, curve, alng, dwn, align):
     its radial exit. Type reading ACROSS it (`along.reading` -> 0) is set square
     across the corridor, so its `distance` -- which acts along the reading
     direction there -- has already answered where the words start, and its
-    offset carries them nowhere along the corridor to correct: the seven
+    offset carries them nowhere along the corridor to correct: the four
     `outer-green` radial labels, which read across their ring, and Rosslyn and
     Smithsonian on the core arcs; their slide is 0 under either start rule.
     """
@@ -902,7 +906,8 @@ def label_placement(sp, st, placed):
     }
 
 
-CONNECTION_PLACES = ("left", "right", "bottom")
+CONNECTION_PLACES = ("left", "right", "bottom", "top")
+ROW_PLACES = ("bottom", "top")
 
 
 def connection(sp, st):
@@ -913,8 +918,8 @@ def connection(sp, st):
 
 def connection_place(sp, st, lp):
     """Where a station's connection badges stand at its label: in a row at the
-    `bottom` of the block, which is the default, or in the line of type, `left`
-    or `right` of the name, where the item's `place` says so."""
+    `bottom` of the block, which is the default, or at its `top`, or in the line
+    of type, `left` or `right` of the name, where the item's `place` says so."""
     item = connection(sp, st)
     place = item.get("place", "bottom")
     if place not in CONNECTION_PLACES:
@@ -926,7 +931,7 @@ def connection_place(sp, st, lp):
 def inline_services(sp, st):
     """The services whose badges are set in the station's own label line."""
     item = connection(sp, st)
-    if not item or item.get("place", "bottom") == "bottom":
+    if not item or item.get("place", "bottom") in ROW_PLACES:
         return []
     return item["services"]
 
@@ -958,12 +963,18 @@ def badge_glyphs(sp, key):
     }
 
 
+def inline_gap(sp, st):
+    """The gap between the items of a label line: a connection item's own `gap`,
+    or the one all station marks share."""
+    return float((connection(sp, st) or {}).get("gap", sp.const["station_marks"]["gap"]))
+
+
 def marks_advance(sp, st):
     """Room the station's inline marks and badges take at the end of their
     label line."""
     cst, con = sp.const["station_marks"], sp.data["connections"]
     return (len(st.get("marks", [])) * float(cst["advance"])
-            + sum(float(con["services"][key]["width"]) + float(cst["gap"]) + 1.0
+            + sum(float(con["services"][key]["width"]) + inline_gap(sp, st) + 1.0
                   for key in inline_services(sp, st)))
 
 
@@ -1017,10 +1028,17 @@ def marked_line(sp, st, lp, line, part):
         before = badges + before
     else:
         after = after + badges
-    out, owed, drop = [], 0.0, 0.0
+    lower = float((connection(sp, st) or {}).get("badge_dy", 0.0))
+    out, owed, drop, prev = [], 0.0, 0.0, None
     for i, item in enumerate(before + [None] + after):
         mark = item[2] if item else {}
-        dx = float(cst["gap"]) + owed + float(mark.get("lead_dx", 0.0)) if i else 0.0
+        kind = item[0] if item else None
+        if kind == "connection" and prev != "connection":
+            drop += lower
+        elif kind != "connection" and prev == "connection":
+            drop -= lower
+        prev = kind
+        dx = inline_gap(sp, st) + owed + float(mark.get("lead_dx", 0.0)) if i else 0.0
         if item:
             out.append(mark_tspans(st, item[1], mark, dx, item[0], drop))
         elif i:
@@ -1194,6 +1212,18 @@ def ring_arc_d(sp, r, a0, a1, direction, close=None):
     return d
 
 
+def rect_d(item):
+    """A rect as a path whose east corners have their own radii (`east_rx`,
+    `east_ry`), the west ones keeping `rx` and `ry`."""
+    x, y, w, h = (float(item[k]) for k in ("x", "y", "width", "height"))
+    wx, wy, ex, ey = (float(item[k]) for k in ("rx", "ry", "east_rx", "east_ry"))
+    return ("M %s L %s A %s %s 0 0 1 %s L %s A %s %s 0 0 1 %s L %s A %s %s 0 0 1 %s L %s A %s %s 0 0 1 %s Z"
+            % (pt((x + wx, y)), pt((x + w - ex, y)), fmt(ex), fmt(ey), pt((x + w, y + ey)),
+               pt((x + w, y + h - ey)), fmt(ex), fmt(ey), pt((x + w - ex, y + h)),
+               pt((x + wx, y + h)), fmt(wx), fmt(wy), pt((x, y + h - wy)),
+               pt((x, y + wy)), fmt(wx), fmt(wy), pt((x + wx, y))))
+
+
 def emit_geo_shape(sp, o, item, discs=None):
     shape = item["shape"]
     if shape == "rect":
@@ -1211,7 +1241,11 @@ def emit_geo_shape(sp, o, item, discs=None):
             cy = item["y"] + item["height"] / 2.0
             a.append(("transform", "rotate(%s %s %s)"
                       % (fmt(item["rotate"]), fmt(cx), fmt(cy))))
-        o.line("<rect" + attrs(a) + " />")
+        if "east_rx" in item:
+            keep = [kv for kv in a if kv[0] not in ("id", "x", "y", "width", "height", "rx", "ry")]
+            o.line("<path" + attrs([("id", item["id"]), ("d", rect_d(item))] + keep) + " />")
+        else:
+            o.line("<rect" + attrs(a) + " />")
     elif shape == "ring_arc":
         r = sp.ring(item["ring"])
         d = ring_arc_d(sp, r, float(item["from_angle"]), float(item["to_angle"]),
@@ -1278,7 +1312,8 @@ def emit_geo_ring_label(sp, o, lab, r, font):
 
 def emit_geo_label(o, lab, font):
     """Straight geography type: the block of `lines` centred on `at` and turned
-    by `rotate` about it. `size_px` and `letter_spacing` on the label replace the font's."""
+    by `rotate` about it. `size_px` and `letter_spacing` on the label replace the font's;
+    a `halo` is an outline drawn under the letters."""
     a = math.radians(float(lab["rotate"]))
     grow = float(lab.get("size_px", font["size_px"])) / float(font["size_px"])
     wrap = float(font["wrap_dy"]) * grow
@@ -1290,7 +1325,8 @@ def emit_geo_label(o, lab, font):
         ("letter-spacing", lab.get("letter_spacing")),
         ("transform", "rotate(%s, %s, %s)" % (fmt(lab["rotate"]), x, y)
          if lab["rotate"] else None),
-    ]) + ">")
+    ] + ([("stroke", lab["halo"]["stroke"]), ("stroke-width", fmt(lab["halo"]["stroke_width"])),
+          ("stroke-linejoin", "round"), ("paint-order", "stroke")] if "halo" in lab else [])) + ">")
     o.line("".join("<tspan" + attrs([
         ("x", x), ("dy", "0" if i == 0 else fmt(wrap)),
     ]) + ">" + esc(part) + "</tspan>" for i, part in enumerate(lab["lines"])))
@@ -1420,7 +1456,7 @@ def emit_geo(sp, o, placements):
     font = sp.const["fonts"]["park"]
     open_geo_labels(o, "geo-labels-parks", font)
     for item in geo["parks"] + geo.get("islands", []):
-        if "label" in item:
+        if "label" in item and not item["label"].get("above_lines"):
             emit_geo_label(o, item["label"], font)
     o.close("</g>")
 
@@ -1649,15 +1685,20 @@ def layer_name(sp, lid):
     return lid
 
 
-def emit_lines(sp, o, resolved):
+def emit_lines(sp, o, resolved, under=False):
+    """The lines layer, or with `under` the lines marked `under_geography`,
+    drawn before the geography so its parks and icons cover them."""
     c = sp.const["line"]
-    o.open('<g id="layer-lines" data-name="%s" fill="none" stroke-width="%s" '
+    o.open('<g id="%s" data-name="%s" fill="none" stroke-width="%s" '
            'stroke-linecap="%s" stroke-linejoin="%s">'
-           % (esc(layer_name(sp, "layer-lines")), fmt(c["stroke_width"]),
+           % ("layer-lines-under-geography" if under else "layer-lines",
+              esc(layer_name(sp, "layer-lines")), fmt(c["stroke_width"]),
               c["linecap"], c["linejoin"]))
     service = sp.data["service_patterns"]
     for lid in draw_order(sp):
         ln = sp.line(lid)
+        if bool(ln.get("under_geography")) != under:
+            continue
         d = resolved[lid]["d"]
         if ln.get("casing", True):
             o.line("<path" + attrs([
@@ -1681,11 +1722,33 @@ def emit_lines(sp, o, resolved):
                 ("stroke", ln["colour"]), ("stroke-width", fmt(ticks["stroke_width"])),
                 ("stroke-linecap", "butt"),
             ]) + " />")
-            if "label" in at:
+            if "label" in at and at["label"].get("curve") == "concentric":
                 font, lab = sp.const["fonts"][ticks["label_font"]], at["label"]
+                r = math.dist(p, sp.centre)
+                o.open("<g" + attrs([
+                    ("font-size", "%spx" % fmt(font["size_px"])),
+                    ("font-weight", str(font["weight"])), ("fill", font["fill"]),
+                    ("stroke", "none"),
+                ]) + ">")
+                parts = lab.get("lines", [at["name"]])
+                outward = -1.0 if math.sin(math.radians(angle_of(sp.centre, p))) > 0 else 1.0
+                for j, part in enumerate(parts):
+                    emit_geo_ring_label(sp, o, {
+                        "id": "stop-name-%s-%d" % (lid, i + 1) + ("-%d" % (j + 1) if len(parts) > 1 else ""),
+                        "angle": angle_of(sp.centre, p) + math.degrees(float(lab.get("ds", 0.0)) / r),
+                        "half_span": 30.0, "align": lab.get("align", "middle"), "text": part,
+                    }, r + outward * float(font["wrap_dy"]) * ((len(parts) - 1) / 2.0 - j), font)
+                o.close("</g>")
+            elif "label" in at:
+                font, lab = sp.const["fonts"][ticks["label_font"]], at["label"]
+                x = fmt(p[0] + float(lab["dx"]))
+                text = "".join(
+                    "<tspan" + attrs([("x", x), ("dy", "0" if j == 0 else fmt(font["wrap_dy"]))])
+                    + ">" + esc(part) + "</tspan>" for j, part in enumerate(lab["lines"])
+                ) if "lines" in lab else esc(at["name"])
                 o.line("<text" + attrs([
                     ("id", "stop-name-%s-%d" % (lid, i + 1)),
-                    ("x", fmt(p[0] + float(lab["dx"]))),
+                    ("x", x),
                     ("y", fmt(p[1] + float(lab["dy"]) + float(font["baseline_dy"]))),
                     ("text-anchor", lab.get("align", "start")),
                     ("font-size", "%spx" % fmt(font["size_px"])),
@@ -1694,7 +1757,7 @@ def emit_lines(sp, o, resolved):
                     ("transform", "rotate(%s %s)" % (fmt(lab["rotate"]), pt(
                         (p[0] + float(lab["dx"]), p[1] + float(lab["dy"]))))
                      if lab.get("rotate") else None),
-                ]) + ">%s</text>" % esc(at["name"]))
+                ]) + ">%s</text>" % text)
             if "connections" in at:
                 badges = at["connections"]
                 legend_symbol(sp, o, dict(badges, kind="connections"),
@@ -1907,6 +1970,21 @@ def emit_curved_label(sp, o, st, lp, arcs, shared):
     o.close("</g>")
 
 
+def emit_geo_labels_above_lines(sp, o):
+    """Park names marked `above_lines`, set in the labels layer instead of the
+    geography, so that a line crossing them goes under their `halo`."""
+    geo = sp.data["geo"]
+    labels = [item["label"] for item in geo["parks"] + geo.get("islands", [])
+              if item.get("label", {}).get("above_lines")]
+    if not labels:
+        return
+    font = sp.const["fonts"]["park"]
+    open_geo_labels(o, "geo-labels-above-lines", font)
+    for lab in labels:
+        emit_geo_label(o, lab, font)
+    o.close("</g>")
+
+
 def emit_labels(sp, o, placements):
     prim = sp.const["fonts"]["primary"]
     groups = [(cid, [st for st in sp.data["stations"] if st["corridor"] == cid])
@@ -1941,49 +2019,107 @@ def emit_labels(sp, o, placements):
                 emit_straight_label(sp, o, st, lp, shared)
         o.close("</g>")
     emit_connections(sp, o, placed)
+    emit_geo_labels_above_lines(sp, o)
     o.close("</g>")
 
 
-def emit_connections(sp, o, placed):
-    """The connection badges that stand at the BOTTOM of their station's label:
-    one rounded rect per service with its name in it, in a row under the last
-    line of type, on the edge the label is anchored to and turned with it. The
-    badges that stand in a label's line are part of that line (`marked_line`)."""
+def connection_badges(sp, stations, placed):
+    """Each connection badge that stands in a row at the BOTTOM or TOP of its
+    station's label: its station, item, service and width, the middles of its
+    start and end edges in the label's reading direction, and its centre."""
     con = sp.data["connections"]
-    font, badge = con["font"], con["badge"]
-    height, gap = float(badge["height"]), float(badge["gap"])
-    o.open("<g" + attrs([
-        ("id", "connections"), ("font-size", "%spx" % fmt(font["size_px"])),
-        ("font-weight", str(font["weight"])), ("text-anchor", "middle"),
-    ]) + ">")
-    for st in sp.data["stations"]:
+    badge = con["badge"]
+    gap = float(badge["gap"])
+    for st in stations:
         item = connection(sp, st)
         lp = placed[st["id"]]
-        if not item or connection_place(sp, st, lp) != "bottom":
+        if not item or connection_place(sp, st, lp) not in ROW_PLACES:
             continue
-        point, down = label_baselines(sp, st, lp)[-1]
+        top = item.get("place") == "top"
+        point, down = label_baselines(sp, st, lp)[0 if top else -1]
+        lift = float(badge["above_dy"]) if top else -float(badge["below_dy"])
         widths = [float(con["services"][key]["width"]) for key in item["services"]]
         frac = {"start": 0.0, "middle": 0.5, "end": 1.0}[lp["align"]]
         s = -frac * (sum(widths) + gap * (len(widths) - 1)) + float(item.get("shift", 0.0))
         for key, width in zip(item["services"], widths):
-            service = con["services"][key]
-            a, b, c = (along_label(sp, lp, point, down, s + k * width, -float(badge["below_dy"]))
+            a, b, c = (along_label(sp, lp, point, down, s + k * width, lift)
                        for k in (0.0, 1.0, 0.5))
-            angle = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
-            turn = "rotate(%s %s)" % (fmt(angle), pt(c)) if abs(angle) > 1e-9 else None
-            o.line("<rect" + attrs([
-                ("id", "connection-%s-%s" % (st["id"], key)),
-                ("x", fmt(c[0] - width / 2.0)), ("y", fmt(c[1] - height / 2.0)),
-                ("width", fmt(width)), ("height", fmt(height)),
-                ("rx", fmt(badge["rx"])), ("fill", item.get("fill", {}).get(key, service["fill"])),
-                ("transform", turn),
-            ]) + " />")
-            o.line("<text" + attrs([
-                ("x", fmt(c[0])), ("y", fmt(c[1] + float(font["baseline_dy"]))),
-                ("fill", service.get("text_fill", font["fill"])), ("transform", turn),
-            ]) + ">%s</text>" % esc(service["text"]))
+            yield st, item, key, width, a, b, c
             s += width + gap
+
+
+def emit_connections(sp, o, placed):
+    """The connection badges that stand in a row at their station's label: one
+    rounded rect per service with its name in it, under the last line of type or
+    over the first, on the edge the label is anchored to and turned with it. The
+    badges that stand in a label's line are part of that line (`marked_line`)."""
+    con = sp.data["connections"]
+    font, badge = con["font"], con["badge"]
+    height = float(badge["height"])
+    o.open("<g" + attrs([
+        ("id", "connections"), ("font-size", "%spx" % fmt(font["size_px"])),
+        ("font-weight", str(font["weight"])), ("text-anchor", "middle"),
+    ]) + ">")
+    for st, item, key, width, a, b, c in connection_badges(sp, sp.data["stations"], placed):
+        service = con["services"][key]
+        angle = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0]))
+        turn = "rotate(%s %s)" % (fmt(angle), pt(c)) if abs(angle) > 1e-9 else None
+        o.line("<rect" + attrs([
+            ("id", "connection-%s-%s" % (st["id"], key)),
+            ("x", fmt(c[0] - width / 2.0)), ("y", fmt(c[1] - height / 2.0)),
+            ("width", fmt(width)), ("height", fmt(height)),
+            ("rx", fmt(badge["rx"])), ("fill", item.get("fill", {}).get(key, service["fill"])),
+            ("transform", turn),
+        ]) + " />")
+        o.line("<text" + attrs([
+            ("x", fmt(c[0])), ("y", fmt(c[1] + float(font["baseline_dy"]))),
+            ("fill", service.get("text_fill", font["fill"])), ("transform", turn),
+        ]) + ">%s</text>" % esc(service["text"]))
     o.close("</g>")
+
+
+def emit_connection_links(sp, o, placements):
+    """The links from connection badges to their lines (`link`), in their own
+    group under the station markers, so a link can pass under a station's dot."""
+    stations = [st for st in sp.data["stations"] if "link" in (connection(sp, st) or {})]
+    placed = {st["id"]: label_placement(sp, st, placements[st["id"]]) for st in stations}
+    o.open('<g id="connection-links">')
+    for st, item, key, width, a, b, c in connection_badges(sp, stations, placed):
+        if item["link"]["service"] == key:
+            emit_connection_link(sp, o, st, item["link"], a, b)
+    o.close("</g>")
+
+
+def emit_connection_link(sp, o, st, link, end, far):
+    """A stroke from a badge's start `end`, away from its `far` end, to its
+    service's line where that line runs on `link.axis`, in the line's colour
+    and width: straight on along the badge's axis, or with `ring` on the ring
+    about the map's centre through `end`, to where that ring cuts the axis's
+    middle slot."""
+    ln = next((ln for ln in sp.data["lines"] if ln["id"] == link["line"]), None)
+    if ln is None:
+        raise SpecError("%s: connection link has no line %r" % (st["id"], link["line"]))
+    axis = sp.axis(link["axis"])
+    if link.get("ring"):
+        r = math.dist(end, sp.centre)
+        target = resolve_arc_target_angle(sp, {"axis": link["axis"]}, r)
+        turn = (angle_of(sp.centre, end) - angle_of(sp.centre, far) + 180.0) % 360.0 - 180.0
+        sweep = 1 if turn < 0 else 0
+        span = ((angle_of(sp.centre, end) - target) if sweep else (target - angle_of(sp.centre, end))) % 360.0
+        d = "M %s A %s %s 0 %d %d %s" % (pt(polar(sp.centre, r, target)), fmt(r), fmt(r),
+                                         1 if span > 180.0 else 0, sweep, pt(end))
+    else:
+        p, across = axis["origin"], axis_basis(axis)[1]
+        length = math.dist(end, far)
+        u = ((end[0] - far[0]) / length, (end[1] - far[1]) / length)
+        t = ((p[0] - end[0]) * across[0] + (p[1] - end[1]) * across[1]) / (u[0] * across[0] + u[1] * across[1])
+        d = "M %s L %s" % (pt((end[0] + t * u[0], end[1] + t * u[1])), pt(end))
+    o.line("<path" + attrs([
+        ("id", "connection-link-%s-%s" % (st["id"], link["service"])),
+        ("d", d),
+        ("stroke", ln["colour"]), ("stroke-width", fmt(ln["stroke_width"])),
+        ("stroke-linecap", "butt"), ("fill", "none"),
+    ]) + " />")
 
 
 def legend_text(o, font, x, y, text, anchor=None):
@@ -2047,7 +2183,7 @@ def legend_symbol(sp, o, row, cx, cy):
         fills = row.get("fill", {})
         services = [dict(con["services"][key], fill=fills.get(key, con["services"][key]["fill"]))
                     for key in row["services"]]
-        gap, height = float(badge["gap"]), float(badge["height"])
+        gap, height = float(row.get("gap", badge["gap"])), float(badge["height"])
         x = cx - (sum(float(s["width"]) for s in services) + gap * (len(services) - 1)) / 2.0
         for service in services:
             width = float(service["width"])
@@ -2260,10 +2396,13 @@ def build_svg(sp, resolved, placements, layers):
               fmt(cv["height"]), esc(sp.const["fonts"]["family"])))
     o.line("<title id=\"title\">%s</title>" % esc(sp.data["title"]))
     o.line('<g id="layer-page" data-name="%s" />' % esc(layer_name(sp, "layer-page")))
+    if "lines" in layers:
+        emit_lines(sp, o, resolved, under=True)
     if "geo" in layers:
         emit_geo(sp, o, placements)
     if "lines" in layers:
         emit_lines(sp, o, resolved)
+        emit_connection_links(sp, o, placements)
     if "stations" in layers:
         emit_stations(sp, o, placements)
     if "labels" in layers:

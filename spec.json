@@ -362,7 +362,7 @@
       "id": "outer-green",
       "r": 632.0,
       "fraction_of_R": "79R/90",
-      "name": "The orbit of the two outer arms: the Green arc (Southern Av - Branch Av) and, at its mean slot, the Orange/Silver NE arc (Minnesota Av - Landover). 79R/90 = 632 is 20 outside the earlier 17R/20 = 612, which gives the white between the arms and the Anacostia park band (572) room for the DC boundary: the Orange/Silver pair's inner casing edge is at 603 and the Green arc's at 617. The pair's outer edge at 661 keeps 59 off the Beltway (720), and the radial station labels of the NE arm now reach the Beltway line",
+      "name": "The orbit of the two outer arms: the Green arc (Congress Heights - Naylor Rd) and, at its mean slot, the Orange/Silver NE arc (Minnesota Av - Landover). 79R/90 = 632 is 20 outside the earlier 17R/20 = 612, which gives the white between the arms and the Anacostia park band (572) room for the DC boundary: the Orange/Silver pair's inner casing edge is at 603 and the Green arc's at 617. The pair's outer edge at 661 keeps 59 off the Beltway (720), and the radial station labels of the NE arm now reach the Beltway line",
       "basis": "grid"
     },
     {
@@ -394,17 +394,73 @@
       "basis": "grid"
     },
     {
-      "id": "vre-outer",
-      "r": 760.0,
-      "fraction_of_R": "beltway + 40",
-      "name": "VRE to Manassas, the part outside the Beltway: 40 outside the Beltway, from the crossing at theta 119 round to the level of the Manassas airport's apron; at 28 it was too near the ring",
+      "id": "marc-bwi-ring",
+      "r": 830.0,
+      "fraction_of_R": "beltway + 110",
+      "name": "MARC and Amtrak to BWI, the ring: out on the `bwi` radius past New Carrollton, then one left turn, counter-clockwise from 330 deg to BWI at 314.0 deg, about 30 below the Camden Line's stopper; 110 outside the Beltway, clear of the Beltway's name inside it and of New Carrollton's name, which starts at 332.3 deg",
+      "basis": "derived"
+    },
+    {
+      "id": "marc-camden-ring",
+      "r": 900.0,
+      "fraction_of_R": "Glenmont's radius + 32",
+      "name": "MARC Camden Line, the ring: 32 outside Glenmont's radius, so that the line, which ends level with the top of BWI's name, sits more as Baltimore does to BWI, north of it, from the Green and Yellow radius (`ne-diagonal`) clockwise to Camden Station",
+      "basis": "derived"
+    },
+    {
+      "id": "vre-union-ring",
+      "r": 388.5,
+      "fraction_of_R": "10.5 outside the tops of Judiciary Sq's capitals, with the name moved in to a baseline of about 367.8; 4.5 further out than 384 to make the L from Union Station's VRE badge shorter",
+      "name": "VRE from Union Station, the one ring after the L: from the leg in from the station's VRE badge (theta 312.89) clockwise outside Judiciary Sq's name, past the Capitol and across the east trunk, down to y 1059.5 (`vre-lenfant`'s `top` slot, theta 8.81, x 1383.92). The leg is about 22.5 long (badge row inner edge 411.4). A trial: it crosses the trunk through Capitol South's dot (r 386, ink 374 - 398) and passes Judiciary Sq's dot (r 380, theta 309) about 12 from its ink, beside the leg",
       "basis": "derived"
     },
     {
       "id": "vre-king",
-      "r": 696.346,
-      "fraction_of_R": "the radius of the row of connection badges under King St-Old Town's name",
-      "name": "VRE to Manassas, the part inside the Beltway: the line starts where the row of badges under King St-Old Town's name ends and goes on along the row's own ring, 24 inside the Beltway, to the crossing at theta 119",
+      "r": 702.0,
+      "fraction_of_R": "between King St-Old Town's marker (ink to r 681.3 on its column) and Eisenhower Av's dot on the Beltway (ink from r 708 at x 993)",
+      "name": "VRE to Manassas, the turn west south of King St-Old Town: from the vertical straight east of the Yellow line (`vre-alexandria`, theta 89.1) clockwise west across the Yellow line and the Blue line's Franconia branch, under King St-Old Town's name and badges (about 3 below the foot of the name, which is at about r 696.3), 3 above Eisenhower Av's dot and 3 from Van Dorn St's, to the 120 deg radius (`vre-cross`)",
+      "basis": "derived"
+    },
+    {
+      "id": "vre-potomac",
+      "r": 276.69,
+      "fraction_of_R": "the radius of x 1269.19 at y 1064, 4 inside the east end of L'Enfant Plaza's VRE badge; it was 266, the badge's middle",
+      "name": "VRE from L'Enfant Plaza, the ring across the Potomac (`vre-long-bridge`): from the level line at x 1270.22, y 1059.5 (theta 12.42), under the east end of L'Enfant Plaza's VRE badge, clockwise across the river, as the Long Bridge does, to the vertical straight east of the Yellow line (`vre-alexandria`, x 1011) at theta 87.72, at the river's west bank. It is concentric with the Yellow line's ring (294), close inside it: the two casings are 2.31 apart (279.69 and 282) and the blue is 5.31 from the yellow",
+      "basis": "derived"
+    },
+    {
+      "id": "marc-rockville",
+      "r": 892.8,
+      "fraction_of_R": "Rockville's radius",
+      "name": "MARC Brunswick Line at Rockville: the ring west of the station, on Rockville's own radius, so the line and the station's MARC badge on it are centred with the station's dot: from the line beside the Red Line (`marc-brunswick-in`, theta 229.20) counter-clockwise to the 224.5 deg radius (`marc-brunswick-out`). The badge is on it at theta 228.91, 4 from the dot, over the corner at 229.20, so the line goes through the badge. It was 886.472, the radius of the badge's end in the row under Rockville's name, where the badge was before",
+      "basis": "derived"
+    },
+    {
+      "id": "marc-silver-spring",
+      "r": 637.7,
+      "fraction_of_R": "the radius of Silver Spring's MARC badge",
+      "name": "MARC Brunswick Line, the arc from Silver Spring: the line starts under the MARC badge below the station's name and goes on along the badge's own ring, as at Union Station (`marc-union`), west to the line beside the Red Line (`marc-brunswick-in`), which it meets at theta 228.48, between Friendship Heights and Bethesda. It is 25 inside the Purple Line's casing (663) and about 17 outside the top of Rock Creek Park (618.4); it crosses the Red Line between Friendship Heights (dot to 612) and Bethesda (marker to 650)",
+      "basis": "derived"
+    },
+    {
+      "id": "marc-frederick",
+      "r": 1019.6,
+      "fraction_of_R": "Point of Rocks's radius on `marc-brunswick-out`",
+      "name": "MARC Brunswick Line, Frederick branch: Point of Rocks's own ring, from the station clockwise to Frederick",
+      "basis": "derived"
+    },
+    {
+      "id": "md-wv-boundary",
+      "r": 1045.2,
+      "fraction_of_R": "half-way between Brunswick (1035.45) and Harpers Ferry (1057.45) names on `marc-brunswick-out`",
+      "name": "Maryland - West Virginia boundary across the Brunswick Line: half-way between the top of Brunswick's name (about 1040.2) and the descenders of Harpers Ferry's (about 1050.2)",
+      "basis": "derived"
+    },
+    {
+      "id": "vre-outer",
+      "r": 750.46,
+      "fraction_of_R": "midway between the radii of Van Dorn St (720, on the Beltway) and Franconia-Springfield (780.92)",
+      "name": "VRE to Manassas, the part outside the Beltway: 30.46 outside the Beltway, from the straight to Alexandria (`vre-cross`, theta 120) round to the level of the Manassas airport's apron (theta 161.47). It was 40 outside the Beltway (760)",
       "basis": "derived"
     },
     {
@@ -448,6 +504,12 @@
       "note": "Yellow/Green north-east diagonal (Greenbelt)"
     },
     "green-se": {"origin": [1000, 1000], "angle": 49.5, "slots": {"mid": 0}, "note": "Green south-east radial leg"},
+    "green-se-exit": {
+      "origin": [1000, 1000],
+      "angle": 41.5,
+      "slots": {"mid": 0},
+      "note": "Radial exit of the Green arm from Naylor Rd, the arc's corner, out to Branch Av on the Beltway, as `nc-exit` takes New Carrollton out. On the ground Naylor Rd is the northernmost station of the arm, and the line goes south-east from there. 632 to 720 is two steps of 44, the 44.12 of the 4 deg arc step, so the whole arm reads at one spacing: Suitland at s = 676 and Branch Av on the Beltway."
+    },
     "west-trunk": {
       "origin": [1000, 1033],
       "angle": 180.0,
@@ -496,29 +558,41 @@
       "slots": {"mid": 0},
       "note": "the radius that the MARC and Amtrak line to BWI goes out on. 330 is on the 1.5 deg angle grid and is the one free radius in this quarter from Union Station's ring to the canvas: it passes 17 from NoMa-Gallaudet U's name, 25 from Rhode Island Av's, west of the Anacostia's end (333.4), 43 from Glenridge's name, 24 from New Carrollton's Purple terminal and 12 from the start of New Carrollton's name."
     },
-    "bwi-out": {
-      "origin": [1834.7, 271.0],
-      "angle": 116.9018,
+    "vre-union": {
+      "origin": [1000, 1000],
+      "angle": 312.89,
       "slots": {"mid": 0},
-      "note": "the last leg of the line to BWI, from New Carrollton up to the airport's apron. Its origin is the apron's centre. The leg is on the straight line from the line's turn at New Carrollton (the `bwi` radius at r = 759.1, level with the station's name) to the north arrow at (1922.5, 98), so it points at the arrow; it turns 33.1 deg to the north at New Carrollton and is at 63.1 deg to the horizontal. The apron is on that line where the leg is as long as the first part of the line. The leg was parallel to the Greenbelt arm before (108.5)."
+      "note": "VRE at Union Station: the radius through the middle of the station's VRE badge (r 417.91), the leg of the L from the badge in to `vre-union-ring` (388.5), about 22.5 long; Judiciary Sq's name is moved in along its spoke to make room."
+    },
+    "vre-lenfant": {
+      "origin": [1000, 1062],
+      "angle": 0.0,
+      "slots": {"mid": 0, "top": -2.5},
+      "note": "VRE to L'Enfant Plaza: level, below the east trunk's casing (the Blue Line's, y 1056), from the `vre-union-ring` ring west to L'Enfant Plaza's VRE badge, under the station's two circles at x 1260.19, across the Green and Yellow lines. The badge is on the middle slot (y 1062); the line is on the `top` slot (y 1059.5), so the line's top edge (y 1057.5) is 2 below the badge's top edge (y 1055.5), and its casing's top is 0.5 below the Blue Line's casing. The ring across the river (`vre-potomac`) leaves it at x 1270.22, under the badge's east end."
     },
     "vre-cross": {
       "origin": [1000, 1000],
-      "angle": 119.0,
+      "angle": 120.0,
       "slots": {"mid": 0},
-      "note": "the radius on which the VRE line to Manassas crosses the Beltway, from its ring inside (`vre-king`) to its ring outside (`vre-outer`). On the ground the line crosses the Beltway between Backlick Road, which is just inside it, and Rolling Road. 119 is past Van Dorn St's name (which ends at 116.2, outside the Beltway) and before the Beltway's own name (from 129.3); Franconia-Springfield's name, further out, ends at 121."
+      "note": "the radius on which the VRE line to Manassas turns south from its ring under King St-Old Town's name (`vre-king`) and crosses the Beltway to the outer ring (`vre-outer`), half a spacing (6.91 deg) before Rolling Road's tick there. On the ground the line crosses the Beltway between Backlick Road, which is just inside it, and Rolling Road."
     },
-    "marc-camden-out": {
-      "origin": [1238.8642, 320.777],
-      "angle": 0.0,
+    "vre-alexandria": {
+      "origin": [1011.0, 1000.0],
+      "angle": 270.0,
       "slots": {"mid": 0},
-      "note": "MARC's Camden Line: horizontal, east from the centre of Greenbelt's Green terminal, outside the Beltway and under the end of the station's name."
+      "note": "VRE to Alexandria: one vertical straight at x 1011, EAST of the Yellow line, as the railway is east of the Metro through Crystal City: its white edge is 3 from the Yellow line's casing (x 1005) and 3 from the DCA apron and the Old Town area (from x 1017, both moved 12.25 east to make the room), over the bank trail. It runs from the `vre-potomac` ring at the river's bank (s -265.77, theta 87.63, the `neg` branch) down through Crystal City's VRE badge (s -415.31, level with the station) and King St-Old Town's (s -689.66, the end of the station's name below it), to the `vre-king` ring (theta 89.1), on which the Manassas Line turns west across the Yellow and Blue lines south of King St-Old Town. `s` is 1000 - y."
+    },
+    "marc-brunswick-in": {
+      "origin": [978.2399, 1017.621],
+      "angle": 231.0,
+      "slots": {"mid": 0},
+      "note": "MARC's Brunswick Line from Bethesda to Rockville, very close beside the Red Line, as on the ground, where the railway and the Red Line run side by side towards Rockville: parallel to the Red Line's radius, 28 west of it - the origin is the map's centre moved 28 across (n = -28), so the middle slot is the line and ticks, which are placed on an axis's centre line, sit on it; `s` is measured as on the Red Line's radius, from the Silver Spring ring (`marc-silver-spring`) to Rockville's badge ring (`marc-rockville`). 28 is the least that clears Bethesda's transfer marker (ink to 22): the line's edge is 4 from it, 14 from the Red Line's casing and 14 from the dots of Medical Center to Rockville."
     },
     "marc-brunswick-out": {
-      "origin": [434.6186, 301.8121],
-      "angle": 180.0,
+      "origin": [1000, 1000],
+      "angle": 224.5,
       "slots": {"mid": 0},
-      "note": "MARC's Brunswick Line: horizontal, west from the centre of Rockville's circle, below Shady Grove's terminal."
+      "note": "MARC's Brunswick Line: one radius from the Rockville ring (`marc-rockville`, r 892.8) out to Martinsburg. 224.5 deg is 6.5 deg from the Red Line (231), nearer it than the middle between the Red Line and the Potomac's north bank (`geo.water.potomac.nw_arm.north_bank_edge`), which was too near the river: 101.1 from the Red Line at r 892.8 and 178.8 from the bank at r 1076.7, where Martinsburg was before."
     },
     "vre-south": {
       "origin": [778.2043, 1748.7698],
@@ -530,7 +604,7 @@
       "origin": [91, 1238.5],
       "angle": 0.0,
       "slots": {"mid": 0},
-      "note": "the last leg of the VRE line: horizontal, at the y of the Manassas airport's apron (1238.5), from the apron east to the `vre-outer` ring, which it meets at theta 161.71. All of it is outside the Beltway. Its origin is the apron's centre."
+      "note": "the last leg of the VRE line: horizontal, at the y of the Manassas airport's apron (1238.5), from the apron east to the `vre-outer` ring, which it meets at theta 161.47. All of it is outside the Beltway. Its origin is the apron's centre."
     },
     "blue-franconia": {
       "origin": [1000, 1000],
@@ -551,10 +625,10 @@
     "red-nw-outer": {
       "axis": "red-nw",
       "slot": "mid",
-      "s0": 748.0,
-      "step": 37.6,
+      "s0": 720.0,
+      "step": 43.2,
       "count": 6,
-      "note": "Medical Center to Shady Grove. Both ends are pinned, so the step is solved from them: s0 = beltway + 28, as on `red-north-outer`, and Shady Grove stays at 936, the end of the line - five steps of 37.6. Medical Center stood at 696, inside the Beltway; Bethesda's transfer marker at 672 reaches 699.4 and leaves no room for a dot between it and the Beltway, so the Beltway now passes BETWEEN Bethesda and Medical Center, as it does between Silver Spring and Forest Glen."
+      "note": "Medical Center to Shady Grove. Both ends are pinned, so the step is solved from them: s0 = the Beltway (720), so Medical Center is ON the Beltway, as Forest Glen is on `red-north-outer`, and Shady Grove stays at 936, the end of the line - five steps of 43.2. Inside the Beltway there is no room: Bethesda's transfer marker at 672 reaches 694 and the Beltway's inner edge is 717, 23 between them, and the dot is 24 across. On the Beltway the dot is 14 from Bethesda's marker. It stood at 748 (beltway + 28) before, with a step of 37.6."
     },
     "red-north-spoke": {
       "axis": "north",
@@ -567,10 +641,10 @@
     "red-north-outer": {
       "axis": "north",
       "slot": "mid",
-      "s0": 748.0,
-      "step": 48.0,
+      "s0": 720.0,
+      "step": 74.0,
       "count": 3,
-      "note": "a run of its own rather than the tail of `red-north-spoke`: the Glenmont arm is deliberately open inside the Beltway and compressed outside it, and one arithmetic run cannot express both spacings. s0 = beltway + 28."
+      "note": "a run of its own rather than the tail of `red-north-spoke`: that run's step of 114 is what puts Silver Spring on the `purple` ring, and this arm is a little closer outside the Beltway. s0 = the Beltway (720), so Forest Glen is ON the Beltway, as Medical Center is on `red-nw-outer`, 48 past Silver Spring (672); the step of 74 puts Wheaton at 794 and Glenmont at 868 (y = 132), and its terminal's top at y = 117.5 is 57.5 below the canvas's 60 margin; nothing is above it. The Red line's route ends at the literal s = 868 on `north`, so a change here must move that end too. Forest Glen stood at 748 (beltway + 28) with a step of 60 before; a step of 48 made the arm look compressed, and 76, one even ladder from Silver Spring, was also tried."
     },
     "red-ne-spoke": {
       "axis": "red-ne",
@@ -719,7 +793,7 @@
     "GSE": {
       "name": "Green south-east spoke (Branch Av)",
       "label_default": {"ds": 0.0, "rotate": 0.0, "curve": "radial"},
-      "note": "`curve` radial: the four `outer-green` ring stations of the Branch Av arm sit 4 deg apart at one radius, where concentric type piles up; a sunburst separates them by angle. `ds` 0.0 is what that mode wants — under `radial` a slide acts ACROSS the type on a ring station, so the clearance is `distance`'s job alone."
+      "note": "`curve` radial: the `outer-green` ring stations of the Branch Av arm sit 4 deg apart at one radius, where concentric type piles up; a sunburst separates them by angle. Branch Av takes it too, at the far END of `green-se-exit` with open paper past the Beltway, as New Carrollton does. Naylor Rd and Suitland override it, because there radial type reads along the exit. `ds` 0.0 is what that mode wants — under `radial` a slide acts ACROSS the type on a ring station, so the clearance is `distance`'s job alone."
     },
     "MJOS": {
       "name": "Orange/Silver New Carrollton branch: diagonal out to Minnesota Av, concentric arc to Landover, radial exit to New Carrollton",
@@ -775,7 +849,7 @@
           "to": {"ring": "major"}
         },
         {"kind": "arc", "ring": "major", "to": {"angle": 270.0}, "dir": "ccw"},
-        {"kind": "straight", "axis": "north", "slot": "mid", "from": {"prev": true}, "to": {"s": 844}}
+        {"kind": "straight", "axis": "north", "slot": "mid", "from": {"prev": true}, "to": {"s": 868}}
       ]
     },
     {
@@ -961,7 +1035,14 @@
           "from": {"prev": true},
           "to": {"ring": "outer-green"}
         },
-        {"kind": "arc", "ring": "outer-green", "to": {"angle": 33.5}, "dir": "ccw"}
+        {"kind": "arc", "ring": "outer-green", "to": {"angle": 41.5}, "dir": "ccw"},
+        {
+          "kind": "straight",
+          "axis": "green-se-exit",
+          "slot": "mid",
+          "from": {"prev": true},
+          "to": {"ring": "beltway"}
+        }
       ]
     },
     {
@@ -969,32 +1050,68 @@
       "name": "MARC Penn Line and Amtrak to BWI",
       "colour_key": "marc",
       "colour": "#B7414E",
-      "casing": false,
+      "casing": true,
+      "casing_width": 6,
       "stroke_width": 4,
-      "dasharray": "10 6",
       "linecap": "butt",
-      "note": "a trial: the MARC Penn Line, which Amtrak also uses, from Union Station to BWI Marshall Airport. It is not a Metro line, so it is a thin dashed line - dashes 10 long and 6 apart, 4 wide - in the red of the MARC badge (#B7414E), with no casing, and its stations are ticks. The red is the Penn Line's own colour on MARC's system map of 2020, where the Camden Line is orange and the Brunswick Line yellow, and it is the red of that map's heading. It is written from the airport in, because an arc cannot open a path: down the `bwi-out` leg from the airport's apron to the `bwi` radius at r = 759.1, level with New Carrollton's name, where it turns - the start of the leg, s = 34.86, sets the dashes so that the turn is at the middle of a dash - in along that radius to the `marc-union` ring, and counter-clockwise on that ring to theta 326.43, 6 past the end of the row of badges under Union Station's name. MARC is the last badge of that row, so the dashes go on from it. It crosses the Purple Line, the DC boundary and the Beltway, and is first in `draw_order`, under every other line. At New Carrollton it passes 24 from the Purple terminal; a tick marks the station, beside the start of its name.",
+      "note": "a trial: the MARC Penn Line, which Amtrak also uses, from Union Station to BWI Marshall Airport. It is not a Metro line, so it is a thin solid line - 4 wide - in the red of the MARC badge (#B7414E), with a white casing 1 wider on each side (`casing_width` 6), as all the commuter lines have, so that where it is drawn over another line or the geography a thin white edge shows which is on top, and its stations are ticks. The commuter lines were dashed while they were only starts; now that they have all their stations, they are solid. The red is the Penn Line's own colour on MARC's system map of 2020, where the Camden Line is orange and the Brunswick Line yellow, and it is the red of that map's heading. It is written from the airport in: clockwise on the ring `marc-bwi-ring` (r 830) from BWI's stopper at theta 314 to the `bwi` radius (an arc may open a path with a `from` angle), then in along that radius past New Carrollton (r 759.1) to the `marc-union` ring, and counter-clockwise on that ring to theta 326.43, 6 past the end of the row of badges under Union Station's name. MARC is the last badge of that row, so the line goes on from it. It crosses the Purple Line, the DC boundary and the Beltway, and is drawn after the Metro lines in `draw_order`, so it is above the Purple Line near Glenridge, as the other commuter lines are above the Metro lines they cross. At New Carrollton it passes 24 from the Purple terminal; the link from the station's MARC badge marks the station.",
       "ticks": {
         "length": 10,
         "stroke_width": 3,
         "label_font": "place",
         "at": [
-          {"axis": "bwi", "s": 759.1, "name": "New Carrollton"},
-          {"axis": "bwi-out", "s": 295.86, "name": "Seabrook", "label": {"dx": 8.9, "dy": 4.5, "align": "start"}},
-          {"axis": "bwi-out", "s": 199.86, "name": "Bowie State", "label": {"dx": 8.9, "dy": 4.5, "align": "start"}},
-          {"axis": "bwi-out", "s": 103.86, "name": "Odenton", "label": {"dx": 8.9, "dy": 4.5, "align": "start"}}
+          {"ring": "marc-bwi-ring", "angle": 327.71, "name": "Seabrook", "label": {"dx": 7.61, "dy": -4.81, "align": "start", "rotate": -32.29}},
+          {"ring": "marc-bwi-ring", "angle": 323.14, "name": "Bowie State", "label": {"dx": 7.2, "dy": -5.4, "align": "start", "rotate": -36.86}},
+          {"ring": "marc-bwi-ring", "angle": 318.57, "name": "Odenton", "label": {"dx": 6.75, "dy": -5.96, "align": "start", "rotate": -41.43}}
         ],
-        "note": "the stations of the line as small ticks across it: a stroke 10 long and 3 wide, in the line's colour. New Carrollton's tick is at the line's turn, on the radius, level with the middle of the station's name and 4 from its first letter; it has no name of its own. Seabrook, Bowie State and Odenton, which only MARC serves, are on the leg to BWI, 96 apart, 6 periods of the dashes, each at the middle of a dash, with their names in the `place` font at the right of the tick. Their distances along the line are not the ground's."
+        "note": "the stations of the line as small ticks across it: a stroke 10 long and 3 wide, in the line's colour. New Carrollton has no tick: the link from its MARC badge (`connections`) marks it. Seabrook, Bowie State and Odenton, which only MARC serves, are on the ring to BWI (`marc-bwi-ring`), 66.22 apart, the first half a spacing past the corner at 330 deg and BWI's stopper a spacing past Odenton, with their names in the `place` font straight and outward along the radius (`rotate` the tick's angle less 360), starting 9 from the line, as on the Camden ring. Their distances along the line are not the ground's."
       },
       "badges": [
-        {"axis": "bwi", "s": 527.1, "services": ["marc"], "rotate": -30},
-        {"axis": "bwi-out", "s": 247.86, "services": ["marc"], "rotate": -63.0982}
+        {"ring": "marc-bwi-ring", "angle": 314.0, "services": ["marc"], "rotate": 0}
       ],
-      "badges_note": "MARC's badge ON the line, turned with it (`rotate`), one on each long part: between Union Station and New Carrollton, in the clear space between NoMa's name and the District boundary, and at the middle between Bowie State and Seabrook. The first is at the middle of a gap between two dashes (13 more than a multiple of 16 from the line's start), so it covers two dashes and has a gap of 2.5 at each end. The second is on a dash, as the middle between two ticks is, so a short piece of a dash, 4.5, shows 6 from each of its ends.",
+      "badges_note": "Only the line's stopper: a badge on this map marks a stop - a transfer at a Metro station, or the end of a commuter line - so the line has no badge of its own between Union Station and New Carrollton (an Amtrak and MARC row stood there, near the Anacostia); its colour and the legend name it. The ring to BWI has none of its own: the stopper at BWI is MARC's, with Amtrak's beside it (the airport's `connections`). The stopper at BWI: on the line's end, at theta 314.0 on `marc-bwi-ring`, level (`rotate` 0), its top 6 below the apron, which is moved so that it is centred over the badge.",
       "segments": [
-        {"kind": "straight", "axis": "bwi-out", "slot": "mid", "from": {"s": 34.86}, "to": {"axis": "bwi", "slot": "mid"}},
+        {"kind": "arc", "ring": "marc-bwi-ring", "from": {"angle": 314.0}, "to": {"angle": 330.0}, "dir": "cw"},
         {"kind": "straight", "axis": "bwi", "slot": "mid", "from": {"prev": true}, "to": {"ring": "marc-union"}},
         {"kind": "arc", "ring": "marc-union", "to": {"angle": 326.43}, "dir": "ccw"}
+      ]
+    },
+    {
+      "id": "vre-core",
+      "name": "VRE from Union Station to L'Enfant Plaza",
+      "under_geography": true,
+      "colour_key": "vre",
+      "colour": "#003D73",
+      "casing": true,
+      "casing_width": 6,
+      "stroke_width": 4,
+      "linecap": "butt",
+      "note": "a trial: the part of VRE that both its lines use, from Union Station to L'Enfant Plaza, in the blue of the VRE badge (#003D73), as the Manassas Line is. From Union Station's VRE badge, an L: in along the badge's radius (`vre-union`) to `vre-union-ring`, clockwise on that one ring outside Judiciary Sq's name, past the Capitol and under the east end of the National Mall, across the east trunk, down into the east trunk, ending at y 1052 under the Blue line's casing (theta 7.69), where `vre-long-bridge` goes on from the casing's bottom edge, level to L'Enfant Plaza's VRE badge and above the Yellow and Green lines. `under_geography`: it is drawn before the geography, so the Mall, which is widened to cover it, and the Capitol's icons are drawn over it, as the railway runs in a tunnel under Capitol Hill.",
+      "segments": [
+        {"kind": "straight", "axis": "vre-union", "slot": "mid", "from": {"s": 414.0}, "to": {"ring": "vre-union-ring"}},
+        {"kind": "arc", "ring": "vre-union-ring", "to": {"angle": 7.69}, "dir": "cw"}
+      ]
+    },
+    {
+      "id": "vre-long-bridge",
+      "name": "VRE from below the east trunk to L'Enfant Plaza, across the Potomac and to King St-Old Town",
+      "colour_key": "vre",
+      "colour": "#003D73",
+      "casing": true,
+      "casing_width": 6,
+      "stroke_width": 4,
+      "linecap": "butt",
+      "note": "a trial: the VRE line from where `vre-core` comes out of the east trunk, at the Blue line's casing's bottom edge (y 1056, theta 8.29 on `vre-union-ring`), round the turn and west level at y 1059.5 (`vre-lenfant`'s `top` slot), in the upper half of L'Enfant Plaza's VRE badge, to the badge, under the station's two circles; from the badge's east end clockwise on a ring (`vre-potomac`), close inside the Yellow line's, across the Potomac, as the Long Bridge does, to the river's west bank; then straight down east of the Yellow line (`vre-alexandria`), through Crystal City's VRE badge to King St-Old Town's, both ON the line, where the Manassas Line goes on. A line of its own so that, unlike `vre-core`, it is drawn above the river, and last in `draw_order`, above the Yellow and Green lines it crosses on the way to L'Enfant Plaza.",
+      "badges": [
+        {"axis": "vre-lenfant", "s": 260.19, "services": ["vre"], "rotate": 0},
+        {"axis": "vre-alexandria", "s": -415.31, "services": ["vre"], "rotate": -1.52}
+      ],
+      "badges_note": "L'Enfant Plaza's VRE badge, ON the line, where its level part turns onto the ring across the river: ON the level line (`vre-lenfant`, s 260.19), level, under the station's two circles (x 1260.19; the capsule runs from 1240 to 1293.23), at y 1062, its top (1055.5) 0.5 over the bottom of the Blue Line's white casing (1056) and 1.5 below the Blue Line's colour, with the turn onto the ring across the river under its east end, so the line comes in to its east end, its top edge 2 below the badge's top edge (`vre-lenfant`'s `top` slot, y 1059.5), and leaves it south from there, at x 1270.22, 3 inside the badge's east end (x 1273.19), which is about 1.4 clear of the Yellow line's casing (from about x 1274.6). It replaces the badge that stood under the station's name. The second is Crystal City's, ON the vertical straight east of the Yellow line (`vre-alexandria`, x 1011), level with its station (y 1415.31), turned to the ring through it (`rotate` -1.52): 26 long, about x 998 - 1024, so it overlaps the Yellow line's casing (1005) by about 7. King St-Old Town's VRE badge is in its name's line, at the line's end, centred on the VRE line, which ends under it (s -689.66), where the Manassas Line goes on.",
+      "segments": [
+        {"kind": "arc", "ring": "vre-union-ring", "from": {"angle": 8.29}, "to": {"axis": "vre-lenfant", "slot": "top"}, "dir": "cw"},
+        {"kind": "straight", "axis": "vre-lenfant", "slot": "top", "from": {"prev": true}, "to": {"ring": "vre-potomac"}},
+        {"kind": "arc", "ring": "vre-potomac", "to": {"axis": "vre-alexandria", "branch": "neg"}, "dir": "cw"},
+        {"kind": "straight", "axis": "vre-alexandria", "slot": "mid", "from": {"prev": true}, "to": {"s": -689.66}}
       ]
     },
     {
@@ -1002,22 +1119,33 @@
       "name": "VRE Fredericksburg Line",
       "colour_key": "vre",
       "colour": "#E0393E",
-      "casing": false,
+      "casing": true,
+      "casing_width": 6,
       "stroke_width": 4,
-      "dasharray": "10 6",
       "linecap": "butt",
       "ticks": {
         "length": 10,
         "stroke_width": 3,
         "label_font": "place",
         "at": [
-          {"axis": "vre-south", "s": 161.83, "name": "to Fredericksburg", "label": {"dx": 0, "dy": 25, "align": "middle"}, "connections": {"dx": 0, "dy": 11, "services": ["vre"], "fill": {"vre": "#E0393E"}}}
+          {"axis": "vre-south", "s": 23.35, "name": "Lorton", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 46.71, "name": "Woodbridge", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 70.06, "name": "Rippon", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 93.42, "name": "Quantico", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 116.77, "name": "Brooke", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 140.12, "name": "Leeland Road", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 163.48, "name": "Fredericksburg", "label": {"dx": 8.9, "dy": 0, "align": "start"}},
+          {"axis": "vre-south", "s": 186.83, "name": "Spotsylvania", "label": {"dx": 17, "dy": 0, "align": "start"}}
         ],
-        "note": "one tick at the end of the line, with the name of where the line goes: its eight stations past Franconia-Springfield are not on the map."
+        "note": "the eight stations past Franconia-Springfield, Lorton to Spotsylvania, evenly spaced from Franconia-Springfield's centre: 23.35 apart (186.83 / 8). Spotsylvania, the terminus, is the end tick at s = 186.83, where its name's baseline is on the river's bottom edge (y 1940), as the old `to Fredericksburg` was, so the canvas's 60 margin stays clear below it. Each name is level, to the right of its tick: it starts 8.9 from the line, 3.9 past the tick's end, and its middle is level with the tick; Spotsylvania's starts 17 from the line, 4 past the stopper badge's end. Huntington's name, the nearest type, starts at x 866.7, right of the longest name here."
       },
-      "note": "VRE's second line, to Fredericksburg and Spotsylvania, which leaves Metro at Franconia-Springfield. The same thin dashed line as `vre-manassas`, but in VRE's red (#E0393E): VRE's own map has the Fredericksburg Line in red and the Manassas Line in blue, and the VRE badge at Franconia-Springfield, which is only on this line, is red too. It is only a start: one straight line down from under Franconia-Springfield's terminal - it starts 3 below the circle - for 144.83, to an end tick with a VRE badge in the line's red under it and then the words `to Fredericksburg`, whose baseline is on the river's bottom edge (y 1940).",
+      "badges": [
+        {"axis": "vre-south", "s": 186.83, "services": ["vre"], "fill": {"vre": "#E0393E"}, "rotate": 0}
+      ],
+      "badges_note": "The operator's badge is the line's stopper: on the end tick, centred on the line's end and turned across the line, so the line ends in it; the end station's name starts clear of it. Here it is level, across the vertical line, in the line's red, as at Franconia-Springfield.",
+      "note": "VRE's second line, to Fredericksburg and Spotsylvania, which leaves Metro at Franconia-Springfield. The same thin solid line as `vre-manassas`, but in VRE's red (#E0393E): VRE's own map has the Fredericksburg Line in red and the Manassas Line in blue, and the VRE badge at Franconia-Springfield, which is only on this line, is red too. One straight line down from under Franconia-Springfield's terminal - it starts 3 below the circle - to Spotsylvania's stopper, level with the river's bottom edge, with all eight of its stations past Franconia-Springfield as ticks.",
       "segments": [
-        {"kind": "straight", "axis": "vre-south", "slot": "mid", "from": {"s": 161.83}, "to": {"s": 17}}
+        {"kind": "straight", "axis": "vre-south", "slot": "mid", "from": {"s": 186.83}, "to": {"s": 17}}
       ]
     },
     {
@@ -1025,22 +1153,34 @@
       "name": "MARC Camden Line",
       "colour_key": "marc",
       "colour": "#DF6B47",
-      "casing": false,
+      "casing": true,
+      "casing_width": 6,
       "stroke_width": 4,
-      "dasharray": "10 6",
       "linecap": "butt",
       "ticks": {
         "length": 10,
         "stroke_width": 3,
         "label_font": "place",
         "at": [
-          {"axis": "marc-camden-out", "s": 147, "name": "to Baltimore", "label": {"dx": 45.9, "dy": 0, "align": "start"}, "connections": {"dx": 25.4, "dy": 0, "services": ["marc"]}}
+          {"ring": "marc-camden-ring", "angle": 289.77, "name": "Muirkirk", "label": {"dx": 3.04, "dy": -8.47, "align": "start", "rotate": -70.23}},
+          {"ring": "marc-camden-ring", "angle": 292.32, "name": "Laurel", "label": {"dx": 3.42, "dy": -8.33, "align": "start", "rotate": -67.68}},
+          {"ring": "marc-camden-ring", "angle": 294.87, "name": "Laurel Racetrack", "label": {"dx": 3.78, "dy": -8.17, "align": "start", "rotate": -65.13}},
+          {"ring": "marc-camden-ring", "angle": 297.41, "name": "Savage", "label": {"dx": 4.14, "dy": -7.99, "align": "start", "rotate": -62.59}},
+          {"ring": "marc-camden-ring", "angle": 299.96, "name": "Jessup", "label": {"dx": 4.49, "dy": -7.8, "align": "start", "rotate": -60.04}},
+          {"ring": "marc-camden-ring", "angle": 302.51, "name": "Dorsey", "label": {"dx": 4.84, "dy": -7.59, "align": "start", "rotate": -57.49}},
+          {"ring": "marc-camden-ring", "angle": 305.05, "name": "St. Denis", "label": {"dx": 5.17, "dy": -7.37, "align": "start", "rotate": -54.95}},
+          {"ring": "marc-camden-ring", "angle": 307.6, "name": "Camden Station", "label": {"lines": ["Baltimore", "Camden Station"], "dx": 7.75, "dy": -19.9, "align": "start", "rotate": -52.4}}
         ],
-        "note": "one tick at the end of the line, then a MARC badge (`connections`: its middle from the tick, and its `services`) in MARC's red, 8.9 from the tick, and the name of where the line goes, 4 after the badge."
+        "note": "the eight stations past Greenbelt, all on the ring (`marc-camden-ring`), 40 apart, the first half a spacing past the corner; the radial from Greenbelt has none. Every name is straight and outward along the radius (`rotate` the tick's angle less 360), at right angles to the ring, starting 9 from the line, outside the ring. The last name is two lines, `Baltimore` and `Camden Station`, centred across the tick's radius (6 back across the type), starting 20.5 from the line, clear of the stopper badge."
       },
-      "note": "a trial: MARC's Camden Line, which leaves Metro at Greenbelt. Only a start, as `vre-fredericksburg` is: one straight line east from the Green terminal - it starts 3 from the circle - for 130, to an end tick with the words `to Baltimore`. The orange is the Camden Line's on MARC's own map.",
+      "badges": [
+        {"ring": "marc-camden-ring", "angle": 307.6, "services": ["marc"], "rotate": -52.4}
+      ],
+      "badges_note": "The operator's badge is the line's stopper: on the end tick, centred on the line's end and turned across the line, so the line ends in it; the end station's name starts clear of it. Here it is along the radius through Camden Station, across the ring, reading outward as the ring's names do.",
+      "note": "a trial: MARC's Camden Line, which leaves Metro at Greenbelt, as a radial and a ring: straight on, as a continuation of the Green and Yellow lines' own radius (`ne-diagonal`, its middle slot, 288.5 deg), from Greenbelt's MARC badge over the name (r 758, under the badge, which is at r 751.8 - 764.8; the name's baseline is at r 738.3), so that the name, the badge and the line are one column, to the ring `marc-camden-ring` (r 900, 32 outside Glenmont's radius); then one right turn, clockwise on that ring, to Camden Station's stopper at theta 307.6. The orange is the Camden Line's on MARC's own map.",
       "segments": [
-        {"kind": "straight", "axis": "marc-camden-out", "slot": "mid", "from": {"s": 147}, "to": {"s": 17}}
+        {"kind": "straight", "axis": "ne-diagonal", "slot": "mid", "from": {"s": 758}, "to": {"ring": "marc-camden-ring"}},
+        {"kind": "arc", "ring": "marc-camden-ring", "to": {"angle": 307.6}, "dir": "cw"}
       ]
     },
     {
@@ -1048,22 +1188,72 @@
       "name": "MARC Brunswick Line",
       "colour_key": "marc",
       "colour": "#E5B04E",
-      "casing": false,
+      "casing": true,
+      "casing_width": 6,
       "stroke_width": 4,
-      "dasharray": "10 6",
       "linecap": "butt",
       "ticks": {
         "length": 10,
         "stroke_width": 3,
         "label_font": "place",
         "at": [
-          {"axis": "marc-brunswick-out", "s": 150, "name": "to Brunswick", "label": {"dx": -45.9, "dy": 0, "align": "end"}, "connections": {"dx": -25.4, "dy": 0, "services": ["marc"]}}
+          {"axis": "marc-brunswick-in", "s": 741.6, "name": "Kensington", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-in", "s": 784.8, "name": "Garrett Park", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 908.65, "name": "Washington Grove", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 924.5, "name": "Gaithersburg", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 940.35, "name": "Metropolitan Grove", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 956.2, "name": "Germantown", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 972.05, "name": "Boyds", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 987.9, "name": "Barnesville", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1003.75, "name": "Dickerson", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1019.6, "name": "Point of Rocks", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1035.45, "name": "Brunswick", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1057.45, "name": "Harpers Ferry", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1073.3, "name": "Duffields", "label": {"curve": "concentric", "ds": -9, "align": "end"}},
+          {"axis": "marc-brunswick-out", "s": 1089.15, "name": "Martinsburg", "label": {"curve": "concentric", "ds": -20.5, "align": "end"}}
         ],
-        "note": "one tick at the end of the line, then a MARC badge (`connections`: its middle from the tick, and its `services`) in MARC's red, 8.9 from the tick, and the name of where the line goes, 4 after the badge."
+        "note": "the fourteen stations of the main line past Silver Spring. Kensington and Garrett Park, the two that only MARC serves between Silver Spring and Rockville, are on the line beside the Red Line (`marc-brunswick-in`), both outside the Beltway as on the ground: Kensington at s 741.6, midway between Medical Center and Grosvenor-Strathmore, and Garrett Park at 784.8, midway between Grosvenor-Strathmore and North Bethesda, which is where it is on the ground. The twelve past Rockville are on the radial (`marc-brunswick-out`), 15.85 apart, from Washington Grove at r 908.65, one spacing past the corner with the Rockville ring (r 892.8), to Martinsburg at r 1089.15, with one wider step of 22 between Brunswick (1035.45) and Harpers Ferry (1057.45), where the line crosses the Maryland - West Virginia boundary (`geo.parks` `boundary-md-wv`, r 1045.2): it leaves 3.5 of white on each side of the boundary's dots, from the top of Brunswick's name (about 1040.2) and from the descenders of Harpers Ferry's (about 1050.2). Every name is at right angles to the line, along the ring through the tick (`curve` concentric), on its lower side toward the Potomac, ending 9 from the line along the ring (`ds` -9, `align` end), so it reads up toward the tick. The upper side is the Frederick branch's. Martinsburg's name ends 20.5 from the line, clear of the stopper badge."
       },
-      "note": "a trial: MARC's Brunswick Line, which leaves Metro at Rockville. Only a start: one straight line west from Rockville's circle for 130, to an end tick with the words `to Brunswick`. It starts 20 from the circle's centre, which is 3 from the Red Line's casing: the Red Line goes up and left from here. The gold is the Brunswick Line's on MARC's own map.",
+      "badges": [
+        {"ring": "marc-rockville", "angle": 228.91, "services": ["marc"], "rotate": -41.09},
+        {"axis": "marc-brunswick-out", "s": 1089.15, "services": ["marc"], "rotate": -45.5}
+      ],
+      "badges_note": "Rockville's MARC badge is on the line west of the station: centred on the Rockville ring (`marc-rockville`, Rockville's own radius, so the badge is centred with the dot) at theta 228.91 and turned along the ring (`rotate` the angle less 270). It spans 227.86 - 229.97 deg, so its east end is 4 from Rockville's dot, which ends at 230.23 deg on this ring, and it covers the corner where the line turns onto the line beside the Red Line (229.20): the line comes in at its west end and goes out of its inner edge. The operator's badge is also the line's stopper: on the end tick, centred on the line's end and turned across the line, so the line ends in it; the end station's name starts clear of it. Here it is along the ring through Martinsburg, across the radial.",
+      "note": "a trial: MARC's Brunswick Line, from Silver Spring, where it starts under the station's MARC badge, west on the badge's ring (`marc-silver-spring`) across the Red Line between Friendship Heights and Bethesda, then up beside the Red Line, 28 west of it (`marc-brunswick-in`), past Bethesda to Rockville, as on the ground. It is drawn after the Metro lines (`draw_order`), so it is above the Red Line where it crosses it between Friendship Heights and Bethesda; at Rockville counter-clockwise on the ring west of the station (`marc-rockville`), through Rockville's MARC badge, to the 224.5 deg radius, and out along that radius (`marc-brunswick-out`) to Martinsburg's stopper at r 1089.15. It cannot go out on Rockville's own radius (231 deg): that is the Red Line, to Shady Grove. Rockville's MARC badge is on the line (`badges`), west of the station. The gold is the Brunswick Line's on MARC's own map.",
       "segments": [
-        {"kind": "straight", "axis": "marc-brunswick-out", "slot": "mid", "from": {"s": 150}, "to": {"s": 20}}
+        {"kind": "straight", "axis": "marc-brunswick-out", "slot": "mid", "from": {"s": 1089.15}, "to": {"ring": "marc-rockville"}},
+        {"kind": "arc", "ring": "marc-rockville", "to": {"axis": "marc-brunswick-in"}, "dir": "cw"},
+        {"kind": "straight", "axis": "marc-brunswick-in", "slot": "mid", "from": {"prev": true}, "to": {"ring": "marc-silver-spring"}},
+        {"kind": "arc", "ring": "marc-silver-spring", "to": {"angle": 266.18}, "dir": "cw"}
+      ]
+    },
+    {
+      "id": "marc-brunswick-frederick",
+      "name": "MARC Brunswick Line, Frederick branch",
+      "colour_key": "marc",
+      "colour": "#E5B04E",
+      "casing": true,
+      "casing_width": 6,
+      "stroke_width": 4,
+      "linecap": "butt",
+      "ticks": {
+        "length": 10,
+        "stroke_width": 3,
+        "label_font": "place",
+        "at": [
+          {"ring": "marc-frederick", "angle": 226.08, "name": "Monocacy", "label": {"dx": 6.24, "dy": 6.48, "align": "start", "rotate": 46.08}},
+          {"ring": "marc-frederick", "angle": 227.65, "name": "Frederick", "label": {"dx": 13.81, "dy": 15.15, "align": "start", "rotate": 47.65}}
+        ],
+        "note": "the branch's two stations, Monocacy and Frederick, 28.05 apart along the branch (1.5765 deg on r 1019.6). Their names are below the branch and read inward along the radius, toward the map's centre: each is turned with the radius (`rotate` the tick's angle less 180) and starts 9 from the branch (`align` start; Frederick's 20.5, clear of the stopper), in the space between the main line (224.5 deg) and the Red Line."
+      },
+      "badges": [
+        {"ring": "marc-frederick", "angle": 227.65, "services": ["marc"], "rotate": 47.65}
+      ],
+      "badges_note": "The operator's badge is the line's stopper: on the end tick, centred on the line's end and turned across the line, so the line ends in it; the end station's name starts clear of it. Here it is along the radius, across the branch.",
+      "note": "a trial: the Brunswick Line's branch to Frederick, which leaves the main line at Point of Rocks. The same line as `marc-brunswick`: clockwise from Point of Rocks's tick on Point of Rocks's own ring (`marc-frederick`), up and to the right, on the radial's upper side, where the main line has no names, to Frederick's stopper at theta 227.65. An arc cannot open a path, so the branch starts with a straight of no length on the main line's radial at Point of Rocks.",
+      "segments": [
+        {"kind": "straight", "axis": "marc-brunswick-out", "slot": "mid", "from": {"s": 1019.6}, "to": {"s": 1019.6}},
+        {"kind": "arc", "ring": "marc-frederick", "to": {"angle": 227.65}, "dir": "cw"}
       ]
     },
     {
@@ -1071,33 +1261,35 @@
       "name": "VRE Manassas Line to Manassas airport",
       "colour_key": "vre",
       "colour": "#003D73",
-      "casing": false,
+      "casing": true,
+      "casing_width": 6,
       "stroke_width": 4,
-      "dasharray": "10 6",
       "linecap": "butt",
-      "note": "a trial: VRE's Manassas Line, which ends beside Manassas Regional Airport. The same thin dashed line as `marc-bwi`, in VRE's blue (#003D73), the colour of the VRE badge: VRE's own map has the Manassas Line in blue and the Fredericksburg Line in red. It is written from the airport in: east along `hef-out` from the apron, level with it, to the `vre-outer` ring at theta 161.71; counter-clockwise on that ring, 40 outside the Beltway, to theta 119; in along the `vre-cross` radius, across the Beltway, to the `vre-king` ring, 24 inside it; and counter-clockwise on that ring to theta 99.3, 6 past the west end of the row of badges under King St-Old Town's name - VRE is the first badge of that row, so the dashes go on from it. Inside the Beltway it is 12 from Van Dorn St's dot and crosses the Blue line's Franconia branch. King St-Old Town is the last station that the line shares with Metro; it also stops at Union Station, L'Enfant Plaza and Crystal City, which have the VRE badge.",
+      "note": "a trial: VRE's Manassas Line, which ends at Broad Run, beside Washington Manassas Airport. The same thin solid line as `marc-bwi`, in VRE's blue (#003D73), the colour of the VRE badge: VRE's own map has the Manassas Line in blue and the Fredericksburg Line in red. It is written from the airport in: east along `hef-out` from the apron, level with it, to the `vre-outer` ring at theta 161.47; counter-clockwise on that ring, 30.46 outside the Beltway, midway between Van Dorn St and Franconia-Springfield, to theta 120; in along the `vre-cross` radius, across the Beltway, past Backlick Road, to the `vre-king` ring (702); east on it across the Blue and Yellow lines, south of King St-Old Town, to the vertical straight east of the Yellow line (`vre-alexandria`), and up that, to King St-Old Town's VRE badge, at the end of the station's name, centred on the line, where `vre-long-bridge` goes on along the same straight through Crystal City - one straight from the ring to just above Pentagon. King St-Old Town is the last station that the line shares with Metro; it also stops at Union Station, L'Enfant Plaza and Crystal City, which have the VRE badge.",
       "ticks": {
         "length": 10,
         "stroke_width": 3,
         "label_font": "place",
         "at": [
-          {"ring": "vre-king", "angle": 114.46, "name": "Backlick Road", "label": {"dx": 5.53, "dy": -12.15, "align": "middle", "rotate": 24.46}},
-          {"ring": "vre-outer", "angle": 124.52, "name": "Rolling Road", "label": {"dx": -7.57, "dy": 11.0, "align": "middle", "rotate": 34.52}},
-          {"ring": "vre-outer", "angle": 139.0, "name": "Burke Centre", "label": {"dx": -10.08, "dy": 8.76, "align": "middle", "rotate": 49.0}},
-          {"ring": "vre-outer", "angle": 153.47, "name": "Manassas Park", "label": {"dx": -11.94, "dy": 5.96, "align": "middle", "rotate": 63.47}},
-          {"axis": "hef-out", "s": 104.7, "name": "Manassas", "label": {"dx": 0, "dy": -12, "align": "middle"}}
+          {"ring": "vre-king", "angle": 114.0, "name": "Backlick Road", "label": {"dx": 5.43, "dy": -12.2, "align": "middle", "rotate": 24.0}},
+          {"ring": "vre-outer", "angle": 126.91, "name": "Rolling Road", "label": {"dx": -8.02, "dy": 10.67, "align": "middle", "rotate": 36.91}},
+          {"ring": "vre-outer", "angle": 140.73, "name": "Burke Centre", "label": {"dx": -10.34, "dy": 8.45, "align": "middle", "rotate": 50.73}},
+          {"ring": "vre-outer", "angle": 154.56, "name": "Manassas Park", "label": {"dx": -12.06, "dy": 5.73, "align": "middle", "rotate": 64.56}},
+          {"axis": "hef-out", "s": 116.6, "name": "Manassas", "label": {"dx": 0, "dy": 12, "align": "start"}},
+          {"axis": "hef-out", "s": 35.7, "name": "Broad Run", "label": {"lines": ["Broad", "Run"], "dx": 10.5, "dy": 12, "align": "start"}}
         ],
-        "note": "the five VRE stations between Alexandria (King St-Old Town) and Broad Run/Airport, as small ticks across the line, as on `marc-bwi`, with their names in the `place` font: the four on the rings are centred on their ticks and turned to the ring's tangent there (`rotate`, the tick's angle less 90), so they run along the circle, 4 from the tick: Backlick Road's on the inner side of its ring, inside the Beltway, and Rolling Road's, Burke Centre's and Manassas Park's on the outer side of the outer ring, below the line on the page; Manassas's is level, above its tick. They are 192 apart along the line, 12 periods of the dashes, and each is at the middle of a dash. Manassas's tick is at the middle of the level leg, half-way between the apron's edge and the corner where the leg meets the ring; the line's start, s = 35.7, sets the dashes for that. Backlick Road is on the ring inside the Beltway, as the station is on the ground; Rolling Road, Burke Centre and Manassas Park are on the ring outside it, and Manassas is on the level leg. Their distances along the line are not the ground's."
+        "note": "the six VRE stations past Alexandria (King St-Old Town), as small ticks across the line, as on `marc-bwi`, with their names in the `place` font: the four on the rings are centred on their ticks and turned to the ring's tangent there (`rotate`, the tick's angle less 90), so they run along the circle, 4 from the tick: Backlick Road's on the inner side of its ring, inside the Beltway, and Rolling Road's, Burke Centre's and Manassas Park's on the outer side of the outer ring, below the line on the page; Manassas's is level, below the line and starting at its tick (`align` start), as Broad Run's is. Rolling Road, Burke Centre and Manassas Park are spread evenly on the outer ring between its two corners - the turn off the `vre-cross` radial at 120 and the turn onto the level leg at 161.47 - 13.82 deg (181.1) apart, with half a spacing at each end; except Backlick Road, which is on the `vre-king` ring (r 702), inside the Beltway as the station is on the ground, at theta 114: west of King St-Old Town's line (which starts at about 104) and 6 deg before the corner with `vre-cross` (120); its name is inside the ring, centred on the tick and turned to the ring's tangent (`rotate` 24), 13.35 from the line, as Rolling Road's is outside the outer ring. Manassas's tick is at the middle of the level leg's line, half-way between Broad Run's tick (s 35.7) and the corner where the leg meets the ring (s 197.45). Backlick Road is on the ring inside the Beltway, as the station is on the ground; Rolling Road, Burke Centre and Manassas Park are on the ring outside it, and Manassas is on the level leg. Broad Run, the terminus beside the airport, is an end tick at the line's start, 13.7 from the apron's edge, with its name level below the line in two lines, `Broad` and `Run` (`lines`), starting 10.5 from the tick (`align` start), 4 past the stopper badge, so it is clear of the apron and narrow enough to stay clear of Manassas's name, which is level with its first line. Their distances along the line are not the ground's."
       },
       "badges": [
-        {"ring": "vre-outer", "angle": 131.76, "services": ["vre"], "rotate": 41.76}
+        {"axis": "hef-out", "s": 35.7, "services": ["vre"], "rotate": -90}
       ],
-      "badges_note": "VRE's badge ON the line, turned with it, at the middle between Rolling Road and Burke Centre. That point is on a dash, so the dashes on each side touch the badge's ends.",
+      "badges_note": "Only the line's stopper: a badge on this map marks a stop - a transfer at a Metro station, or the end of a commuter line - so the VRE badge that stood ON the line between Rolling Road and Burke Centre is gone; the line's colour and the legend name it. The stopper at Broad Run, as on the other commuter lines: on the end tick, upright across the level line, about 7 from the apron's edge. The airport's stack has no badge of its own.",
       "segments": [
         {"kind": "straight", "axis": "hef-out", "slot": "mid", "from": {"s": 35.7}, "to": {"ring": "vre-outer", "branch": "neg"}},
-        {"kind": "arc", "ring": "vre-outer", "to": {"angle": 119.0}, "dir": "ccw"},
+        {"kind": "arc", "ring": "vre-outer", "to": {"angle": 120.0}, "dir": "ccw"},
         {"kind": "straight", "axis": "vre-cross", "slot": "mid", "from": {"prev": true}, "to": {"ring": "vre-king"}},
-        {"kind": "arc", "ring": "vre-king", "to": {"angle": 99.3}, "dir": "ccw"}
+        {"kind": "arc", "ring": "vre-king", "to": {"axis": "vre-alexandria", "branch": "neg"}, "dir": "ccw"},
+        {"kind": "straight", "axis": "vre-alexandria", "slot": "mid", "from": {"prev": true}, "to": {"s": -689.66}}
       ]
     },
     {
@@ -1363,13 +1555,14 @@
       },
       "label": {
         "title": ["L’Enfant", "Plaza"],
-        "override": {"align": "end", "rotate": 0.0, "curve": "straight", "distance": -31.0, "ds": -33},
-        "note": "`rotate` 0 cancels `E`'s 37.75 so the block reads horizontally beside the capsule instead of down the trunk's diagonal rank, and `align` end finishes it just left of the capsule's left edge. `distance` and `ds` are one vector read in the corridor's (perp, along): the negative gap cancels most of the frame's vertical offset: -55 lands the block on the capsule's own centreline, and -31 puts its first baseline at y = 1035, which keeps 11.2 between its caps (from y = 1024.8) and the Smithsonian subtitle above. The block ends at y = 1049, 5 below the capsule's lower edge (y = 1044). `ds` -33 ends the block at x = 1207, 1 left of the ink of the Blue line where it comes down from the core ring to the trunk (x = 1208 - 1228). Type set along its own horizontal corridor carries no aim, so nothing is solved underneath these two numbers. This is also the only label that reaches `side`'s outward-radial fallback, its offset being exactly across the reading direction."
+        "override": {"align": "end", "rotate": 0.0, "curve": "straight", "distance": 3.1, "ds": 2},
+        "note": "beside the station's VRE badge, which is ON the VRE line under the capsule's two circles (x 1247.19 - 1273.19, middle y 1062; it was at y 1064 when this label was set, so the first line's capitals are now centred 2 below it): two lines, level (`rotate` 0 cancels `E`'s 37.75), both ending at x 1242 (`align` end, `ds` 2), about 5.2 left of the badge (from x 1247.19), so that `Plaza` clears the VRE ring as it curves down from under the badge (x about 1254.3 at `Plaza`'s height, white edge to about 1251.3), the first line's capitals centred on the badge's middle (`distance` 3.1: first baseline y = 1066 + 3.1 = 1069.1, capitals 1058.9 - 1069.1; `Plaza` on 1083.1, about 12 left of the VRE line's ring as it curves down from the badge). `distance` and `ds` are one vector read in the corridor's (perp, along): the first baseline is at y = 1066 + `distance` and the end at x = 1240 + `ds`, as the old two-line block (-31, -33) put its first baseline at 1035 and its end at 1207. The capitals' tops are 2.9 below the Blue line's casing where it comes down from the core ring to the trunk (bottom edge y 1056, x 1206 - 1230). Type set along its own horizontal corridor carries no aim, so nothing is solved underneath these two numbers. This is also the only label that reaches `side`'s outward-radial fallback, its offset being exactly across the reading direction."
       }
     },
     {
       "name": "Federal Center SW",
       "id": "federal-center-sw",
+      "halo": 2,
       "corridor": "E",
       "lines": ["blue", "orange", "silver"],
       "marker": "dot",
@@ -1490,6 +1683,7 @@
     {
       "name": "Pentagon",
       "id": "pentagon",
+      "halo": 2,
       "corridor": "S",
       "lines": ["blue", "yellow"],
       "marker": "interchange",
@@ -1499,6 +1693,7 @@
     {
       "name": "Pentagon City",
       "id": "pentagon-city",
+      "halo": 2,
       "corridor": "S",
       "lines": ["blue", "yellow"],
       "marker": "dot",
@@ -1512,11 +1707,12 @@
       "lines": ["blue", "yellow"],
       "marker": "dot",
       "at": {"run": "south-leg", "i": 2},
-      "label": {"title": ["Crystal City"], "override": {"ds": -9.85, "distance": 2}, "note": "`ds` -9.85 puts the middle of the BLOCK - the name and the VRE badge under it, 26.2 deep - on the station's own circle; the name alone is centred at -1.81. `distance` 2 puts the label 2 from the Blue line's casing, where the corridor's gap is 4: the station's dot is in the middle of the two lines, 23 from that casing, so the label is far from its dot, and 2 less is what the line leaves. The derived slide makes the label's near end level with the dot on the page, and that end is 28 west of the station, where the station's circle is higher, so the type was outside it."}
+      "label": {"title": ["Crystal City"], "override": {"ds": -1.81, "distance": 2}, "note": "`ds` -1.81 centres the name; its VRE badge is ON the VRE line east of the Yellow line, level with the station (`vre-long-bridge`'s badges), on the station's own circle; with the badge in a row under the name, -9.85 centred that 26.2 deep block. `distance` 2 puts the label 2 from the Blue line's casing, where the corridor's gap is 4: the station's dot is in the middle of the two lines, 23 from that casing, so the label is far from its dot, and 2 less is what the line leaves. The derived slide makes the label's near end level with the dot on the page, and that end is 28 west of the station, where the station's circle is higher, so the type was outside it."}
     },
     {
       "name": "Ronald Reagan Washington National Airport",
       "id": "ronald-reagan-washington-national-airport",
+      "halo": 2,
       "corridor": "S",
       "lines": ["blue", "yellow"],
       "marker": "dot",
@@ -1548,11 +1744,12 @@
       "lines": ["blue", "yellow"],
       "marker": "interchange",
       "at": {"run": "south-leg", "i": 6},
-      "label": {"title": ["King St-Old Town"], "override": {"ds": 22.0, "distance": -8}}
+      "label": {"title": ["King St-Old Town"], "override": {"ds": 28.0, "distance": -65.5}, "note": "below the station, one line with the Amtrak and VRE badges after the name (`connections`, `place` right): `ds` 28 sets the baseline at about r 692.85, 6 lower than at 22, and `distance` -65.5 pushes the line east until it ends in the VRE badge at about x 1024, so that badge is centred on the VRE line east of the Yellow line (x 1011) and the line passes through it. The Amtrak badge lies across the Yellow line and under the station's marker."}
     },
     {
       "name": "Eisenhower Av",
       "id": "eisenhower-av",
+      "halo": 2,
       "corridor": "S",
       "lines": ["yellow"],
       "marker": "dot",
@@ -1560,7 +1757,7 @@
       "label": {
         "title": ["Eisenhower Av"],
         "override": {"ds": 12.0},
-        "note": "off the Beltway with `ds`, not `distance`. This station sits ON the ring, where the ring runs nearly EAST-WEST, and `S`\u2019s offset runs down the south axis normal, due west - the ring\u2019s own tangent - so `distance` slides the words along the Beltway however far it is pushed. `ds` runs north-south, across it. The block straddled the ring at ds 0; +24 drops it clear by 11.3. Negative was tried and rejected: at -24 the block\u2019s east end laps King St-Old Town\u2019s interchange ring by 0.42."
+        "note": "Close to its station at the corridor's own gap (4 from the Yellow line's casing, ending at about x 977), with a `halo`; the VRE line's turn west (`vre-king`, r 702) passes above the name. Off the Beltway with `ds`, not `distance`. This station sits ON the ring, where the ring runs nearly EAST-WEST, and `S`\u2019s offset runs down the south axis normal, due west - the ring\u2019s own tangent - so `distance` slides the words along the Beltway however far it is pushed. `ds` runs north-south, across it. The block straddled the ring at ds 0; +24 drops it clear by 11.3. Negative was tried and rejected: at -24 the block\u2019s east end laps King St-Old Town\u2019s interchange ring by 0.42."
       }
     },
     {
@@ -1684,8 +1881,8 @@
       "terminal_letters": ["Y", "G"],
       "label": {
         "title": ["Greenbelt"],
-        "override": {"distance": -45, "ds": 39.125},
-        "note": "above the two terminals and a little to the right of centre. `ds` 39.125 puts the type at r = 759.125, with its MARC badge under it, 4 from the terminals' tops. `distance` -45 is twice the terminals' extent (25: the slot's 11 and the terminal's 14) taken back, less 5 by eye, so the name starts 5 east of the LEFT edge of the Yellow terminal and runs east with its P. Centred, its west half lay over the Purple Line's radial names and it had to stand 32 above the terminals; from this edge it is 4 east of the nearest one, Baltimore Av-UMD."
+        "override": {"distance": -45, "ds": 23.125},
+        "note": "above the two terminals and a little to the right of centre. `ds` 23.125 puts the baseline at r 738.3, 4 from the terminals' tops (r 734), with its MARC badge over it (`connections`, `place` top); it was 39.125, with the badge under the name. `distance` -45 is twice the terminals' extent (25: the slot's 11 and the terminal's 14) taken back, less 5 by eye, so the name starts 5 east of the LEFT edge of the Yellow terminal and runs east with its P. Centred, its west half lay over the Purple Line's radial names and it had to stand 32 above the terminals; from this edge it is 4 east of the nearest one, Baltimore Av-UMD. The Camden Line (`marc-camden`) goes on out along the Green and Yellow radius from the badge, so the name, the badge and the line are one column; it does not cross the name, which is type on a path, where a `halo` deforms the letters."
       }
     },
     {
@@ -1697,7 +1894,8 @@
       "at": {"run": "red-ne-spoke", "i": 0},
       "label": {
         "title": ["Judiciary Sq"],
-        "note": "a `ds` nudge up the spoke to set the block beside its own dot; the even 49.6 step leaves too little room below it for both this label and Gallery Place's."
+        "override": {"ds": -7.5},
+        "note": "`ds` -7.5 moves the name 7.5 in along the spoke, from r 375.3 to about 367.8, out of the way of the VRE line from Union Station (`vre-union-ring`, r 388.5): its capitals' tops are then about 8.5 inside the line's edge, and its descenders about 10 outside the tops of Gallery Place's first line (about 354.6). The even 49.6 step leaves too little room below it for both this label and Gallery Place's."
       }
     },
     {
@@ -1769,7 +1967,7 @@
       "lines": ["red"],
       "marker": "dot",
       "at": {"run": "red-north-outer", "i": 0},
-      "label": {"title": ["Forest Glen"]}
+      "label": {"title": ["Forest Glen"], "override": {"ds": 12}, "note": "the dot is on the Beltway, which runs level through it here, so `ds` 12 lifts the name off the Beltway's line: half the name's capitals (4.4), half the Beltway's stroke (3) and about 4 of paper"}
     },
     {
       "name": "Wheaton",
@@ -1875,7 +2073,7 @@
       "lines": ["red"],
       "marker": "dot",
       "at": {"run": "red-nw-outer", "i": 0},
-      "label": {"title": ["Medical Center"]}
+      "label": {"title": ["Medical Center"], "override": {"ds": -10}, "note": "the dot is on the Beltway, so `ds` -10 moves the name down the spoke, toward the centre, inside the Beltway's line"}
     },
     {
       "name": "Grosvenor-Strathmore",
@@ -1915,7 +2113,7 @@
       "lines": ["red"],
       "marker": "dot",
       "at": {"run": "red-nw-outer", "i": 4},
-      "label": {"title": ["Rockville"], "override": {"ds": 7.77}, "note": "`ds` 7.77 puts the middle of the BLOCK - the name and the row of connection badges under it, 26.2 deep - on the station's own circle about the map centre. The derived slide centres the name alone, so the block was 8 off the station, to the badges' side."}
+      "label": {"title": ["Rockville"], "note": "the derived slide centres the name, the first line, on the station's own circle about the map centre, as the MARC badge west of the station is (`marc-rockville`); the Amtrak badge is in a row under it. `ds` 7.77 centred the BLOCK - the name and the row - before."}
     },
     {
       "name": "Shady Grove",
@@ -2103,7 +2301,11 @@
       "lines": ["green"],
       "marker": "dot",
       "at": {"ring": "outer-green", "angle": 41.5},
-      "label": {"title": ["Naylor Rd"]}
+      "label": {
+        "title": ["Naylor Rd"],
+        "override": {"side": "right", "align": "start", "distance": -17.0, "ds": -16.0, "curve": "concentric"},
+        "note": "the corner of the arm: radial type would read out along the exit, over Suitland. Concentric type ON the dot's own ring, as if the arc went on: `distance` -17 takes back the casing's 12 and the type's half height of 5, so the name is centred on r = 632, and `ds` -16 starts it past the dot and the exit's casing (12) with 4 of white."
+      }
     },
     {
       "name": "Suitland",
@@ -2113,8 +2315,12 @@
       "corridor": "GSE",
       "lines": ["green"],
       "marker": "dot",
-      "at": {"ring": "outer-green", "angle": 37.5},
-      "label": {"title": ["Suitland"]}
+      "at": {"axis": "green-se-exit", "slot": "mid", "s": 676.0},
+      "label": {
+        "title": ["Suitland"],
+        "override": {"curve": "concentric"},
+        "note": "on the exit spoke, so its type is set ACROSS the spoke, as on `MJB`: radial type would read down the track into Branch Av. Rule A puts it on the north-east flank, the side Waterfront and Navy Yard-Ballpark take on the inner spoke."
+      }
     },
     {
       "name": "Branch Av",
@@ -2124,7 +2330,7 @@
       "corridor": "GSE",
       "lines": ["green"],
       "marker": "terminal",
-      "at": {"ring": "outer-green", "angle": 33.5},
+      "at": {"axis": "green-se-exit", "slot": "mid", "at_ring": "beltway"},
       "terminal_letters": ["G"],
       "label": {"title": ["Branch Av"]}
     },
@@ -2191,15 +2397,17 @@
         ]
       },
       "terminal_letters": ["O", "S", "P"],
+      "marks_line": 1,
       "label": {
-        "title": ["New Carrollton"],
-        "override": {"curve": "concentric", "align": "middle", "distance": -27.5, "ds": 39.125},
-        "note": "turned across the exit, as Greenbelt's is: `curve` concentric sets the name on a ring outside the three terminals, and `ds` 39.125 puts it at r = 759.125, with the row of its two badges between it and the terminals, 4 from their tops. `align` middle centres the name with its P, as one line of type, over the row P, O, S: at `distance` -36.7 its middle is at theta 334.81, the Orange terminal's, which is the middle one of the three. `distance` -27.5 is 9.1 to the right of that, half of the 18.2 that the P and its gap are long, so the NAME alone, without its P, is centred on the Orange terminal: the P is a light mark at the end of the line, and the line looked too far left with the P counted. It started above the outer edge of the Purple terminal before (`distance` -72) and ran east over the row."
+        "title": ["New", "Carrollton"],
+        "override": {"curve": "concentric", "align": "start", "distance": -71.2, "ds": 53.125},
+        "note": "a trial: two lines, `New` and `Carrollton`, narrower than the one line `New Carrollton`. In the upper half a curved label's second line is inward of the first, so `ds` is 53.125, 14 (the primary font's `wrap_dy`) more than the one line's 39.125: `Carrollton` is where the one line was, at r = 759.125, and `New` is outside it. `marks_line` 1 puts the P on `Carrollton`. `align` start with `distance` -71.2: both lines start on the left edge of the Purple terminal, the first of the three (slot -33, 22 before the Orange terminal's -11, whose middle is at `distance` -36.7, less the terminal's radius 12.5). The rest of this note is about the one-line, centred name: turned across the exit, as Greenbelt's is: `curve` concentric sets the name on a ring outside the three terminals, and `ds` 39.125 puts it at r = 759.125, with the row of its two badges between it and the terminals, 4 from their tops. `align` middle centres the name with its P, as one line of type, over the row P, O, S: at `distance` -36.7 its middle is at theta 334.81, the Orange terminal's, which is the middle one of the three. `distance` -27.5 is 9.1 to the right of that, half of the 18.2 that the P and its gap are long, so the NAME alone, without its P, is centred on the Orange terminal: the P is a light mark at the end of the line, and the line looked too far left with the P counted. It started above the outer edge of the Purple terminal before (`distance` -72) and ran east over the row."
       }
     },
     {
       "name": "Van Dorn St",
       "id": "van-dorn-st",
+      "halo": 2,
       "marks": ["parking"],
       "corridor": "MJB",
       "lines": ["blue"],
@@ -2220,7 +2428,7 @@
       "marker": "terminal",
       "at": {"axis": "blue-franconia", "slot": "mid", "s": 780.9287, "note": "the same stand-off from the Beltway as Huntington, the other southern terminal: Huntington sits at r = 780.9287, 60.9287 outside the ring, and this spoke is radial so s = r. The two terminals therefore share a circle about the map centre."},
       "terminal_letters": ["B"],
-      "label": {"title": ["Franconia-", "Springfield"], "override": {"ds": -8.12}, "note": "the name is two lines, `Franconia-` and `Springfield`: in one line it was about 150 long and reached to theta 121, beside the crossing of the dashed VRE line and the name of Rolling Road; in two it ends at 115. `ds` -8.12 puts the middle of the BLOCK - the name and the row of connection badges under it, 26.2 deep - on the station's own circle about the map centre. The derived slide centres the name alone, so the block was 8 off the station, to the badges' side."}
+      "label": {"title": ["Franconia-", "Springfield"], "override": {"ds": -8.12}, "note": "the name is two lines, `Franconia-` and `Springfield`: in one line it was about 150 long and reached to theta 121, beside the crossing of the VRE line and the name of Rolling Road; in two it ends at 115. `ds` -8.12 puts the middle of the BLOCK - the name and the row of connection badges under it, 26.2 deep - on the station's own circle about the map centre. The derived slide centres the name alone, so the block was 8 off the station, to the badges' side."}
     },
     {
       "name": "Connecticut Av",
@@ -2384,7 +2592,7 @@
         "name": "Rock Creek Park",
         "shape": "rect",
         "fill": "#CDE0A0",
-        "x": 870,
+        "x": 856,
         "y": 384,
         "width": 90,
         "height": 210,
@@ -2393,10 +2601,11 @@
         "label": {
           "id": "geo-label-rock-creek",
           "lines": ["Rock", "Creek", "Park"],
-          "at": [915, 489],
+          "at": [901, 489],
           "rotate": 0,
           "note": "three horizontal lines centred on the rect's own centre; no line, station or station label lies inside the rect."
-        }
+        },
+        "note": "x 856 centres the rect in the white between the Red spoke's casing (988) and the end of Cleveland Park's name, about 42 on each side at the rect's bottom, where that white is narrowest. At 870 it was 28 from the casing and 56 from the name."
       },
       {
         "id": "park-white-house",
@@ -2425,10 +2634,12 @@
         "fill": "#CDE0A0",
         "x": 885.03693,
         "y": 912,
-        "width": 500.96307,
+        "width": 505.96307,
         "height": 76,
         "rx": 8.9974928,
         "ry": 7,
+        "east_rx": 0,
+        "east_ry": 0,
         "label": {
           "id": "geo-label-national-mall",
           "lines": ["NATIONAL MALL"],
@@ -2547,11 +2758,11 @@
         "stroke_width": 12,
         "linecap": "butt",
         "segments": [
-          {"kind": "straight", "from": [915, 588], "to": [915, 617.6075], "angle": 90.0},
-          {"kind": "fillet", "r": 14, "to": [904.5089, 631.1607], "tangent": "exact"},
-          {"kind": "arc", "ring": "rock-creek", "from_angle": 255.485, "to_angle": 215.0, "dir": "ccw"}
+          {"kind": "straight", "from": [901, 588], "to": [901, 621.5083], "angle": 90.0},
+          {"kind": "fillet", "r": 14, "to": [891.0051, 634.9232], "tangent": "exact"},
+          {"kind": "arc", "ring": "rock-creek", "from_angle": 253.3768, "to_angle": 215.0, "dir": "ccw"}
         ],
-        "note": "the green valley of Rock Creek, from Rock Creek Park down to the Potomac at Georgetown Waterfront Park: the same 12-wide band as the bank trails, with no name of its own. It leaves the park rect's bottom edge (y = 594) at x = 915, the rect's own centre line - the axis the park's name and the zoo icon stand on - drops to a fillet of radius 14 and turns onto the `rock-creek` ring, which it follows counter-clockwise between Woodley Park's and Dupont Circle's labels. It crosses the Red line at theta 231, between those two stations - where the creek passes under the line on the ground - and ends at theta 215, inside Georgetown Waterfront Park, 26 from the bank, running down the park's east end with its east edge flush with the park's. Both ends are hidden in the parks' own green. The fillet is tangent to the vertical and to the ring: its centre is at (883, 622.7256), 381 + 14 from the map centre."
+        "note": "the green valley of Rock Creek, from Rock Creek Park down to the Potomac at Georgetown Waterfront Park: the same 12-wide band as the bank trails, with no name of its own. It leaves the park rect's bottom edge (y = 594) at x = 901, the rect's own centre line - the axis the park's name and the zoo icon stand on - drops to a fillet of radius 14 and turns onto the `rock-creek` ring, which it follows counter-clockwise between Woodley Park's and Dupont Circle's labels. It crosses the Red line at theta 231, between those two stations - where the creek passes under the line on the ground - and ends at theta 215, inside Georgetown Waterfront Park, 26 from the bank, running down the park's east end with its east edge flush with the park's. Both ends are hidden in the parks' own green. The fillet is tangent to the vertical and to the ring: its centre is at (887, 621.5083), 381 + 14 from the map centre, at theta 253.3768, where the arc starts."
       },
       {
         "id": "park-potomac-north-inner",
@@ -2739,6 +2950,20 @@
           {"kind": "arc", "ring": "dc-boundary-south", "from_angle": 47.0, "to_angle": 80.0, "dir": "cw"}
         ],
         "note": "the District's land boundary with Maryland, as a line of round dots, 3 across and 7 apart. It is not the real diamond - this map's distances are not the ground's - but a line made of the map's own rings. From the Potomac's north bank, just upstream of Georgetown Waterfront, it follows ONE ring about the map's centre, r = 590: round the north between Tenleytown-AU at 552 and Friendship Heights at 600, whose dot (in to 588) covers the line by 2, Takoma at 558 and Silver Spring at 654, Fort Totten at 558 and West Hyattsville at 612; over Kenilworth Park in the 31 of space between the Anacostia's park band (572) and the New Carrollton pair's casing (603), 18 from the first and 13 from the second, to theta 345.69 - half-way between Cheverly at 343.69 and Deanwood at 347.69. There it turns out along the radius, under the pair, to r = 686, half-way between the Silver line's casing (655) and the Beltway's inner edge (717), and is a parallel of the Silver line past Deanwood and Minnesota Av, which are in the District: on the 686 ring to theta 354.61, where that ring meets the 45-degree line through the boundary's crossing of the east trunk. The radial is two straights: the second has its own `from`, under the Silver line and 5 dash periods and 0.2 (35.7) short of the corner, so the dash pattern starts again there and a dot ends 0.1 before the corner - on it to the eye, and whole, where a dash that went round the corner would be bent. From that sharp corner it is ONE straight, parallel to the Silver diagonal and 45.7 from its centre line, to the 590 ring at theta 2.84, under the east trunk and 17 from the centre of Benning Rd's dot, which hides the join with the trunk. Capitol Heights (613.4) is outside. From there it is the 590 ring again, with no step, down the east side, 18 outside the Anacostia's park band, to theta 47.0. There it steps out, between Southern Av at 45.5 and Congress Heights at 49.5 and the nearer to Southern Av, 4 from the edge of its dot, to r = 664, and runs down to the Potomac. Both ends run on under the water, which is drawn over the parks. West of the river there is no line: the Potomac is the boundary. The labels of Deanwood and Minnesota Av start at r = 663, so the line goes behind their first letters. Station labels that lie across the line are not avoided by the route: `label_gap` cuts the line instead - the generator leaves the dots out wherever the line comes within `label_gap` of a label. The labels of the stations in `label_gap_except` - Friendship Heights, Takoma and Fort Totten, which the line runs along and does not cross - make no gap. It is the last entry of `geo.parks`, so it is drawn over every park and under the water and the lines."
+      },
+      {
+        "id": "boundary-md-wv",
+        "name": "Maryland - West Virginia boundary",
+        "shape": "trail",
+        "stroke": "#8C968C",
+        "stroke_width": 3,
+        "linecap": "round",
+        "dasharray": "0.1 7",
+        "segments": [
+          {"kind": "straight", "from": [142.57, 402.29], "to": [142.57, 402.29]},
+          {"kind": "arc", "ring": "md-wv-boundary", "from_angle": 214.88, "to_angle": 229.0, "dir": "cw"}
+        ],
+        "note": "where the Brunswick Line crosses into West Virginia, between Brunswick and Harpers Ferry, in the DC boundary's form: round dots, 3 across and 7 apart, on one ring (`md-wv-boundary`, r 1045.2) across the line's radial (224.5 deg). It is not the real boundary, the Potomac: only a short mark across the line. On the upper side it goes 4.5 deg, to 229.0, about the length of the Rockville ring (`marc-rockville`), and stops about 38 below the legend's header; on the lower side it goes 9.62 deg, to 214.88, past the `MD` and `WV` names (`boundary_labels`), which are past the station names. An arc cannot open a path, so it starts with a straight of no length at its 214.88 deg end."
       }
     ],
     "water": {
@@ -2880,9 +3105,11 @@
         "label": {
           "id": "geo-label-east-potomac",
           "lines": ["East Potomac Park"],
-          "at": [1082.65, 1197.7],
+          "above_lines": true,
+          "halo": {"stroke": "#CDE0A0", "stroke_width": 3},
+          "at": [1082.65, 1192.7],
           "rotate": 90,
-          "note": "one line reading top to bottom on the island's centre line, in the middle of the free part between the Jefferson Memorial icon (bottom at y = 1130.45) and the Yellow line's casing edge (about y = 1265 on that line). The ~100-long text at 12 px spans y 1148 - 1248, 17 from each."
+          "note": "one line reading top to bottom on the island's centre line, 5 above the middle of the free part (the Jefferson Memorial icon moved up 3.5 with it, the name 1.5 more), so the name clears the VRE line, between the Jefferson Memorial icon (bottom at y = 1126.95) and the Yellow line's casing edge (about y = 1265 on that line). The ~100-long text at 12 px spans y 1148 - 1248, 17 from each."
         },
         "note": "vertical 55.5 x 313.7 rounded rect, y 1095.7-1409.4, centred in the south arm: the arm runs from x = 1020.9 to 1144.3 (centre 1082.6), which leaves 34 of water on each side. Its north end runs up into the Tidal Basin and its south tip - Hains Point - ends 45.7 above the DCA apron."
       },
@@ -2891,21 +3118,21 @@
         "name": "Old Town Alexandria",
         "shape": "rect",
         "fill": "#FAEFBE",
-        "x": 1004.75,
+        "x": 1017.0,
         "y": 1586.5,
         "width": 34,
         "height": 119.2,
         "rx": 8,
         "ry": 8,
-        "label": {"id": "geo-label-old-town", "lines": ["Alexandria"], "at": [1021.75, 1657.23], "rotate": 90, "fill": "#5E3D00", "note": "one line reading top to bottom, below the anchor icon, as The Wharf's name reads: the ~58-long name at 12 px is 2 above King St-Old Town's y, moved up by eye, and spans y 1628.2 - 1686.2, 15.7 below the icon's foot (1612.5) and 19.5 above the strip's end. `fill` is the dark brown of The Wharf's name."},
-        "note": "Old Town Alexandria's waterfront as a pale yellow area, the fill of The Wharf, built as The Wharf's strip is: the waterfront anchor at its top and the name below it, reading top to bottom. It is against the Yellow line and starts across from Braddock Rd: its top, y = 1586.5, is level with the top of that station's dot. Its left edge is x = 1004.75, the west edge of the bank trail, which is at the Yellow line's casing (1005). The Virginia bank has no free land here, so the area lies over the trail's full width, the bank (x = 1022.5) and 16 of the water, as the DCA apron does. It is in `geo.islands` and not in `geo.parks` because that group is drawn above the water. It is 34 wide, the width of The Wharf and of National Harbor, and it stops short of the Capital Beltway: its foot, y = 1705.7, is 10.3 above the Beltway's inner edge at the area's east corner (y = 1715.95 at x = 1038.75), as National Harbor's top is 10.3 below the outer edge. The real waterfront goes on under the Beltway to Jones Point; an area drawn across the ring was tried and taken back. Inside it the anchor is The Wharf's 17.2 below the top, the name is centred 2 above King St-Old Town's own y (1659.23), 15.7 below the anchor's foot, and 19.5 of amber is below the name."
+        "label": {"id": "geo-label-old-town", "lines": ["Alexandria"], "at": [1034.0, 1657.23], "rotate": 90, "fill": "#5E3D00", "note": "one line reading top to bottom, below the anchor icon, as The Wharf's name reads: the ~58-long name at 12 px is 2 above King St-Old Town's y, moved up by eye, and spans y 1628.2 - 1686.2, 15.7 below the icon's foot (1612.5) and 19.5 above the strip's end. `fill` is the dark brown of The Wharf's name."},
+        "note": "Old Town Alexandria's waterfront as a pale yellow area, the fill of The Wharf, built as The Wharf's strip is: the waterfront anchor at its top and the name below it, reading top to bottom. It is against the Yellow line and starts across from Braddock Rd: its top, y = 1586.5, is level with the top of that station's dot. Its left edge is x = 1017, 12.25 east of the west edge of the bank trail (1004.75, at the Yellow line's casing, 1005), to make room for the VRE line between it and the Yellow line (x 1011). The Virginia bank has no free land here, so the area lies over the trail's full width, the bank (x = 1022.5) and 16 of the water, as the DCA apron does. It is in `geo.islands` and not in `geo.parks` because that group is drawn above the water. It is 34 wide, the width of The Wharf and of National Harbor, and it stops short of the Capital Beltway: its foot, y = 1705.7, is 10.3 above the Beltway's inner edge at the area's east corner (at x = 1051), as National Harbor's top is 10.3 below the outer edge. The real waterfront goes on under the Beltway to Jones Point; an area drawn across the ring was tried and taken back. Inside it the anchor is The Wharf's 17.2 below the top, the name is centred 2 above King St-Old Town's own y (1659.23), 15.7 below the anchor's foot, and 19.5 of amber is below the name."
       },
       {
         "id": "ferry-potomac",
         "name": "Potomac water taxi: Georgetown - The Wharf - Old Town - National Harbor",
         "shape": "trail", "stroke": "#ffffff", "stroke_width": 2.5, "linecap": "butt", "dasharray": "6 5",
-        "segments": [{"kind": "straight", "from": [643.26, 805.11], "to": [637.12, 813.14]}, {"kind": "ellipse_arc", "rx": 8, "ry": 8, "rotation": 0, "sweep": 0, "to": [638.62, 824.35]}, {"kind": "straight", "to": [801.1, 948.53]}, {"kind": "ellipse_arc", "rx": 20, "ry": 20, "rotation": 0, "sweep": 0, "to": [823.15, 950.03]}, {"kind": "ellipse_arc", "rx": 34.29, "ry": 34.29, "rotation": 0, "sweep": 1, "to": [861.5, 1006.66]}, {"kind": "ellipse_arc", "rx": 20, "ry": 20, "rotation": 0, "sweep": 0, "to": [854.26, 1025.79]}, {"kind": "ellipse_arc", "rx": 148, "ry": 148, "rotation": 0, "sweep": 0, "to": [1000, 1148]}, {"kind": "ellipse_arc", "rx": 37.75, "ry": 55.33, "rotation": 0, "sweep": 1, "to": [1037.75, 1203.33]}, {"kind": "straight", "to": [1037.75, 1405]}, {"kind": "cubic", "d": "c 0,30 45.25,35 45.25,65", "to": [1083, 1470]}],
-        "note": "the water taxi on the Potomac, as a thin white dashed line on the water - white as the Great Falls icon is - between the four waterfronts that have the anchor icon. Every turn is an arc that is tangent to the parts it joins. This part starts 5 from the boat off Georgetown Waterfront Park, goes straight out for 10.1, square to the bank and on the boat's own axis, and turns a quarter on an arc of radius 8 into the middle of the north-west arm and goes down it. Theodore Roosevelt Island is in the middle of the arm, and the river's main channel is on its District side, so the line goes round the island's north and east sides: it leaves the middle on an arc of radius 20 and follows a circle about the island's own centre, 6.3 off the island - in the middle of the water between the island and the District's bank - for 171 deg, down to the island's south-east. There an arc of radius 20 turns it onto the circle of radius 148 about the map's centre - the middle of the water round the bulge, a ring of the map, as the bank's green and the Blue line beside it are. It follows that ring to the bottom, turns into the south arm on a quarter of an ellipse, goes down the middle of the channel west of East Potomac Park (x = 1037.75), and below Hains Point one S curve takes it to the middle of the south arm, at (1083, 1470), where `ferry-wharf` and `ferry-national-harbor` meet it. Those two and `ferry-old-town` are each written FROM their boat, so that a whole dash starts 5 from each boat. They are in `geo.islands`, which is drawn above the water; the Metro lines cross over them. The service is seasonal, and its routes are the operator's, not surveyed here."
+        "segments": [{"kind": "straight", "from": [643.26, 805.11], "to": [637.12, 813.14]}, {"kind": "ellipse_arc", "rx": 8, "ry": 8, "rotation": 0, "sweep": 0, "to": [638.62, 824.35]}, {"kind": "straight", "to": [801.1, 948.53]}, {"kind": "ellipse_arc", "rx": 20, "ry": 20, "rotation": 0, "sweep": 0, "to": [823.15, 950.03]}, {"kind": "ellipse_arc", "rx": 34.29, "ry": 34.29, "rotation": 0, "sweep": 1, "to": [861.5, 1006.66]}, {"kind": "ellipse_arc", "rx": 20, "ry": 20, "rotation": 0, "sweep": 0, "to": [854.26, 1025.79]}, {"kind": "cubic", "d": "c 1.5,8.51 2.67,17.07 5.06,25.41", "to": [859.32, 1051.2]}, {"kind": "cubic", "d": "c 2.39,8.35 5.4,16.77 9.28,24.66", "to": [868.6, 1075.87]}, {"kind": "cubic", "d": "c 3.88,7.89 8.59,15.64 13.98,22.66", "to": [882.58, 1098.53]}, {"kind": "cubic", "d": "c 5.39,7.03 11.71,13.59 18.39,19.5", "to": [900.96, 1118.03]}, {"kind": "cubic", "d": "c 6.68,5.91 14.05,11.27 21.69,15.94", "to": [922.66, 1133.96]}, {"kind": "cubic", "d": "c 7.65,4.67 15.81,8.84 24.19,12.07", "to": [946.85, 1146.03]}, {"kind": "cubic", "d": "c 8.38,3.23 17.25,5.68 26.11,7.33", "to": [972.96, 1153.37]}, {"kind": "cubic", "d": "c 8.86,1.65 17.99,2.59 27.04,2.59", "to": [1000.0, 1155.96]}, {"kind": "ellipse_arc", "rx": 37.75, "ry": 47.37, "rotation": 0, "sweep": 1, "to": [1037.75, 1203.33]}, {"kind": "straight", "to": [1037.75, 1405]}, {"kind": "cubic", "d": "c 0,30 45.25,35 45.25,65", "to": [1083, 1470]}],
+        "note": "the water taxi on the Potomac, as a thin white dashed line on the water - white as the Great Falls icon is - between the four waterfronts that have the anchor icon. Every turn is an arc that is tangent to the parts it joins. This part starts 5 from the boat off Georgetown Waterfront Park, goes straight out for 10.1, square to the bank and on the boat's own axis, and turns a quarter on an arc of radius 8 into the middle of the north-west arm and goes down it. Theodore Roosevelt Island is in the middle of the arm, and the river's main channel is on its District side, so the line goes round the island's north and east sides: it leaves the middle on an arc of radius 20 and follows a circle about the island's own centre, 6.3 off the island - in the middle of the water between the island and the District's bank - for 171 deg, down to the island's south-east. There an arc of radius 20 turns it into the middle of the water round the bulge, which is not a ring: the water's outer edge is the ring r 180, but its inner edge is the Tidal Basin shore (`park-tidal-basin`, a hand-drawn curve, its outer edge 17.35 from its line), 116 from the map's centre at the top of the bend and 132 at the bottom. So the line follows the middle of the two, (inner + 180) / 2, from r 148.03 at theta 169.97 to 155.96 at the bottom (theta 90), as eight cubic curves through the middle points every 10 deg, tangent at both ends; it was the ring r 148, which is the middle only at the top and was 8 too far in at the bottom. It turns into the south arm on a quarter of an ellipse, goes down the middle of the channel west of East Potomac Park (x = 1037.75), and below Hains Point one S curve takes it to the middle of the south arm, at (1083, 1470), where `ferry-wharf` and `ferry-national-harbor` meet it. Those two and `ferry-old-town` are each written FROM their boat, so that a whole dash starts 5 from each boat. They are in `geo.islands`, which is drawn above the water; the Metro lines cross over them. The service is seasonal, and its routes are the operator's, not surveyed here."
       },
       {
         "id": "ferry-national-harbor",
@@ -2925,7 +3152,7 @@
         "id": "ferry-old-town",
         "name": "Potomac water taxi, the branch to Old Town Alexandria",
         "shape": "trail", "stroke": "#ffffff", "stroke_width": 2.5, "linecap": "butt", "dasharray": "6 5",
-        "segments": [{"kind": "straight", "from": [1065, 1603.7], "to": [1083, 1603.7]}],
+        "segments": [{"kind": "straight", "from": [1077.25, 1603.7], "to": [1083, 1603.7]}],
         "note": "a short level branch from the main line to the boat off the amber Old Town area (which ends at x = 1038.75), level with the area's anchor."
       },
       {
@@ -2967,7 +3194,7 @@
         "at": [
           {"angle": 149.63, "offset": -8, "rotate": 59.63},
           {"angle": 299.8, "offset": 8, "rotate": 29.8},
-          {"angle": 223, "offset": 0, "rotate": -47},
+          {"angle": 221.33, "offset": 0, "rotate": -48.67},
           {"angle": 57, "offset": 0, "rotate": -33}
         ],
         "parts": [
@@ -2976,7 +3203,7 @@
           {"d": "M -12.42,-6.04 H 12.42", "fill": "none", "stroke": "#ffffff", "stroke_width": 0.5}
         ],
         "text": {"text": "495", "size_px": 10.72, "weight": 700, "fill": "#ffffff", "dy": 4.39, "squeeze": 0.76, "note": "`size_px` is in the shield's own frame: with the shield's `scale` (1.119) the type is 12 px on the map."},
-        "note": "the Interstate 495 shield, in its official red and blue, as the first sign of each of the ring's two names: on the name's own line (`offset` from the ring, as the name has), turned with it (`rotate`) and 6 before its first letter. The names' widths are from Inter's own metrics (246 and 265), and each name is moved along the ring so that the shield and the name together are centred where the name alone was. The shape is traced from the road sign for a number of three figures, 25 wide and 19.66 high in its own frame with the origin at its centre: two shallow dips that meet in a point at the top, pointed top corners, a red crown that gets wider down to a white rule, and a blue field whose sides are one round curve from the rule to a blunt point at the bottom, with no straight part. `scale` 1.119 makes it 22 high and 28.0 wide, the size of a landmark icon: its top is 19 from the ring's centre line, on the names' side, and its point at the bottom goes across the ring to the ring's far edge, so the shield stands ON the road. Its `offset` (8) is thus less than the names'. Two more shields stand alone in the other two quadrants, with no name, and their centres are ON the ring's centre line (`offset` 0), so the ring goes through their middle: at 223 deg in the north-west, turned as a name outside the ring is, between the Great Falls icon and the Red Line, and at 57 deg in the south-east, turned as a name inside the ring is, between Congress Heights' name and the District's boundary names; nothing is within 45 of either. The crown has no word in it. The number is in the map's bold type, made narrower (`squeeze`) to the width that the road sign's narrow figures have."
+        "note": "the Interstate 495 shield, in its official red and blue, as the first sign of each of the ring's two names: on the name's own line (`offset` from the ring, as the name has), turned with it (`rotate`) and 6 before its first letter. The names' widths are from Inter's own metrics (246 and 265), and each name is moved along the ring so that the shield and the name together are centred where the name alone was. The shape is traced from the road sign for a number of three figures, 25 wide and 19.66 high in its own frame with the origin at its centre: two shallow dips that meet in a point at the top, pointed top corners, a red crown that gets wider down to a white rule, and a blue field whose sides are one round curve from the rule to a blunt point at the bottom, with no straight part. `scale` 1.119 makes it 22 high and 28.0 wide, the size of a landmark icon: its top is 19 from the ring's centre line, on the names' side, and its point at the bottom goes across the ring to the ring's far edge, so the shield stands ON the road. Its `offset` (8) is thus less than the names'. Two more shields stand alone in the other two quadrants, with no name, and their centres are ON the ring's centre line (`offset` 0), so the ring goes through their middle: at 221.33 deg in the north-west, turned as a name outside the ring is, midway on the ring between the Potomac's north bank (213.89) and the MARC Brunswick Line beside the Red Line (228.77), 93.2 from each, and at 57 deg in the south-east, turned as a name inside the ring is, between Congress Heights' name and the District's boundary names; nothing is within 45 of the south-east one. The crown has no word in it. The number is in the map's bold type, made narrower (`squeeze`) to the width that the road sign's narrow figures have."
       },
       "labels_note": "type OUTSIDE the ring, centred at `angle`: one line that names the ring and the state it is in, `CAPITAL BELTWAY – MARYLAND` in the north-east and `CAPITAL BELTWAY – VIRGINIA` in the south-west. The states' names stood inside the ring, as lines of their own, before. `offset` puts the caps' centre 11.1 from the ring's centre line: 3 of ring half-width, 3 of paper, and 5.1 of half cap height. The ~260-wide bold text spans about 20 deg, and `half_span` is the carrier arc's length each side. The two copies sit in opposite quadrants.",
       "labels": [
@@ -2986,7 +3213,7 @@
           "angle": 138.14,
           "half_span": 12.0,
           "offset": -11.1,
-          "note": "the name and the 495 shield before it are ONE block, 6 apart, and the block's middle is at 139.5: the name's own middle is thus 138.14, 16.99 along the ring from it. 139.5 is the middle of the free stretch 116 - 162 deg on the 1.5 grid; the name spans about 129 - 150. `offset` -13.1 puts it INSIDE the ring, where the paper is free: outside, the dashed VRE line to Manassas runs on a ring 28 from the Beltway and the name was between the two. In the map's lower half the type runs counter-clockwise with its top toward the ring, so it reads left to right and upward."
+          "note": "the name and the 495 shield before it are ONE block, 6 apart, and the block's middle is at 139.5: the name's own middle is thus 138.14, 16.99 along the ring from it. 139.5 is the middle of the free stretch 116 - 162 deg on the 1.5 grid; the name spans about 129 - 150. `offset` -13.1 puts it INSIDE the ring, where the paper is free: outside, the VRE line to Manassas runs on a ring 28 from the Beltway and the name was between the two. In the map's lower half the type runs counter-clockwise with its top toward the ring, so it reads left to right and upward."
         },
         {
           "id": "geo-label-capital-beltway-ne",
@@ -3000,13 +3227,15 @@
       "note": "r = R = 720; the grid is defined by this ring"
     },
     "boundary_labels": {
-      "note": "the names of the three jurisdictions, in the grey of the Beltway's name. The District's and Maryland's stand on the two sides of the boundary, each `offset` 8.5 off the line, as two groups whose names share one edge on one radius (`align`): the south group's names START at theta 76.0, their left edge, and the north-west group's START at theta 219.0, also their left edge. The south group is on the boundary's south ring (r = 664), its District name centred near theta 69.0, in the one long stretch of the boundary that no station label crosses, between the end of Congress Heights' label (theta 62) and the Potomac (theta 77). The north-west group is on the main ring (r = 590) in its first stretch, between the Potomac and the Red line, above Georgetown Waterfront Park: the boundary leaves the river at theta 211.5 and the Red line's casing is at 229.8. The names start at 219.0, on the 1.5 grid and about 12 past the park's inland edge (217.8 at this radius), and the longest, `DISTRICT OF`, ends near 228.4, about 14 short of the Red line's casing; Friendship Heights' and Tenleytown-AU's own names are east of the line. The group was at theta 255.8, in the white between those two names and the west edge of Rock Creek Park. At the font's 12 the District's name in one line (160) is as long as the whole stretch, so it is two concentric lines, `DISTRICT OF` and `COLUMBIA`, 10.5 apart - 1.8 of white between the two lines of capitals. In the north-east every stretch of the ring is crossed by a slanted station label. Virginia has no boundary line - the Potomac is the boundary - so its name is there twice. One is straight type on the river's Virginia bank, parallel to the water (37.5) and 14 outside the bank's green; it, the river's name and Georgetown Waterfront's name are centred on one line across the river. The other is in the Beltway's own name outside the ring in the south-west, `CAPITAL BELTWAY – VIRGINIA`, and Maryland's is in the north-east one (`geo.beltway.labels`).",
+      "note": "the names of the three jurisdictions, in the grey of the Beltway's name. The District's and Maryland's stand on the two sides of the boundary, each `offset` 8.5 off the line, as two groups whose names share one edge on one radius (`align`): the south group's names START at theta 76.0, their left edge, and the north-west group's START at theta 219.0, also their left edge. The south group is on the boundary's south ring (r = 664), its District name centred near theta 69.0, in the one long stretch of the boundary that no station label crosses, between the end of Congress Heights' label (theta 62) and the Potomac (theta 77). The north-west group is on the main ring (r = 590) in its first stretch, between the Potomac and the Red line, above Georgetown Waterfront Park: the boundary leaves the river at theta 211.5 and the Red line's casing is at 229.8. The names start at 219.0, on the 1.5 grid and about 12 past the park's inland edge (217.8 at this radius), and the longest, `DISTRICT OF`, ends near 228.4, about 14 short of the Red line's casing; Friendship Heights' and Tenleytown-AU's own names are east of the line. The group was at theta 255.8, in the white between those two names and the west edge of Rock Creek Park. At the font's 12 the District's name in one line (160) is as long as the whole stretch, so it is two concentric lines, `DISTRICT OF` and `COLUMBIA`, 10.5 apart - 1.8 of white between the two lines of capitals. In the north-east every stretch of the ring is crossed by a slanted station label. The Maryland - West Virginia boundary (`md-wv-boundary`, r 1045.2), where the Brunswick Line crosses it between Brunswick and Harpers Ferry, has short names, `MD` inside and `WV` outside, 8.5 off the line, on the radial's lower side: they END at theta 217.98, their right edge, about 35 past the end of Harpers Ferry's name (219.86), whose ring WV shares, and past Brunswick's (220.8), whose ring MD shares, about 2.1 deg from the boundary's lower end (214.88). Virginia has no boundary line - the Potomac is the boundary - so its name is there twice. One is straight type on the river's Virginia bank, parallel to the water (37.5) and 14 outside the bank's green; it, the river's name and Georgetown Waterfront's name are centred on one line across the river. The other is in the Beltway's own name outside the ring in the south-west, `CAPITAL BELTWAY – VIRGINIA`, and Maryland's is in the north-east one (`geo.beltway.labels`).",
       "on_ring": [
         {"id": "geo-label-district-of-columbia", "text": "DISTRICT OF COLUMBIA", "ring": "dc-boundary-south", "angle": 76.0, "align": "start", "half_span": 7.5, "offset": -8.5},
         {"id": "geo-label-maryland", "text": "MARYLAND", "ring": "dc-boundary-south", "angle": 76.0, "align": "start", "half_span": 4.0, "offset": 8.5},
         {"id": "geo-label-district-of-columbia-north", "text": "DISTRICT OF", "ring": "dc-boundary", "angle": 219.0, "align": "start", "half_span": 5.0, "offset": -8.5},
         {"id": "geo-label-district-of-columbia-north-2", "text": "COLUMBIA", "ring": "dc-boundary", "angle": 219.0, "align": "start", "half_span": 4.0, "offset": -19.0},
-        {"id": "geo-label-maryland-north", "text": "MARYLAND", "ring": "dc-boundary", "angle": 219.0, "align": "start", "half_span": 4.0, "offset": 8.5}
+        {"id": "geo-label-maryland-north", "text": "MARYLAND", "ring": "dc-boundary", "angle": 219.0, "align": "start", "half_span": 4.0, "offset": 8.5},
+        {"id": "geo-label-maryland-wv", "text": "MD", "ring": "md-wv-boundary", "angle": 217.98, "align": "end", "half_span": 1.5, "offset": -8.5},
+        {"id": "geo-label-west-virginia", "text": "WV", "ring": "md-wv-boundary", "angle": 217.98, "align": "end", "half_span": 1.5, "offset": 8.5}
       ],
       "straight": [
         {"id": "geo-label-virginia", "lines": ["VIRGINIA"], "at": [516.32, 819.47], "rotate": 37.5}
@@ -3020,7 +3249,7 @@
         {
           "id": "landmark-us-capitol",
           "name": "US Capitol",
-          "at": [1355.1, 950],
+          "at": [1359.1, 950],
           "scale": 1.5,
           "d": "M -0.7,-8.06 L -0.42,-8.84 C -0.53,-9.39 -0.5,-10.17 -0.25,-10.64 C -0.44,-10.86 -0.44,-11.33 -0.22,-11.52 L 0.0,-12.13 L 0.22,-11.52 C 0.44,-11.33 0.44,-10.86 0.25,-10.64 C 0.5,-10.17 0.53,-9.39 0.42,-8.84 L 0.7,-8.06 Z M -1.49,-6.88 A 1.49,1.02 0 0 1 1.49,-6.88 H 1.64 V -6.57 H 1.25 V -4.93 L 1.8,-4.46 H -1.8 L -1.25,-4.93 V -6.57 H -1.64 V -6.88 Z M -0.84,-6.26 H -0.56 V -5.16 H -0.84 Z M -0.14,-6.26 H 0.14 V -5.16 H -0.14 Z M 0.56,-6.26 H 0.84 V -5.16 H 0.56 Z M -5.95,2.82 C -5.32,2.19 -5.09,1.25 -4.93,0.31 C -4.54,-2.35 -2.5,-4.15 0.0,-4.15 C 2.5,-4.15 4.54,-2.35 4.93,0.31 C 5.09,1.25 5.32,2.19 5.95,2.82 A 5.95,0.7 0 0 0 -5.95,2.82 Z M -4.57,0.39 A 0.19,0.19 0 0 1 -4.19,0.39 V 0.73 A 0.19,0.19 0 0 1 -4.57,0.73 Z M -3.47,0.01 A 0.19,0.19 0 0 1 -3.1,0.01 V 0.35 A 0.19,0.19 0 0 1 -3.47,0.35 Z M -2.38,-0.27 A 0.19,0.19 0 0 1 -2.0,-0.27 V 0.08 A 0.19,0.19 0 0 1 -2.38,0.08 Z M -1.28,-0.43 A 0.19,0.19 0 0 1 -0.91,-0.43 V -0.09 A 0.19,0.19 0 0 1 -1.28,-0.09 Z M -0.19,-0.49 A 0.19,0.19 0 0 1 0.19,-0.49 V -0.14 A 0.19,0.19 0 0 1 -0.19,-0.14 Z M 0.91,-0.43 A 0.19,0.19 0 0 1 1.28,-0.43 V -0.09 A 0.19,0.19 0 0 1 0.91,-0.09 Z M 2.0,-0.27 A 0.19,0.19 0 0 1 2.38,-0.27 V 0.08 A 0.19,0.19 0 0 1 2.0,0.08 Z M 3.1,0.01 A 0.19,0.19 0 0 1 3.47,0.01 V 0.35 A 0.19,0.19 0 0 1 3.1,0.35 Z M 4.19,0.39 A 0.19,0.19 0 0 1 4.57,0.39 V 0.73 A 0.19,0.19 0 0 1 4.19,0.73 Z M -7.35,6.56 V 4.69 A 7.35,2.03 0 0 1 7.35,4.69 V 6.56 L 6.1,6.16 V 4.25 A 0.47,0.47 0 0 0 5.16,4.25 V 5.91 L 4.22,5.71 V 3.81 A 0.47,0.47 0 0 0 3.29,3.81 V 5.54 L 2.35,5.42 V 3.59 A 0.47,0.47 0 0 0 1.41,3.59 V 5.33 L 0.47,5.29 V 3.52 A 0.47,0.47 0 0 0 -0.47,3.52 V 5.29 L -1.41,5.33 V 3.59 A 0.47,0.47 0 0 0 -2.35,3.59 V 5.42 L -3.29,5.54 V 3.81 A 0.47,0.47 0 0 0 -4.22,3.81 V 5.71 L -5.16,5.91 V 4.25 A 0.47,0.47 0 0 0 -6.1,4.25 V 6.16 Z M -9.07,10.72 V 8.29 A 9.07,2.5 0 0 1 9.07,8.29 V 10.72 L 7.98,10.52 V 8.76 A 0.47,0.47 0 0 0 7.04,8.76 V 10.37 L 6.1,10.24 V 8.21 A 0.47,0.47 0 0 0 5.16,8.21 V 10.13 L 4.22,10.03 V 7.89 A 0.47,0.47 0 0 0 3.29,7.89 V 9.96 L 2.35,9.9 V 7.72 A 0.47,0.47 0 0 0 1.41,7.72 V 9.86 L 0.47,9.84 V 7.67 A 0.47,0.47 0 0 0 -0.47,7.67 V 9.84 L -1.41,9.86 V 7.72 A 0.47,0.47 0 0 0 -2.35,7.72 V 9.9 L -3.29,9.96 V 7.89 A 0.47,0.47 0 0 0 -4.22,7.89 V 10.03 L -5.16,10.13 V 8.21 A 0.47,0.47 0 0 0 -6.1,8.21 V 10.24 L -7.04,10.37 V 8.76 A 0.47,0.47 0 0 0 -7.98,8.76 V 10.52 Z M -10.01,11.27 H 10.01 V 12.2 H -10.01 Z",
           "note": "the Capitol's dome on a plinth, this map's own drawing: the statue as a small figure on a foot; the lantern - a cap, a cornice and a drum with three slots on a flared base; the dome, taller than a half circle and flared at its foot, with a row of nine windows; and two rings of columns as floating tiers, seven arched openings in the upper ring and nine in the lower, each 0.94 wide in this frame so that they stay open at map size. The frame is 20 across and 24.4 high. Inside the National Mall's east end, which stops at Capitol South's x = 1386: at `scale` 1.5 it is 30 across and 36.6 high. It is centred in the patch of the Mall east of the Green line: the line's casing is at x = 1324.2 at this y and the Mall ends at 1386, so the icon keeps 15.9 on each side. The Library of Congress is on the other side of the edge."
@@ -3074,22 +3303,22 @@
         {
           "id": "landmark-library-of-congress",
           "name": "Library of Congress",
-          "at": [1403, 966],
+          "at": [1405, 966],
           "scale": 0.8,
           "d": "M 0,-5 C -3,-8 -8,-8 -11,-7 V 7 C -8,6 -3,6 0,9 C 3,6 8,6 11,7 V -7 C 8,-8 3,-8 0,-5 Z M -0.5,-3.5 h 1 v 10.5 h -1 z",
-          "note": "an open book, not the building: the Jefferson Building is a dome on a block and would read as a second Capitol. The slot is the gutter between the two pages. On paper just east of the National Mall, on the museums' south row (y = 966), below the Supreme Court's gavel and on its centre line (x = 1403). At `scale` 0.8 the book is 17.6 across: the Mall stops at Capitol South's x = 1386 and the book starts 8.2 past that edge, so the Mall's end separates the two icons. Its centre is 17 west of Eastern Market (x = 1420)."
+          "note": "an open book, not the building: the Jefferson Building is a dome on a block and would read as a second Capitol. The slot is the gutter between the two pages. On paper just east of the National Mall, on the museums' south row (y = 966), below the Supreme Court's gavel and on its centre line (x = 1405). At `scale` 0.8 the book is 17.6 across: the Mall stops at Capitol South's x = 1386 and the book starts 8.2 past that edge, so the Mall's end separates the two icons. Its centre is 17 west of Eastern Market (x = 1420)."
         },
         {
           "id": "landmark-jefferson-memorial",
           "name": "Jefferson Memorial",
-          "at": [1082.65, 1121.45],
+          "at": [1082.65, 1117.95],
           "d": "M -11,9 V 7.2 H -10.2 V -0.2 H -11 V -2.4 H -8.6 V -3.6 H -7.6 V -4.8 H -6.6 A 7.29,7.29 0 0 1 6.6,-4.8 H 7.6 V -3.6 H 8.6 V -2.4 H 11 V -0.2 H 10.2 V 7.2 H 11 V 9 Z M -9.0,0.5 h 1.543 v 6.7 h -1.543 z M -6.257,0.5 h 1.543 v 6.7 h -1.543 z M -3.514,0.5 h 1.543 v 6.7 h -1.543 z M -0.771,0.5 h 1.543 v 6.7 h -1.543 z M 1.972,0.5 h 1.543 v 6.7 h -1.543 z M 4.715,0.5 h 1.543 v 6.7 h -1.543 z M 7.458,0.5 h 1.543 v 6.7 h -1.543 z",
           "note": "a rotunda in the memorial's own proportions, taken from a photograph: of the 22 width, the colonnade is 7.4 high (eight tall columns, seven gaps), the entablature above it 2.2 and the widest part, two attic steps come in to 0.78 and 0.69 of the width, and the dome is a low cap, 0.6 of the width across and only 4.2 high - a saucer and not a half circle. The low dome on the wide ring is what tells it from the Lincoln Memorial and from the Capitol. At the north end of East Potomac Park, on the island's centre line, with the same 16.75 of green above the dome as at each side of the base - the tip of the peninsula that faces the Tidal Basin."
         },
         {
           "id": "landmark-national-zoo",
           "name": "Smithsonian National Zoo",
-          "at": [915, 562],
+          "at": [901, 562],
           "d": "M 0,0 C 3.5,0 7,4 7,7.5 C 7,10.5 4,11 0,10 C -4,11 -7,10.5 -7,7.5 C -7,4 -3.5,0 0,0 Z M -10.1,-2 a 2.6,2.6 0 1 0 5.2,0 a 2.6,2.6 0 1 0 -5.2,0 z M -5.8,-7 a 2.8,2.8 0 1 0 5.6,0 a 2.8,2.8 0 1 0 -5.6,0 z M 0.2,-7 a 2.8,2.8 0 1 0 5.6,0 a 2.8,2.8 0 1 0 -5.6,0 z M 4.9,-2 a 2.6,2.6 0 1 0 5.2,0 a 2.6,2.6 0 1 0 -5.2,0 z",
           "note": "a paw print: one pad and four toes. In Rock Creek Park, where the zoo is, in the lower part of the rect - the end nearest Woodley Park - and 66 below the park's name."
         },
@@ -3138,7 +3367,7 @@
           "id": "landmark-old-town",
           "name": "Old Town Alexandria waterfront",
           "like": "landmark-the-wharf",
-          "at": [1021.75, 1603.7],
+          "at": [1034.0, 1603.7],
           "scale": 0.8,
           "note": "the waterfront anchor for Old Town Alexandria, at the top of the amber `area-old-town` and above its name, placed as The Wharf's is in its area: on the strip's centre line, 17.2 below the strip's top, with the same 7.9 of amber above it as at each side. It is across from Braddock Rd, where the strip starts."
         },
@@ -3182,11 +3411,11 @@
           "id": "landmark-water-taxi-old-town",
           "name": "Potomac water taxi, Old Town Alexandria",
           "like": "landmark-water-taxi-georgetown",
-          "at": [1050, 1603.7],
+          "at": [1062.25, 1603.7],
           "scale": 0.75,
           "fill": "#FFC72C",
           "halo": {"stroke": "#11304A", "stroke_width": 3},
-          "note": "the water taxi boat off the amber Old Town area, 3 from its edge (x = 1038.75) and level with the area's anchor (y = 1603.7), at the end of the branch `ferry-old-town`."
+          "note": "the water taxi boat off the amber Old Town area, 3 from its edge (x = 1051) and level with the area's anchor (y = 1603.7), at the end of the branch `ferry-old-town`."
         },
         {
           "id": "landmark-water-taxi-national-harbor",
@@ -3304,7 +3533,7 @@
         {
           "id": "landmark-supreme-court",
           "name": "Supreme Court",
-          "at": [1403, 934],
+          "at": [1405, 934],
           "scale": 0.75,
           "d": "M -6,11.5 V 9.5 H -0.9 V -7 H -10 V -8.5 H -0.9 V -9.28 A 1.6,1.6 0 1 1 0.9,-9.28 V -8.5 H 10 V -7 H 0.9 V 9.5 H 6 V 11.5 Z M -8,-7 L -12,2.2 H -4 Z M -8,-5 L -5.1,1.4 H -10.9 Z M -12.6,2.2 H -3.4 A 4.6,4.6 0 0 1 -12.6,2.2 Z M 8,-7 L 4,2.2 H 12 Z M 8,-5 L 10.9,1.4 H 5.1 Z M 3.4,2.2 H 12.6 A 4.6,4.6 0 0 1 3.4,2.2 Z",
           "note": "the scales of justice: a post with a finial on a base, a beam across its top, and a pan hung from each end by two chains. On paper east of the National Mall's end, 16 above the Mall's centre line (y = 934) and directly above the Library of Congress's book, 17 clear of it - the Court stands north of the Library, behind the Capitol, on the ground. The pair is one column, 6 past the Mall's east edge, inside the Mall's own height (y 912 - 988), 16 above and 16 below its centre line (y = 950)."
@@ -3330,15 +3559,15 @@
             "id": "airport-dca-apron",
             "shape": "rect",
             "fill": "#5B6470",
-            "x": 1004.75,
+            "x": 1017.0,
             "y": 1454.24,
             "width": 44,
             "height": 44,
             "rx": 8,
             "ry": 8
           },
-          "at": [1026.75, 1476.24],
-          "note": "a 44 x 44 apron, the same square as Dulles's so the two airports are one sign, against the airport station across the line: its west edge is x = 1004.75, the west edge of the bank trail, which is at the Yellow line's casing (1005) - the edge Crystal City's badge and King St-Old Town's column had before they were tied to the labels - and its centre (1026.75, 1476.24) is at the station's y. It lies over the trail's full width, the bank (x 1021.5-1021.9 here) and 27 of the water. The plane at that centre keeps 5.4 off the apron on every side."
+          "at": [1039.0, 1476.24],
+          "note": "a 44 x 44 apron, the same square as Dulles's so the two airports are one sign, against the airport station across the line: its west edge is x = 1017, 12.25 east of the west edge of the bank trail (1004.75), to make room for the VRE line between it and the Yellow line (x 1011), which is at the Yellow line's casing (1005) - the edge Crystal City's badge and King St-Old Town's column had before they were tied to the labels - and its centre (1039.0, 1476.24) is at the station's y. It lies over the trail's full width, the bank (x 1021.5-1021.9 here) and 27 of the water. The plane at that centre keeps 5.4 off the apron on every side."
         },
         {
           "id": "geo-airport-iad",
@@ -3366,22 +3595,22 @@
             "id": "airport-bwi-apron",
             "shape": "rect",
             "fill": "#5B6470",
-            "x": 1812.7,
-            "y": 249.0,
+            "x": 1554.57,
+            "y": 346.45,
             "width": 44,
             "height": 44,
             "rx": 8,
             "ry": 8
           },
-          "at": [1834.7, 271.0],
-          "connections": {"services": ["amtrak", "marc"], "at": [1852.2, 236.5], "note": "the railways that go to the airport, as the same badges that the stations have: one row under the name, as a station's row is - its middle 9.5 below the name's baseline - and 6 above the apron. The row starts on the apron's left edge, where the name starts; it is 79 long."},
-          "label": {"id": "geo-label-bwi", "lines": ["Baltimore/Washington"], "at": [1812.7, 222.65], "rotate": 0, "align": "start", "note": "the airport's name, because no station carries it: `Baltimore/Washington`, the words that the code in the apron stands for, in one line of the `place` font. `align` start: the name starts on the apron's left edge, and the row of badges under it starts there too, so the name, the badges and the apron are one stack with one left edge."},
-          "note": "a trial: BWI is not on Metro; MARC and Amtrak go there from Union Station and New Carrollton. The same 44 x 44 apron as the other airports, outside the Beltway in the north-east, at the distance that makes the two parts of the dashed line equal: New Carrollton's tick is 367.2 along the line from Union Station's badges, and the apron's edge is 367.2 from the tick. The dashed `marc-bwi` line ends against it. Its distance from the Beltway is not the ground's: the airport is about 30 miles from Washington."
+          "at": [1576.57, 368.45],
+          "connections": {"at": [1617.57, 402.95], "services": ["amtrak"], "note": "Amtrak's badge, level, right of the MARC stopper and 3 from it (the badge `gap`), so the two make one row under the apron, MARC first and on the line's end. Amtrak's own timetable and its station page (amtrak.com/stations/bwi, October 2026) give the Acela, Northeast Regional, Vermonter and Silver Meteor/Palmetto at BWI; many Acela trains, not all, stop there."},
+          "label": {"id": "geo-label-bwi", "lines": ["Baltimore/Washington Airport"], "at": [1554.57, 333.95], "rotate": 0, "align": "start", "note": "the airport's name, because no station carries it: `Baltimore/Washington Airport`, the words that the code in the apron stands for and the word `Airport`, in one line of the `place` font, above the apron, its middle 12.5 above the apron's top edge, as at Manassas. `align` start: it starts on the apron's left edge, so the name and the apron are one stack with one left edge, as at Manassas; the apron is centred over the MARC stopper. It spans about x 1554 - 1719. The `marc-bwi` line ends below the apron, at its MARC stopper, which the apron is centred over."},
+          "note": "a trial: BWI is not on Metro; MARC and Amtrak go there from Union Station and New Carrollton. The same 44 x 44 apron as the other airports, outside the Beltway in the north-east, at the distance that made the two parts of the line equal when the line ended against it (New Carrollton, at r 759.1, is 367.2 along the line from Union Station's badges, and the apron's edge was 367.2 from it). The `marc-bwi` line now ends at a level MARC stopper 6 below the apron, at the end of the ring to BWI (`marc-bwi-ring`, theta 314.0), and the apron is centred over the stopper. On that ring BWI points the same way from Washington as Camden Station does on the Camden Line's, but less far out, as on the ground. MARC's badge is the stopper, and the airport's own `connections` puts Amtrak's beside it. Its distance from the Beltway is not the ground's: the airport is about 30 miles from Washington."
         },
         {
           "id": "geo-airport-hef",
           "code": "HEF",
-          "name": "Manassas Regional Airport",
+          "name": "Washington Manassas Airport",
           "apron": {
             "id": "airport-hef-apron",
             "shape": "rect",
@@ -3394,9 +3623,8 @@
             "ry": 8
           },
           "at": [91, 1238.5],
-          "connections": {"services": ["vre"], "at": [82, 1204.0], "note": "the VRE badge under the name, as BWI's row is: it starts on the apron's left edge (x = 69), its middle is 9.5 below the name's baseline, and it is 6 above the apron."},
-          "label": {"id": "geo-label-hef", "lines": ["Manassas"], "at": [69, 1190.15], "rotate": 0, "align": "start", "note": "the airport's name, above the apron: one line in the `place` font that starts on the apron's left edge (`align` start), with the VRE badge under it, so the name, the badge and the apron are one stack with one left edge, as at BWI."},
-          "note": "a trial: Manassas Regional Airport, a general aviation airport south-west of Washington, with no airline service and no Metro station; VRE's Manassas Line ends beside it. The same 44 x 44 apron as the other airports, with the code HEF. It is on Dulles's x (91), and as far below the map's horizontal centre line (y = 1000) as Dulles is above it, 238.5, so the two aprons are one column on the west side, in the free paper below Vienna's label."
+          "label": {"id": "geo-label-hef", "lines": ["Washington Manassas Airport"], "at": [69, 1204.0], "rotate": 0, "align": "start", "note": "the airport's name, above the apron: `Washington Manassas Airport`, the words that the code in the apron stands for and the word `Airport`, as at BWI, in one line of the `place` font that starts on the apron's left edge (`align` start), so the name and the apron are one stack with one left edge; its middle is where the VRE badge's was, 12.5 above the apron, now that the badge is the line's stopper at Broad Run. On the canvas's west side, `align` end would put the name past the left edge."},
+          "note": "a trial: Washington Manassas Airport (Manassas Regional Airport until 2026; the airfield is Harry P. Davis Field), south-west of Washington, with no Metro station and airline service from 2027; VRE's Manassas Line ends beside it, at Broad Run. The same 44 x 44 apron as the other airports, with the code HEF. It is on Dulles's x (91), and as far below the map's horizontal centre line (y = 1000) as Dulles is above it, 238.5, so the two aprons are one column on the west side, in the free paper below Vienna's label."
         }
       ]
     }
@@ -3436,9 +3664,9 @@
     ]
   },
   "connections": {
-    "note": "other railways a Metro station connects to, each as a small badge in the service's colour with its name in white capitals. A badge is PART OF ITS STATION'S LABEL, as the P and the hospital cross are, and has no co-ordinates: an item names its `station` and its `services`, and the generator puts the badges at that label, so they move with it. There are three places. `left` and `right` set the badge in the label's own line, before or after the name - beyond the marks when it is on their side. `bottom` draws the badges as a row of rounded rects under the last line of type, `badge.below_dy` from its baseline to their middle, on the edge the label is anchored to and turned with the label. The default is `bottom`, and every station has it now; an item's `place` selects the line. The colours are dark and muted on purpose, so no badge reads as a Metro line.",
+    "note": "other railways a Metro station connects to, each as a small badge in the service's colour with its name in white capitals. A badge is PART OF ITS STATION'S LABEL, as the P and the hospital cross are, and has no co-ordinates: an item names its `station` and its `services`, and the generator puts the badges at that label, so they move with it. There are three places. `left` and `right` set the badge in the label's own line, before or after the name - beyond the marks when it is on their side. `bottom` draws the badges as a row of rounded rects under the last line of type, `badge.below_dy` from its baseline to their middle, on the edge the label is anchored to and turned with the label; `top` draws the same row over the first line, `badge.above_dy` from its baseline to their middle: the 14 px name's ascenders (about 10.5), 3 of white, as under a name, and half the badge. The default is `bottom`; an item's `place` selects another. The colours are dark and muted on purpose, so no badge reads as a Metro line.",
     "font": {"size_px": 8, "weight": 700, "fill": "#ffffff", "baseline_dy": 2.9},
-    "badge": {"height": 13, "rx": 3, "gap": 3, "below_dy": 9.5},
+    "badge": {"height": 13, "rx": 3, "gap": 3, "below_dy": 9.5, "above_dy": 20},
     "inline": {
       "box": {"text": "■", "size_px": 14, "stroke_width": 3.5},
       "box_advance_em": 0.909,
@@ -3448,19 +3676,17 @@
     },
     "services": {
       "amtrak": {"text": "AMTRAK", "width": 43, "text_width": 34.9, "fill": "#C5CCD3", "text_fill": "#003B5C", "note": "silver, the colour of Amtrak's cars, with the name in a dark blue: Amtrak has no line of its own on this map, and VRE has the blue. `text_fill` replaces the white of the other badges, which silver cannot carry."},
-      "marc": {"text": "MARC", "width": 33, "text_width": 24.3, "fill": "#B7414E", "note": "MARC's red, the colour of the Penn Line on its own map and of the dashed `marc-bwi` line here."},
-      "vre": {"text": "VRE", "width": 26, "text_width": 16.0, "fill": "#003D73", "note": "VRE's blue, the colour of its Manassas Line on its own map and of the dashed `vre-manassas` line here, so the badge and the line are one colour. VRE's logo is red and blue; the red is MARC's here."}
+      "marc": {"text": "MARC", "width": 33, "text_width": 24.3, "fill": "#B7414E", "note": "MARC's red, the colour of the Penn Line on its own map and of the `marc-bwi` line here."},
+      "vre": {"text": "VRE", "width": 26, "text_width": 16.0, "fill": "#003D73", "note": "VRE's blue, the colour of its Manassas Line on its own map and of the `vre-manassas` line here, so the badge and the line are one colour. VRE's logo is red and blue; the red is MARC's here."}
     },
     "items": [
       {"station": "union-station", "services": ["vre", "amtrak", "marc"], "note": "a row under the name. MARC is last, so the dashed line to BWI (`marc-bwi`) goes on from its badge"},
-      {"station": "new-carrollton", "services": ["amtrak", "marc"], "shift": -9.1, "note": "a row under the name, between it and the terminals, centred above the Orange terminal and under the middle of the name without its P: the row is centred as the label is, and `shift` -9.1 takes back the 9.1 by which the label, with its P, is right of that terminal; the label is lifted by the row's depth (`ds` 39.125)"},
-      {"station": "king-st-old-town", "services": ["vre", "amtrak"], "note": "a row under the name, west of the line. VRE is first, at the row's west end, so the dashed line to Manassas (`vre-manassas`) goes on from its badge. The badges were one column with the amber `area-old-town`, east of the station; the area stays there"},
-      {"station": "rockville", "services": ["amtrak", "marc"], "note": "a row under the name"},
-      {"station": "silver-spring", "services": ["marc"], "note": "under the east end of the name, beside the station's marker: the label is end-anchored"},
+      {"station": "new-carrollton", "services": ["marc", "amtrak"], "link": {"service": "marc", "line": "marc-bwi", "axis": "bwi", "ring": true}, "note": "a row under the last line of the name (`Carrollton`), between it and the terminals. MARC first, then Amtrak. The label is left-aligned (`align` start), so the row starts where the name does, on the left edge of the Purple terminal; the old `shift` -9.1, which centred the row under the one-line name without its P, is gone. `link` joins the MARC badge to the line to BWI: a stroke from the badge's top end on the ring through it (`ring`, r 752.88, the ring the curved label and its row are set on), about 30 long, to the line on the `bwi` radius. The link marks the station, so the line has no tick there."},
+      {"station": "king-st-old-town", "services": ["amtrak", "vre"], "place": "right", "gap": 3, "badge_dy": 2, "note": "in the name's own line, after it (`place` right), Amtrak then VRE, 3 apart and 3 after the name (`gap`, in place of the marks' 7, the gap of a row of badges), 2 below the name's baseline (`badge_dy`), so the line ends in the VRE badge, which is centred on the VRE line (`vre-alexandria`, x 1011) east of the Yellow line; the VRE line passes through it. The badges were before the name, which put VRE about 217 from the station; before that a row under the name, below the station, and before that one column with the amber `area-old-town`, east of the station; the area stays there"},
+      {"station": "rockville", "services": ["amtrak"], "note": "a row under the name. The MARC badge is not in the row: it is on the Brunswick Line west of the station (`marc-brunswick`, `badges`). It was first in the row, joined to the line by a `link` across the Red Line"},
+      {"station": "silver-spring", "services": ["marc"], "note": "under the east end of the name, beside the station's marker: the label is end-anchored. The Brunswick Line (`marc-brunswick`) goes on from the badge's west end, on its ring (`marc-silver-spring`), to theta 266.18, 6 under the badge, as at Union Station"},
       {"station": "college-park-u-of-md", "services": ["marc"], "place": "right", "note": "in the line, after the name and its P: Hyattsville Crossing's label is 13 under this one, so a row under the name has no room"},
-      {"station": "greenbelt", "services": ["marc"], "note": "under the start of the name, between it and the terminals; the label is lifted by the row's depth (`ds` 39.125)"},
-      {"station": "lenfant-plaza", "services": ["vre"], "note": "under `Plaza` with its right edge on the label's own right edge"},
-      {"station": "crystal-city", "services": ["vre"], "note": "under the east end of the name: the label is end-anchored"},
+      {"station": "greenbelt", "services": ["marc"], "place": "top", "note": "over the start of the name (`place` top), on the Green and Yellow radius, so the Camden Line (`marc-camden`) goes on out from the badge. The badge is at r 751.8 - 764.8; the line starts at r 758, under it"},
       {"station": "franconia-springfield", "services": ["vre"], "fill": {"vre": "#E0393E"}, "note": "under the east end of the name, beside the terminal"}
     ]
   },
@@ -3519,7 +3745,7 @@
         {"kind": "line", "lines": ["vre-manassas", "vre-fredericksburg"], "pitch": 7, "width": 26, "name": "VRE", "ends": "Commuter rail to Manassas, Fredericksburg"},
         {"kind": "line", "lines": ["marc-bwi", "marc-camden", "marc-brunswick"], "pitch": 7, "width": 26, "name": "MARC", "ends": "Commuter rail to BWI Airport (also Amtrak), Baltimore, Brunswick"}
       ],
-      "samples_note": "the other railways in the line key, after the service row: one row for each operator. Its sample is a short piece of each of its dashed lines, one above the other `pitch` apart, in the order of the places in the row's text; then a short name where a line's name is and the places where a line's ends are.",
+      "samples_note": "the other railways in the line key, after the service row: one row for each operator. Its sample is a short piece of each of its lines, one above the other `pitch` apart, in the order of the places in the row's text; then a short name where a line's name is and the places where a line's ends are.",
       "service": {"kind": "service", "line": "silver", "width": 32, "height": 12, "text": "Served by every other train", "note": "the row of the line key after the Metro lines and before the other railways' `samples`, because it applies only to Metro: a striped sample of `service_patterns` that starts on the key's left edge - 32 long, which is three 9s of the line's colour with two white bars between them - and its meaning in the legend's text type where the lines' ends start (`ends_dx`), in one column with the other rows' text."},
       "rows": [
         {"line": "red", "letter": "R", "name": "Red Line", "ends": "Shady Grove – Glenmont"},
@@ -3601,7 +3827,7 @@
       "id": "layer-lines",
       "name": "3 · Lines",
       "contains": ["lines"],
-      "draw_order": ["marc-bwi", "marc-camden", "marc-brunswick", "vre-manassas", "vre-fredericksburg", "purple", "silver", "silver-new-carrollton-spur", "orange", "blue", "yellow", "green", "red"],
+      "draw_order": ["marc-camden", "marc-brunswick-frederick", "vre-core", "vre-fredericksburg", "purple", "silver", "silver-new-carrollton-spur", "orange", "blue", "yellow", "green", "red", "marc-bwi", "marc-brunswick", "vre-manassas", "vre-long-bridge"],
       "note": "`draw_order` lists `lines[].id` values; each one is drawn twice, white casing (30) first, then the coloured stroke (26) - 18 and 14 for the Purple line. A later line therefore crosses an earlier one with a 2 px white gap."
     },
     {

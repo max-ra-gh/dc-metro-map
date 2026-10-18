@@ -130,7 +130,7 @@ Segments are an **ordered, point-continuous** list. Four kinds:
 | kind | meaning |
 | --- | --- |
 | `straight` | along `axis` at `slot`, from an endpoint spec to an endpoint spec |
-| `arc` | along `ring`, starting at the previous point, ending at `to`, in direction `dir` |
+| `arc` | along `ring`, starting at the previous point (or, as a path's first segment, at `from`: `{"angle": a}`), ending at `to`, in direction `dir` |
 | `riser` | short straight perpendicular to `axis`, from the current slot to `to_slot` |
 | `join` | straight from the previous point to an explicitly named target point |
 
@@ -163,14 +163,25 @@ key ends with a sample of the same pattern (`legend.lines.service`).
 
 **Lines of other railways** are in `lines` too: the MARC and Amtrak line from Union Station to BWI
 (`marc-bwi`) and VRE's Manassas Line from King St-Old Town (`vre-manassas`). Such a line has
-`"casing": false`, its own `stroke_width`, a `dasharray` and a `linecap`, so it is a thin dashed
-line in its operator's colour, and it is first in `draw_order`, under every Metro line. It starts at
+its own `stroke_width` (4), a `casing_width` of 6 - a white edge of 1 on each side - and a `linecap`,
+so it is a thin solid line in its operator's colour. Where it crosses a Metro line it is drawn above
+it (`draw_order`: the commuter lines that cross Metro lines come after them), and the white edge
+shows which is on top; `vre-core` is drawn under the geography instead (`under_geography`). It starts at
 the end of the row of connection badges under a station's name, on that row's own ring. Its stations
 are `ticks`: short strokes across the line at a point of a ring (`ring`, `angle`) or of a straight
-part (`axis`, `s`), each with an optional name (`label`: an offset, an `align` and a `rotate`) in
+part (`axis`, `s`), each with an optional name (`label`: an offset, an `align`, a `rotate` and optional `lines`, the name
+broken into lines `wrap_dy` apart, the first at the offset; or `curve` concentric, which sets the
+name on the ring through the tick, `ds` along it from the tick, with an `align`, and `lines` on rings
+`wrap_dy` apart, the first outermost in the map's upper half) in
 `constants.fonts.place` and optional operator badges (`connections`: `dx`, `dy` to the middle of the row,
 `services`, and a `fill` for a service whose badge has the line's colour). A line can also have `badges` ON it: a
-point as a tick's, the `services` and a `rotate`. The legend's line key has one row for each operator (`legend.lines.samples`), below the `service` row: its `lines`, drawn
+point as a tick's, the `services`, a `rotate` and an optional `gap` between the badges (default `connections.badge.gap`).
+The rule for commuter stops: a **tick** is a stop that only commuter rail serves; a **badge** is a stop
+too - a transfer at a Metro station (in its name's line, or ON the line beside the station), or the
+line's **stopper** at the end of a commuter line. A line has no badge between stops: its colour and
+the legend name its operator. A line with
+`under_geography` true is drawn before the geography, in `<g id="layer-lines-under-geography">`, so
+parks and icons cover it, as a tunnel (`vre-core` under the National Mall and the Capitol). The legend's line key has one row for each operator (`legend.lines.samples`), below the `service` row: its `lines`, drawn
 one above the other `pitch` apart.
 
 ### 4.1 Join constructions
@@ -565,7 +576,7 @@ so percentages are safe.
 `spec.json.connections` lists the other railways a station connects to - Amtrak, MARC, VRE. Each
 service is a badge in the service's colour with its name in white capitals (`services`, `badge`,
 `font`). A badge is part of its station's label and has no co-ordinates: an item names its `station`
-and its `services`, and the generator puts the badges at that label. There are three places:
+and its `services`, and the generator puts the badges at that label. There are four places:
 
 * **`left` / `right`** - in the label's own line, before or after the name, beyond the marks when
   it is on their side. The badge is drawn as a station mark is (§6.9): a bar of Inter's filled
@@ -576,9 +587,22 @@ and its `services`, and the generator puts the badges at that label. There are t
 * **`bottom`** - a row of rounded rects under the last line of type, `badge.below_dy` from its
   baseline to their middle, on the edge the label is anchored to and turned with the label. They are
   emitted last in the labels layer, in `<g id="connections">`, with the same ids.
+* **`top`** - the same row over the first line of type, `badge.above_dy` (20) from its baseline to
+  their middle: the name's ascenders, 3 of white and half the badge (Greenbelt, so the Camden Line
+  goes on out from its badge).
 
-The default is `bottom`. An item's `place` selects the line. An item's `shift` moves a `bottom` row
-along the label, in px in its reading direction (New Carrollton: -9.1).
+The default is `bottom`. An item's `place` selects the line. An item's `shift` moves a `bottom` or `top` row
+along the label, in px in its reading direction (New Carrollton: -9.1). An item's `gap` replaces
+`station_marks.gap` (7) between the items of its station's label line - the name, its marks and its
+inline badges (King St-Old Town: 3), and its `badge_dy` lowers its inline badges that much below
+the name's baseline, the `dy` given back to whatever follows them (King St-Old Town: 2). An item's `link` (`service`, `line`,
+`axis`) joins that service's badge to the line: a stroke in the line's colour and width from the
+start end of the badge straight on along its axis to `line` where it runs on `axis` (a radius or
+other axis through its origin; its slot is not read). With `ring` true the stroke instead goes on
+from the badge's start end along the ring about the map's centre through that end, to where that ring
+cuts `axis`'s middle slot, which may be offset from the centre. Links are emitted after the lines and before the
+station markers, in `<g id="connection-links">`, so a link passes under a station's dot and under its
+badge, with the id `connection-link-<station>-<service>` (New Carrollton: MARC on its ring to `marc-bwi`).
 
 ### 6.9 Station marks
 
@@ -631,8 +655,9 @@ in `<g id="geo-landmarks">`, above the Beltway and below the geography names.
 
 **Airports** (`geo.airports.items`) are a grey apron with a white plane. An item with a `code` has
 its three letters inside the apron, under a smaller plane (`geo.airports.code`). An airport with no
-Metro station - BWI and Manassas - also has its name (`label`, in `constants.fonts.place`) and the
-badges of the railways that go there (`connections`), above the apron.
+Metro station - BWI and Manassas - also has its name (`label`, in `constants.fonts.place`) and can have
+the badges of the railways that go there (`connections`: `at`, the middle of the row, and `services`).
+At BWI it is Amtrak's badge, beside the MARC line's stopper under the apron.
 
 **Water, park and Beltway names** are geography, not station labels: a river, basin, park or island carries
 a `label` on its own object in `spec.json.geo`, and they are emitted last in the geography layer, in
@@ -642,6 +667,13 @@ about it (`at`, `rotate`), with an optional `fill` of its own; the Anacostia's a
 ids start `geo-label-`, so the station-label tools and counts do not see them. A straight label's
 own `size_px` and `letter_spacing` replace the font's (Roosevelt Island: 10 px; the
 National Mall: 10 px, letter-spaced capitals).
+
+A `rect` park with `east_rx` and `east_ry` is drawn as a path whose east corners have those radii
+and whose west corners keep `rx` and `ry` (the National Mall: its east end, widened over the VRE
+tunnel, has square corners: 0, which SVG draws as a straight join). A straight geography label's `halo` (`stroke`, `stroke_width`) is an
+outline under its letters; a park's label with `above_lines` true is set at the end of the labels
+layer, in `<g id="geo-labels-above-lines">`, instead of in the geography, so that a line crossing it
+goes under its halo (East Potomac Park, crossed by the VRE line, with a halo in the island's green).
 
 **The District's boundary** is `boundary-dc`, the last entry of `geo.parks` so that it is drawn
 over every park and under the water and the lines: a `trail` of round dots (`dasharray`) on the
